@@ -1,0 +1,77 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: alloy
+  namespace: alloy
+spec:
+  interval: 5m
+  timeout: 10m
+  chart:
+    spec:
+      chart: alloy
+      version: 1.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: flux-system
+  values:
+    alloy:
+      config:
+        server:
+          log_level: info
+          http_listen_port: 12345
+        metrics:
+          global:
+            remote_write:
+              - url: http://prometheus-operated.prometheus.svc:9090/api/v1/write
+                basic_auth:
+                  username: admin
+                  password: prom-operator
+        traces:
+          configs:
+            - name: default
+              receivers:
+                otlp:
+                  protocols:
+                    grpc:
+                      endpoint: 0.0.0.0:4317
+                    http:
+                      endpoint: 0.0.0.0:4318
+              remote_write:
+                - endpoint: http://tempo.tempo.svc:4317
+                  protocol: otlp
+        logs:
+          configs:
+            - name: default
+              positions:
+                filename: /tmp/positions.yaml
+              scrape_configs:
+                - job_name: kubernetes-pods
+                  kubernetes_sd_configs:
+                    - role: pod
+                  pipeline_stages:
+                    - docker: {}
+              clients:
+                - url: http://loki.loki.svc:3100/loki/api/v1/push
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+    service:
+      type: ClusterIP
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - alloy.dev.local
+      paths:
+        - /
+      tls:
+        - secretName: alloy-tls
+          hosts:
+            - alloy.dev.local
+

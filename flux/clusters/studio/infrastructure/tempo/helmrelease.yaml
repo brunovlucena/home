@@ -1,0 +1,65 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tempo
+  namespace: tempo
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: tempo-distributed
+      version: 1.8.0
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: flux-system
+  values:
+    tempo:
+      storage:
+        trace:
+          backend: s3
+          s3:
+            endpoint: minio.minio.svc:9000
+            region: us-east-1
+            bucket_name: tempo
+            access_key_id: admin
+            secret_access_key: admin123
+            s3forcepathstyle: true
+            insecure: true
+      retention: 24h
+      metrics_generator:
+        enabled: false
+    minio:
+      enabled: true
+      auth:
+        rootUser: admin
+        rootPassword: "admin123"
+      persistence:
+        enabled: true
+        storageClassName: local-path
+        size: 50Gi
+      service:
+        type: ClusterIP
+    resources:
+      requests:
+        cpu: 250m
+        memory: 1Gi
+      limits:
+        cpu: 1000m
+        memory: 4Gi
+    service:
+      type: ClusterIP
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - host: tempo.dev.local
+          paths:
+            - path: /
+              pathType: Prefix
+      tls:
+        - secretName: tempo-tls
+          hosts:
+            - tempo.dev.local
+

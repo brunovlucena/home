@@ -1,0 +1,3 @@
+name: kamaji-multi-cluster
+runtime: go
+description: Multi-cluster Kubernetes infrastructure with Kamaji, Prometheus Operator, and GitOps 

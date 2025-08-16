@@ -1,0 +1,16 @@
+# Binaries and executables
+pulumi/kamaji
+*.exe
+*.bin
+*.app
+
+# Build artifacts
+*.o
+*.so
+*.dylib
+*.dll
+
+# Go build artifacts
+*.exe
+*.test
+*.out 

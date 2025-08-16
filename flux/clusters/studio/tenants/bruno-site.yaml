@@ -1,0 +1,74 @@
+apiVersion: kamaji.clastix.io/v1alpha1
+kind: TenantCluster
+metadata:
+  name: bruno-site-dev
+  namespace: kamaji-system
+spec:
+  dataStoreName: etcd
+  kubernetes:
+    version: v1.33.0
+    kubelet:
+      cgroupfs: systemd
+      containerRuntimeEndpoint: unix:///var/run/containerd/containerd.sock
+      imageGCHighThresholdPercent: 85
+      imageGCLowThresholdPercent: 80
+      maxPods: 110
+      maxOpenFiles: 1000000
+      maxProcesses: 1000000
+    kubeProxy:
+      mode: iptables
+    kubeScheduler:
+      profile: default-scheduler
+    kubeControllerManager:
+      nodeCIDRMaskSize: 24
+      podCIDR: 10.244.0.0/16
+      serviceCIDR: 10.96.0.0/12
+  networkProfile:
+    port: 6443
+    serviceCIDR: 10.96.0.0/12
+    podCIDR: 10.244.0.0/16
+    dnsServiceIP: 10.96.0.10
+    domain: cluster.local
+  addons:
+    - name: nginx-ingress
+      enabled: true
+      namespace: ingress-nginx
+    - name: cert-manager
+      enabled: true
+      namespace: cert-manager
+    - name: alloy
+      enabled: true
+      namespace: alloy
+      config:
+        traces:
+          endpoint: http://observability-dev-alloy.monitoring.svc:4317
+        logs:
+          endpoint: http://observability-dev-alloy.monitoring.svc:4317
+        metrics:
+          endpoint: http://observability-dev-prometheus-operated.monitoring.svc:9090/api/v1/write
+          labels:
+            cluster: bruno-site-dev
+            environment: dev
+        labels:
+          cluster: bruno-site-dev
+          environment: dev
+  controlPlane:
+    address: 10.2.2.10
+    port: 6443
+    endpoint: https://10.2.2.10:6443
+  workerPools:
+    - name: default
+      replicas: 1
+      machineType: standard
+      labels:
+        node-role.kubernetes.io/worker: ""
+        environment: dev
+        cluster: bruno-site-dev
+      taints: []
+      resources:
+        requests:
+          cpu: 250m
+          memory: 512Mi
+        limits:
+          cpu: 1000m
+          memory: 2Gi
