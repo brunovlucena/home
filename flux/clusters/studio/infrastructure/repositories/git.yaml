@@ -5,7 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1m0s
-  url: ssh://git@github.com/brunovlucena/kamaji.git
+  url: ssh://git@github.com/brunovlucena/home.git
   ref:
     branch: main
   secretRef:
