@@ -8,9 +8,9 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: bruno-site
+      chart: .
       version: 0.1.0
       sourceRef:
-        kind: HelmRepository
+        kind: GitRepository
         name: bruno-site-chart
         namespace: flux-system
