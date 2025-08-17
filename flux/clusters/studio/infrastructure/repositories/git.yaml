@@ -10,3 +10,14 @@ spec:
     branch: main
   secretRef:
     name: flux-system 
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: GitRepository
+metadata:
+  name: bruno-site-chart
+  namespace: flux-system
+spec:
+  interval: 1h0m0s
+  url: https://github.com/brunovlucena/bruno-site-chart.git
+  ref:
+    branch: main
