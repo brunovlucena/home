@@ -59,6 +59,4 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1h0m0s
-  url: https://brunovlucena.github.io/bruno-site-chart
-  secretRef:
-    name: bruno-site-helm 
+  url: https://brunovlucena.github.io/bruno-site-chart 
