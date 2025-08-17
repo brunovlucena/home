@@ -96,3 +96,4 @@ The controller exposes metrics that can be scraped by Prometheus. ServiceMonitor
    ```bash
    kubectl get secret -n action-runners github-config -o yaml
    ```
+
