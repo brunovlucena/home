@@ -14,3 +14,18 @@ spec:
         kind: HelmRepository
         name: bruno-site-chart
         namespace: bruno-site
+  values:
+    # Override only what's specific to studio environment
+    global:
+      environment: studio
+    
+    # Use production-ready replica counts
+    api:
+      replicaCount: 2
+      autoscaling:
+        minReplicas: 2
+    
+    frontend:
+      replicaCount: 2
+      autoscaling:
+        minReplicas: 2
