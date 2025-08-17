@@ -1,13 +1,12 @@
-apiVersion: source.toolkit.fluxcd.io/v1
+apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: GitRepository
 metadata:
   name: flux-system
   namespace: flux-system
 spec:
   interval: 1m0s
+  url: https://github.com/brunovlucena/home.git
   ref:
     branch: main
   secretRef:
-    name: bruno-site-helm
-  timeout: 60s
-  url: https://github.com/brunovlucena/home.git
+    name: flux-system 
