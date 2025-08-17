@@ -14,4 +14,3 @@ pulumi/kamaji
 *.exe
 *.test
 *.out 
-secret.yaml

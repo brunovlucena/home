@@ -1,0 +1,45 @@
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: example-runner-deployment
+  namespace: action-runners
+spec:
+  replicas: 2
+  template:
+    spec:
+      repository: your-username/your-repository
+      # Or use organization runners
+      # organization: your-organization
+      
+      # Runner configuration
+      image: summerwind/actions-runner:latest
+      dockerdWithinRunnerContainer: true
+      
+      # Resource limits
+      resources:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+        limits:
+          cpu: 2000m
+          memory: 4Gi
+      
+      # Volume mounts for persistent storage
+      volumeMounts:
+        - name: runner-work
+          mountPath: /runner/_work
+      
+      volumes:
+        - name: runner-work
+          emptyDir: {}
+      
+      # Environment variables
+      env:
+        - name: RUNNER_LABELS
+          value: "self-hosted,linux,amd64"
+        - name: RUNNER_GROUP
+          value: "default"
+      
+      # Service account
+      serviceAccountName: actions-runner-controller
