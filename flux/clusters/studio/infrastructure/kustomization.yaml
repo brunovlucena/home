@@ -9,4 +9,5 @@ resources:
   - loki/
   - tempo/
   - alloy/
-  - nginx/ 
+  - nginx/
+  - bruno-site/ 
