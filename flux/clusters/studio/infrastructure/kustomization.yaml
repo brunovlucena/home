@@ -3,7 +3,6 @@ kind: Kustomization
 resources:
   - repositories/
   - cert-manager/
-  - kamaji/
   - metallb/
   - prometheus-operator/
   - loki/
