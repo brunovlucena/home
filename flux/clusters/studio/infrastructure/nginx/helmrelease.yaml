@@ -43,4 +43,13 @@ spec:
         limits:
           cpu: 50m
           memory: 64Mi
+    admissionWebhooks:
+      enabled: true
+      resources:
+        requests:
+          cpu: 25m
+          memory: 32Mi
+        limits:
+          cpu: 50m
+          memory: 64Mi
 
