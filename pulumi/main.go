@@ -67,7 +67,7 @@ func main() {
 
 		// Install Flux using Pulumi command provider
 		flux, err := local.NewCommand(ctx, "flux-bootstrap", &local.CommandArgs{
-			Create: pulumi.String(fmt.Sprintf("flux bootstrap github --token=%s --owner=brunovlucena --repository=kamaji --branch=%s --path=flux/clusters/%s --personal", githubToken, stack, clusterName)),
+			Create: pulumi.String(fmt.Sprintf("flux bootstrap github --token=%s --owner=brunovlucena --repository=home --branch=main --path=flux/clusters/%s --personal", githubToken, clusterName)),
 		}, pulumi.DependsOn([]pulumi.Resource{waitForCluster}))
 		if err != nil {
 			return err
