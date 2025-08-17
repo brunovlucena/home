@@ -89,6 +89,14 @@ func main() {
 			return err
 		}
 
+		// Update HelmRelease with GitHub token
+		updateHelmRelease, err := local.NewCommand(ctx, "update-helmrelease", &local.CommandArgs{
+			Create: pulumi.String(fmt.Sprintf("kubectl --context kind-%s patch helmrelease bruno-site -n bruno --type='merge' -p='{\"spec\":{\"values\":{\"global\":{\"githubToken\":\"%s\"}}}}'", clusterName, githubToken)),
+		}, pulumi.DependsOn([]pulumi.Resource{infrastructureResources}))
+		if err != nil {
+			return err
+		}
+
 		// Export cluster information
 		ctx.Export("clusterName", pulumi.String(clusterName))
 		ctx.Export("certManagerDeployed", pulumi.String("deployed"))
@@ -97,6 +105,7 @@ func main() {
 		ctx.Export("kamajiDeployed", pulumi.String("deployed"))
 		ctx.Export("observabilityComponents", pulumi.String("deployed"))
 		ctx.Export("infrastructureResources", infrastructureResources.Resources)
+		ctx.Export("helmReleaseUpdated", updateHelmRelease.Stdout)
 
 		return nil
 	})
