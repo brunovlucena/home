@@ -59,6 +59,12 @@ func main() {
 			return fmt.Errorf("GITHUB_TOKEN environment variable is required")
 		}
 
+		// Get GitHub username from environment variable or use default
+		githubUsername := os.Getenv("GITHUB_USERNAME")
+		if githubUsername == "" {
+			githubUsername = "brunovlucena"
+		}
+
 		// Install Flux using Pulumi command provider
 		flux, err := local.NewCommand(ctx, "flux-bootstrap", &local.CommandArgs{
 			Create: pulumi.String(fmt.Sprintf("flux bootstrap github --token=%s --owner=brunovlucena --repository=kamaji --branch=%s --path=flux/clusters/%s --personal", githubToken, stack, clusterName)),
@@ -67,10 +73,18 @@ func main() {
 			return err
 		}
 
+		// Create the GitHub secret using kubectl
+		createSecret, err := local.NewCommand(ctx, "create-github-secret", &local.CommandArgs{
+			Create: pulumi.String(fmt.Sprintf("kubectl --context kind-%s create secret generic bruno-site-helm --namespace=flux-system --from-literal=username=%s --from-literal=password=%s --dry-run=client -o yaml | kubectl --context kind-%s apply -f -", clusterName, githubUsername, githubToken, clusterName)),
+		}, pulumi.DependsOn([]pulumi.Resource{flux}))
+		if err != nil {
+			return err
+		}
+
 		// Deploy infrastructure components using Kustomize from actual YAML files
 		infrastructureResources, err := kustomize.NewDirectory(ctx, "infrastructure-resources", kustomize.DirectoryArgs{
 			Directory: pulumi.String(fmt.Sprintf("../flux/clusters/%s/infrastructure", clusterName)),
-		}, pulumi.Provider(k8sProvider), pulumi.DependsOn([]pulumi.Resource{flux}))
+		}, pulumi.Provider(k8sProvider), pulumi.DependsOn([]pulumi.Resource{createSecret}))
 		if err != nil {
 			return err
 		}
