@@ -4,12 +4,18 @@ kind: ClusterIssuer
 metadata:
   name: bruno-site
 spec:
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    email: bruno@lucena.cloud
-    privateKeySecretRef:
-      name: bruno-site-letsencrypt-key
-    solvers:
-    - http01:
-        ingress:
-          class: nginx 
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bruno-site-selfsigned
+  namespace: bruno
+spec:
+  secretName: bruno-site-tls
+  issuerRef:
+    name: bruno-site
+    kind: ClusterIssuer
+  dnsNames:
+    - bruno.lucena.cloud
+    - api.bruno.lucena.cloud

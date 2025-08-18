@@ -65,9 +65,10 @@ func main() {
 			githubUsername = "brunovlucena"
 		}
 
-		// Install Flux using Pulumi command provider
+		// Install Flux using Pulumi command provider - ensure it's always installed
 		flux, err := local.NewCommand(ctx, "flux-bootstrap", &local.CommandArgs{
-			Create: pulumi.String(fmt.Sprintf("flux bootstrap github --token=%s --owner=brunovlucena --repository=kamaji --branch=%s --path=flux/clusters/%s --personal", githubToken, stack, clusterName)),
+			Create: pulumi.String(fmt.Sprintf("flux bootstrap github --token=%s --owner=brunovlucena --repository=kamaji --branch=%s --path=flux/clusters/%s --personal --timeout=10m", githubToken, stack, clusterName)),
+			Update: pulumi.String(fmt.Sprintf("flux bootstrap github --token=%s --owner=brunovlucena --repository=kamaji --branch=%s --path=flux/clusters/%s --personal --timeout=10m", githubToken, stack, clusterName)),
 		}, pulumi.DependsOn([]pulumi.Resource{waitForCluster}))
 		if err != nil {
 			return err
@@ -94,7 +95,6 @@ func main() {
 		ctx.Export("certManagerDeployed", pulumi.String("deployed"))
 		ctx.Export("fluxOperatorInstalled", pulumi.String("installed"))
 		ctx.Export("fluxInstanceDeployed", pulumi.String("deployed"))
-		ctx.Export("kamajiDeployed", pulumi.String("deployed"))
 		ctx.Export("observabilityComponents", pulumi.String("deployed"))
 		ctx.Export("infrastructureResources", infrastructureResources.Resources)
 

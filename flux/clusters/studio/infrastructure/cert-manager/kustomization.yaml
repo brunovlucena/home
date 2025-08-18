@@ -3,4 +3,13 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - helmrelease.yaml
-  - clusterissuer.yaml 
+  - clusterissuer.yaml
+patches:
+  - target:
+      kind: ClusterIssuer
+      name: bruno-site
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          fluxcd.io/depends-on: "HelmRelease/cert-manager.cert-manager" 
