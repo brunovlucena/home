@@ -1,4 +1,4 @@
-.PHONY: help secret-argocd pf-argocd bootstrap-flux-dev bootstrap-flux-prd flux-status flux-logs init-dev init-prd up-dev up-prd destroy-dev destroy-prd clean logs-dev logs-prd status-dev status-prd setup-env
+.PHONY: help secret-argocd pf-argocd bootstrap-flux-dev bootstrap-flux-prd flux-status flux-logs init-dev init-prd up-dev up-prd destroy-dev destroy-prd clean logs-dev logs-prd status-dev status-prd setup-env flux-refresh flux-refresh-bruno
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -56,3 +56,26 @@ setup-env: ## Setup environment variables for GitHub and Cloudflare authenticati
 	@echo "  export CLOUDFLARE_TOKEN=your_cloudflare_api_token"
 	@echo ""
 	@echo "Or add them to your shell profile (~/.zshrc, ~/.bashrc, etc.)"
+
+# =============================================================================
+# Flux Operations
+# =============================================================================
+
+flux-refresh: ## Force refresh all Flux HelmRepositories
+	@echo "🔄 Forcing refresh of all Flux HelmRepositories..."
+	kubectl annotate helmrepository --all -n flux-system --overwrite reconcile.fluxcd.io/requestedAt="$$(date +%s)"
+	@echo "✅ Flux HelmRepositories refresh triggered"
+
+flux-refresh-bruno: ## Force refresh bruno-site chart specifically
+	@echo "🔄 Forcing refresh of bruno-site-chart HelmRepository..."
+	kubectl annotate helmrepository bruno-site-chart -n flux-system --overwrite reconcile.fluxcd.io/requestedAt="$$(date +%s)"
+	@echo "✅ Bruno-site-chart HelmRepository refresh triggered"
+	@echo "🔄 Forcing refresh of bruno-site HelmRelease..."
+	kubectl annotate helmrelease bruno-site -n bruno --overwrite reconcile.fluxcd.io/requestedAt="$$(date +%s)"
+	@echo "✅ Bruno-site HelmRelease refresh triggered"
+	@echo "⏳ Waiting 30 seconds for Flux to process..."
+	sleep 30
+	@echo "📊 Current HelmRelease status:"
+	kubectl get helmrelease bruno-site -n bruno -o wide
+	@echo "📊 Current HelmChart status:"
+	kubectl get helmchart -n flux-system | grep bruno

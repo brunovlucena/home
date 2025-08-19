@@ -14,10 +14,10 @@ spec:
         kind: HelmRepository
         name: bruno-site-chart
         namespace: flux-system
-  # values:
-  #   ingress:
-  #     enabled: true
-  #     className: nginx
+  values:
+    ingress:
+      enabled: true
+      className: nginx
   #     # annotations:
   #     #   nginx.ingress.kubernetes.io/rewrite-target: /
   #     #   nginx.ingress.kubernetes.io/ssl-redirect: "true"
