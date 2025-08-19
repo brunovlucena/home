@@ -10,6 +10,7 @@ spec:
     branch: main
   secretRef:
     name: home
+
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: GitRepository
