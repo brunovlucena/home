@@ -8,7 +8,7 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: bruno-site
+      chart: .
       version: 0.1.3
       sourceRef:
         kind: GitRepository
