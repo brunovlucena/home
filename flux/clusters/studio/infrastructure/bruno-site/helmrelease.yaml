@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: bruno-site-chart
-      version: 0.1.7
+      version: 0.1.8
       sourceRef:
         kind: HelmRepository
         name: bruno-site-chart
@@ -18,22 +18,22 @@ spec:
     ingress:
       enabled: true
       className: nginx
-  #     # annotations:
-  #     #   nginx.ingress.kubernetes.io/rewrite-target: /
-  #     #   nginx.ingress.kubernetes.io/ssl-redirect: "true"
-  #     #   cert-manager.io/cluster-issuer: "bruno-site"
-  #     #   nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-  #     #   nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
-  #     #   nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
-  #     # tls:
-  #     #   enabled: true
-  #     #   secretName: bruno-site-tls
-  #     #   hosts:
-  #     #     - lucena.cloud
-  #     # hosts:
-  #     #   - host: lucena.cloud
-  #     #     paths:
-  #     #       - path: /
-  #     #         pathType: Prefix
-  #     #         serviceName: bruno-site-frontend
-  #     #         servicePort: 80
+      # annotations:
+      #   nginx.ingress.kubernetes.io/rewrite-target: /
+      #   nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      #   cert-manager.io/cluster-issuer: "bruno-site"
+      #   nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+      #   nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+      #   nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+      # tls:
+      #   enabled: true
+      #   secretName: bruno-site-tls
+      #   hosts:
+      #     - lucena.cloud
+      hosts:
+        - host: lucena.cloud
+          paths:
+            - path: /
+              pathType: Prefix
+              serviceName: bruno-site-frontend
+              servicePort: 80
