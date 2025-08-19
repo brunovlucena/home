@@ -82,7 +82,7 @@ func main() {
 		// Create the GitHub secret using kubectl (with cleanup to handle existing secrets)
 		createSecret, err := local.NewCommand(ctx, "create-github-secret", &local.CommandArgs{
 			Create: pulumi.String(fmt.Sprintf(`kubectl --context kind-%s delete secret home --namespace=flux-system --ignore-not-found=true && \
-kubectl --context kind-%s create secret generic flux-system --namespace=flux-system --from-literal=username=%s --from-literal=password=%s`,
+kubectl --context kind-%s create secret generic home --namespace=flux-system --from-literal=username=%s --from-literal=password=%s`,
 				clusterName, clusterName, githubUsername, githubToken)),
 		}, pulumi.DependsOn([]pulumi.Resource{flux}))
 		if err != nil {
