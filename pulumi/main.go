@@ -65,6 +65,12 @@ func main() {
 			githubUsername = "brunovlucena"
 		}
 
+		// Get Cloudflare token from environment variable
+		cloudflareToken := os.Getenv("CLOUDFLARE_TOKEN")
+		if cloudflareToken == "" {
+			return fmt.Errorf("CLOUDFLARE_TOKEN environment variable is required")
+		}
+
 		// Install Flux controllers only (without GitRepository creation)
 		flux, err := local.NewCommand(ctx, "install-flux", &local.CommandArgs{
 			Create: pulumi.String(fmt.Sprintf("flux install --context kind-%s", clusterName)),
@@ -98,10 +104,20 @@ kubectl --context kind-%s create secret docker-registry ghcr-secret \
 			return err
 		}
 
+		// Create the Cloudflare secret for DDNS
+		createCloudflareSecret, err := local.NewCommand(ctx, "create-cloudflare-secret", &local.CommandArgs{
+			Create: pulumi.String(fmt.Sprintf(`kubectl --context kind-%s create namespace cloudflare-ddns --dry-run=client -o yaml | kubectl apply -f - && \
+kubectl --context kind-%s delete secret cloudflare-api-token --namespace=cloudflare-ddns --ignore-not-found=true && \
+kubectl --context kind-%s create secret generic cloudflare-api-token --namespace=cloudflare-ddns --from-literal=api-token=%s`,
+				clusterName, clusterName, clusterName, cloudflareToken)),
+		}, pulumi.DependsOn([]pulumi.Resource{flux}))
+		if err != nil {
+			return err
+		}
 		// Deploy infrastructure components using Kustomize from actual YAML files
 		infrastructureResources, err := kustomize.NewDirectory(ctx, "infrastructure-resources", kustomize.DirectoryArgs{
 			Directory: pulumi.String(fmt.Sprintf("../flux/clusters/%s/infrastructure", clusterName)),
-		}, pulumi.Provider(k8sProvider), pulumi.DependsOn([]pulumi.Resource{createSecret, createDockerSecret}))
+		}, pulumi.Provider(k8sProvider), pulumi.DependsOn([]pulumi.Resource{createSecret, createDockerSecret, createCloudflareSecret}))
 		if err != nil {
 			return err
 		}

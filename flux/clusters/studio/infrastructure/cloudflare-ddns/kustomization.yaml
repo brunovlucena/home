@@ -7,7 +7,6 @@ metadata:
 
 resources:
   - namespace.yaml
-  - secret.yaml
   - deployment.yaml
 
 commonLabels:
