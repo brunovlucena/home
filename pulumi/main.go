@@ -65,18 +65,34 @@ func main() {
 			githubUsername = "brunovlucena"
 		}
 
-		// Install Flux using Pulumi command provider - ensure it's always installed
-		flux, err := local.NewCommand(ctx, "flux-bootstrap", &local.CommandArgs{
-			Create: pulumi.String(fmt.Sprintf("flux bootstrap github --token=%s --owner=brunovlucena --repository=kamaji --branch=%s --path=flux/clusters/%s --personal --timeout=10m", githubToken, stack, clusterName)),
-			Update: pulumi.String(fmt.Sprintf("flux bootstrap github --token=%s --owner=brunovlucena --repository=kamaji --branch=%s --path=flux/clusters/%s --personal --timeout=10m", githubToken, stack, clusterName)),
+		// Install Flux controllers only (without GitRepository creation)
+		flux, err := local.NewCommand(ctx, "install-flux", &local.CommandArgs{
+			Create: pulumi.String(fmt.Sprintf("flux install --context kind-%s", clusterName)),
 		}, pulumi.DependsOn([]pulumi.Resource{waitForCluster}))
 		if err != nil {
 			return err
 		}
 
-		// Create the GitHub secret using kubectl
+		// Create the GitHub secret using kubectl (with cleanup to handle existing secrets)
 		createSecret, err := local.NewCommand(ctx, "create-github-secret", &local.CommandArgs{
-			Create: pulumi.String(fmt.Sprintf("kubectl --context kind-%s create secret generic flux-system --namespace=flux-system --from-literal=username=%s --from-literal=password=%s", clusterName, githubUsername, githubToken)),
+			Create: pulumi.String(fmt.Sprintf(`kubectl --context kind-%s delete secret home --namespace=flux-system --ignore-not-found=true && \
+kubectl --context kind-%s create secret generic flux-system --namespace=flux-system --from-literal=username=%s --from-literal=password=%s`,
+				clusterName, clusterName, githubUsername, githubToken)),
+		}, pulumi.DependsOn([]pulumi.Resource{flux}))
+		if err != nil {
+			return err
+		}
+
+		// Create the Docker registry secret for GHCR
+		createDockerSecret, err := local.NewCommand(ctx, "create-docker-secret", &local.CommandArgs{
+			Create: pulumi.String(fmt.Sprintf(`kubectl --context kind-%s create namespace bruno --dry-run=client -o yaml | kubectl apply -f - && \
+kubectl --context kind-%s delete secret ghcr-secret --namespace=bruno --ignore-not-found=true && \
+kubectl --context kind-%s create secret docker-registry ghcr-secret \
+    --docker-server=ghcr.io \
+    --docker-username=%s \
+    --docker-password=%s \
+    --namespace=bruno`,
+				clusterName, clusterName, clusterName, githubUsername, githubToken)),
 		}, pulumi.DependsOn([]pulumi.Resource{flux}))
 		if err != nil {
 			return err
@@ -85,7 +101,7 @@ func main() {
 		// Deploy infrastructure components using Kustomize from actual YAML files
 		infrastructureResources, err := kustomize.NewDirectory(ctx, "infrastructure-resources", kustomize.DirectoryArgs{
 			Directory: pulumi.String(fmt.Sprintf("../flux/clusters/%s/infrastructure", clusterName)),
-		}, pulumi.Provider(k8sProvider), pulumi.DependsOn([]pulumi.Resource{createSecret}))
+		}, pulumi.Provider(k8sProvider), pulumi.DependsOn([]pulumi.Resource{createSecret, createDockerSecret}))
 		if err != nil {
 			return err
 		}

@@ -1,7 +1,7 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: GitRepository
 metadata:
-  name: flux-system
+  name: home
   namespace: flux-system
 spec:
   interval: 1m0s
@@ -9,7 +9,7 @@ spec:
   ref:
     branch: main
   secretRef:
-    name: flux-system 
+    name: home
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: GitRepository

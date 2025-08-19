@@ -37,6 +37,8 @@ spec:
         proxy-real-ip-cidr: "0.0.0.0/0"
         use-forwarded-headers: "true"
     defaultBackend:
+      nodeSelector:
+        role: ingress
       enabled: true
       resources:
         requests:

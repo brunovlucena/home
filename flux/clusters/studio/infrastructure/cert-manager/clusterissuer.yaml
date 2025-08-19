@@ -1,21 +1,20 @@
----
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: bruno-site
-spec:
-  selfSigned: {}
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: bruno-site-selfsigned
-  namespace: bruno
-spec:
-  secretName: bruno-site-tls
-  issuerRef:
-    name: bruno-site
-    kind: ClusterIssuer
-  dnsNames:
-    - bruno.lucena.cloud
-    - api.bruno.lucena.cloud
+# ---
+# apiVersion: cert-manager.io/v1
+# kind: ClusterIssuer
+# metadata:
+#   name: bruno-site
+# spec:
+#   selfSigned: {}
+# ---
+# apiVersion: cert-manager.io/v1
+# kind: Certificate
+# metadata:
+#   name: bruno-site-selfsigned
+#   namespace: bruno
+# spec:
+#   secretName: bruno-site-tls
+#   issuerRef:
+#     name: bruno-site
+#     kind: ClusterIssuer
+#   dnsNames:
+#     - lucena.cloud

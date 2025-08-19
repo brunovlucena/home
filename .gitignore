@@ -1,5 +1,5 @@
 # Binaries and executables
-pulumi/kamaji
+pulumi/cluster-studio
 *.exe
 *.bin
 *.app

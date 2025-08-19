@@ -1,4 +1,4 @@
-module kamaji
+module cluster-studio
 
 go 1.23.0
 
