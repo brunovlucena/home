@@ -16,6 +16,8 @@ spec:
         namespace: flux-system
   values:
     loki:
+      nodeSelector:
+        role: observability
       auth_enabled: false
       storage:
         type: s3

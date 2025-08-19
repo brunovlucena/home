@@ -16,6 +16,8 @@ spec:
         namespace: flux-system
   values:
     tempo:
+      nodeSelector:
+        role: observability
       storage:
         trace:
           backend: s3

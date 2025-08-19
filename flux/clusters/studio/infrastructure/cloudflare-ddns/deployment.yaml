@@ -16,6 +16,8 @@ spec:
       labels:
         app.kubernetes.io/name: cloudflare-ddns
     spec:
+      nodeSelector:
+        role: core
       serviceAccountName: cloudflare-ddns
       securityContext:
         runAsNonRoot: true
@@ -35,6 +37,8 @@ spec:
           value: "lucena.cloud"
         - name: IP4_DOMAINS
           value: "lucena.cloud"
+        - name: IP4_URL
+          value: "https://api.ipify.org"
         - name: UPDATE_INTERVAL
           value: "5m"
         resources:

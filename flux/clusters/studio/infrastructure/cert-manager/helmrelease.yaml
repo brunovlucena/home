@@ -17,6 +17,8 @@ spec:
   values:
     installCRDs: true
     replicaCount: 1
+    nodeSelector:
+      role: core
     resources:
       requests:
         cpu: 50m

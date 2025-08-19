@@ -18,6 +18,8 @@ spec:
   values:
     controller:
       replicaCount: 1
+      nodeSelector:
+        role: ingress
       resources:
         requests:
           cpu: 25m

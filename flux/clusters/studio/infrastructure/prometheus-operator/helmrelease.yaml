@@ -17,6 +17,8 @@ spec:
   values:
     prometheus:
       prometheusSpec:
+        nodeSelector:
+          role: observability
         retention: 30d
         storageSpec:
           volumeClaimTemplate:

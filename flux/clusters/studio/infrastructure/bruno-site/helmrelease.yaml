@@ -15,32 +15,28 @@ spec:
         name: bruno-site-chart
         namespace: flux-system
   values:
+    nodeSelector:
+      role: tenant
+      tenant: bruno
     ingress:
       enabled: true
       className: nginx
-      annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: /
-        nginx.ingress.kubernetes.io/ssl-redirect: "true"
-        cert-manager.io/cluster-issuer: "bruno-site"
-        nginx.ingress.kubernetes.io/cors-allow-origin: "*"
-        nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
-        nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
-      tls:
-        enabled: true
-        secretName: bruno-site-tls
-        hosts:
-          - bruno.lucena.cloud
-          - api.bruno.lucena.cloud
+      # annotations:
+      #   nginx.ingress.kubernetes.io/rewrite-target: /
+      #   nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      #   cert-manager.io/cluster-issuer: "bruno-site"
+      #   nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+      #   nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+      #   nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+      # tls:
+      #   enabled: true
+      #   secretName: bruno-site-tls
+      #   hosts:
+      #     - lucena.cloud
       hosts:
-        - host: bruno.lucena.cloud
+        - host: lucena.cloud
           paths:
             - path: /
               pathType: Prefix
               serviceName: frontend-service
-              servicePort: 80
-        - host: api.bruno.lucena.cloud
-          paths:
-            - path: /
-              pathType: Prefix
-              serviceName: api-service
               servicePort: 80
