@@ -3,11 +3,10 @@ kind: Kustomization
 resources:
   - repositories/
   - cert-manager/
-  - metallb/
   - prometheus-operator/
   - loki/
   - tempo/
   - alloy/
   - nginx/
   - bruno-site/
-  - action-runners/ 
+  - cloudflare-ddns/ 

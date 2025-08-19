@@ -1,7 +1,0 @@
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: action-runners
-  labels:
-    app.kubernetes.io/name: action-runners
