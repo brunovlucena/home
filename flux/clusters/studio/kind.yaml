@@ -6,7 +6,7 @@ nodes:
 - role: worker
   image: kindest/node:v1.33.0
   labels:
-    role: ingress
+    role: core
   extraPortMappings:
   - containerPort: 30080
     hostPort: 30080
@@ -17,32 +17,7 @@ nodes:
 - role: worker
   image: kindest/node:v1.33.0
   labels:
-    role: core
-- role: worker
-  image: kindest/node:v1.33.0
-  labels:
     role: observability
-- role: worker
-  image: kindest/node:v1.33.0
-  labels:
-    role: observability
-- role: worker
-  image: kindest/node:v1.33.0
-  labels:
-    role: observability
-- role: worker
-  image: kindest/node:v1.33.0
-  labels:
-    role: tenant
-    tenant: bruno
-- role: worker
-  image: kindest/node:v1.33.0
-  labels:
-    role: knative
-- role: worker
-  image: kindest/node:v1.33.0
-  labels:
-    role: knative
 - role: worker
   image: kindest/node:v1.33.0
   labels:
