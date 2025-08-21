@@ -19,7 +19,7 @@ spec:
     controller:
       replicaCount: 1
       nodeSelector:
-        role: ingress
+        role: core
       resources:
         requests:
           cpu: 25m
@@ -38,7 +38,7 @@ spec:
         use-forwarded-headers: "true"
     defaultBackend:
       nodeSelector:
-        role: ingress
+        role: core
       enabled: true
       resources:
         requests:
