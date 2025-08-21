@@ -32,6 +32,8 @@ spec:
       retention: 24h
       metrics_generator:
         enabled: false
+      ingester:
+        replicas: 1
     minio:
       enabled: true
       auth:
