@@ -18,42 +18,12 @@ spec:
   values:
     controller:
       replicaCount: 1
-      nodeSelector:
-        role: core
-      resources:
-        requests:
-          cpu: 25m
-          memory: 32Mi
-        limits:
-          cpu: 50m
-          memory: 64Mi
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
       service:
-        type: LoadBalancer
-        annotations:
-          metallb.universe.tf/allow-shared-ip: nginx-ingress
-          metallb.universe.tf/address-pool: first-pool
-      config:
-        use-proxy-protocol: "false"
-        proxy-real-ip-cidr: "0.0.0.0/0"
-        use-forwarded-headers: "true"
-    defaultBackend:
-      nodeSelector:
-        role: core
-      enabled: true
-      resources:
-        requests:
-          cpu: 25m
-          memory: 32Mi
-        limits:
-          cpu: 50m
-          memory: 64Mi
-    admissionWebhooks:
-      enabled: true
-      resources:
-        requests:
-          cpu: 25m
-          memory: 32Mi
-        limits:
-          cpu: 50m
-          memory: 64Mi
-
+        type: NodePort
+        nodePorts:
+          http: 30080
+          https: 30443

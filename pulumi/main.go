@@ -104,20 +104,36 @@ kubectl --context kind-%s create secret docker-registry ghcr-secret \
 			return err
 		}
 
-		// Create the Cloudflare secret for DDNS
-		createCloudflareSecret, err := local.NewCommand(ctx, "create-cloudflare-secret", &local.CommandArgs{
+		// Create namespaces first
+		createNamespaces, err := local.NewCommand(ctx, "create-namespaces", &local.CommandArgs{
 			Create: pulumi.String(fmt.Sprintf(`kubectl --context kind-%s create namespace cloudflare-ddns --dry-run=client -o yaml | kubectl apply -f - && \
-kubectl --context kind-%s delete secret cloudflare-api-token --namespace=cloudflare-ddns --ignore-not-found=true && \
-kubectl --context kind-%s create secret generic cloudflare-api-token --namespace=cloudflare-ddns --from-literal=api-token=%s`,
-				clusterName, clusterName, clusterName, cloudflareToken)),
+kubectl --context kind-%s create namespace external-dns --dry-run=client -o yaml | kubectl apply -f -`,
+				clusterName, clusterName)),
 		}, pulumi.DependsOn([]pulumi.Resource{flux}))
 		if err != nil {
 			return err
 		}
+
+		// Create Cloudflare secrets for both namespaces
+		namespaces := []string{"cloudflare-ddns", "external-dns"}
+		var cloudflareSecrets []pulumi.Resource
+
+		for _, namespace := range namespaces {
+			secret, err := local.NewCommand(ctx, fmt.Sprintf("create-cloudflare-secret-%s", namespace), &local.CommandArgs{
+				Create: pulumi.String(fmt.Sprintf(`kubectl --context kind-%s delete secret cloudflare-api-token --namespace=%s --ignore-not-found=true && \
+kubectl --context kind-%s create secret generic cloudflare-api-token --namespace=%s --from-literal=api-token=%s`,
+					clusterName, namespace, clusterName, namespace, cloudflareToken)),
+			}, pulumi.DependsOn([]pulumi.Resource{createNamespaces}))
+			if err != nil {
+				return err
+			}
+			cloudflareSecrets = append(cloudflareSecrets, secret)
+		}
+
 		// Deploy infrastructure components using Kustomize from actual YAML files
 		infrastructureResources, err := kustomize.NewDirectory(ctx, "infrastructure-resources", kustomize.DirectoryArgs{
 			Directory: pulumi.String(fmt.Sprintf("../flux/clusters/%s/infrastructure", clusterName)),
-		}, pulumi.Provider(k8sProvider), pulumi.DependsOn([]pulumi.Resource{createSecret, createDockerSecret, createCloudflareSecret}))
+		}, pulumi.Provider(k8sProvider), pulumi.DependsOn(append([]pulumi.Resource{createSecret, createDockerSecret}, cloudflareSecrets...)))
 		if err != nil {
 			return err
 		}
