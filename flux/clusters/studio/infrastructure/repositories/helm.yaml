@@ -52,15 +52,7 @@ spec:
   interval: 1h0m0s
   url: https://charts.jetstack.io
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta2
-kind: HelmRepository
-metadata:
-  name: bruno-site
-  namespace: flux-system
-spec:
-  interval: 1h0m0s
-  url: https://brunovlucena.github.io/bruno-site
----
+
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:

@@ -8,11 +8,11 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: bruno-site-chart
+      chart: ./chart
       version: 0.1.0
       sourceRef:
-        kind: HelmRepository
-        name: bruno-site-chart
+        kind: GitRepository
+        name: bruno-site
         namespace: flux-system
   values:
     ingress:
