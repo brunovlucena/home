@@ -19,16 +19,20 @@ spec:
       enabled: true
       className: nginx
       annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: letsencrypt-prod
         nginx.ingress.kubernetes.io/ssl-redirect: "true"
         nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-        cert-manager.io/cluster-issuer: letsencrypt-prod
         external-dns.alpha.kubernetes.io/hostname: lucena.cloud
       hosts:
         - host: lucena.cloud
           paths:
             - path: /
               pathType: Prefix
-              service: frontend
+              service:
+                name: bruno-site-frontend
+                port:
+                  number: 80
       tls:
         - secretName: bruno-site-tls
           hosts:
