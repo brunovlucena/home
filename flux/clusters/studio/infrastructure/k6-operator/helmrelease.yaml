@@ -14,24 +14,22 @@ spec:
         name: grafana
         namespace: flux-system
   values:
-    replicaCount: 1
-    image:
-      repository: grafana/k6-operator
-      # tag: "controller-v0.0.22"
-      pullPolicy: IfNotPresent
-    serviceAccount:
-      create: true
-      annotations: {}
-      name: ""
+    manager:
+      replicas: 1
+      image:
+        registry: ghcr.io
+        repository: grafana/k6-operator
+        tag: controller-v0.0.22
+        pullPolicy: IfNotPresent
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 250m
+          memory: 256Mi
     rbac:
       create: true
-    resources:
-      limits:
-        cpu: 500m
-        memory: 512Mi
-      requests:
-        cpu: 250m
-        memory: 256Mi
-    nodeSelector: {}
-    tolerations: []
-    affinity: {}
+    installCRDs: true
+    namespace:
+      create: false
