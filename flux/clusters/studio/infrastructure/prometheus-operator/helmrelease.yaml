@@ -36,7 +36,7 @@ spec:
             cpu: 1000m
             memory: 4Gi
     grafana:
-      adminPassword: admin
+      adminPassword: admin # TODO: Sealed Secrets
       persistence:
         enabled: true
         storageClassName: standard
@@ -45,15 +45,11 @@ spec:
         type: ClusterIP
       ingress:
         enabled: true
-        ingressClassName: nginx
+        ingressClassName: ngrok
         hosts:
-          - grafana.dev.local
+          - grafana.studio.lucena.cloud
         path: /
         pathType: Prefix
-        tls:
-          - secretName: grafana-tls
-            hosts:
-              - grafana.dev.local
     alertmanager:
       alertmanagerSpec:
         storage:
