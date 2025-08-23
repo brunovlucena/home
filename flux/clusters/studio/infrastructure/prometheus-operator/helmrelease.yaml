@@ -49,8 +49,8 @@ spec:
         className: ngrok
         namespace: ngrok-operator
         hosts:
-          - grafana.lucena.cloud
-        path: /
+          - lucena.cloud
+        path: /grafana
         pathType: Prefix
     alertmanager:
       alertmanagerSpec:
