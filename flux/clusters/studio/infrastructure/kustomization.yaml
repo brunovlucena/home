@@ -9,5 +9,4 @@ resources:
   - alloy/
   - nginx/
   - bruno-site/
-  - cloudflare-ddns/
-  - external-dns/ 
+  - k6-operator/ 
