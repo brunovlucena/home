@@ -46,6 +46,8 @@ spec:
       ingress:
         enabled: true
         ingressClassName: ngrok
+        className: ngrok
+        namespace: ngrok-operator
         hosts:
           - grafana.lucena.cloud
         path: /
