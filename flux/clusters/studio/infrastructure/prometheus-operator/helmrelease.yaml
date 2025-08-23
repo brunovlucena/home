@@ -47,7 +47,7 @@ spec:
         enabled: true
         ingressClassName: ngrok
         hosts:
-          - grafana.studio.lucena.cloud
+          - grafana.lucena.cloud
         path: /
         pathType: Prefix
     alertmanager:
