@@ -44,7 +44,7 @@ spec:
       service:
         type: ClusterIP
       ingress:
-        enabled: true
+        enabled: false
         ingressClassName: ngrok
         className: ngrok
         namespace: ngrok-operator
