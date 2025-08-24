@@ -17,13 +17,6 @@ spec:
   values:
     ingress:
       enabled: true
-      className: ngrok
+      className: nginx
       hosts:
         - host: lucena.cloud
-          paths:
-            - path: /
-              pathType: Prefix
-              service:
-                name: bruno-site-frontend
-                port:
-                  number: 80

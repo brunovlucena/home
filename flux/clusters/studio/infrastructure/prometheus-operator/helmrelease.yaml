@@ -19,7 +19,7 @@ spec:
       prometheusSpec:
         nodeSelector:
           role: observability
-        retention: 30d
+        retention: 7d
         storageSpec:
           volumeClaimTemplate:
             spec:
@@ -27,14 +27,14 @@ spec:
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
-                  storage: 50Gi
+                  storage: 10Gi
         resources:
           requests:
             cpu: 250m
             memory: 1Gi
           limits:
             cpu: 1000m
-            memory: 4Gi
+            memory: 1Gi
     grafana:
       adminPassword: admin # TODO: Sealed Secrets
       persistence:
@@ -44,13 +44,11 @@ spec:
       service:
         type: ClusterIP
       ingress:
-        enabled: false
-        ingressClassName: ngrok
-        className: ngrok
-        namespace: ngrok-operator
+        enabled: true
+        ingressClassName: nginx
         hosts:
-          - lucena.cloud
-        path: /grafana
+          - grafana.lucena.cloud
+        path: /
         pathType: Prefix
     alertmanager:
       alertmanagerSpec:
@@ -62,4 +60,3 @@ spec:
               resources:
                 requests:
                   storage: 10Gi
-

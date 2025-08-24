@@ -18,6 +18,8 @@ spec:
   values:
     controller:
       replicaCount: 1
+      nodeSelector:
+        ingress-ready: "true"
       tolerations:
         - key: node-role.kubernetes.io/control-plane
           operator: Exists
