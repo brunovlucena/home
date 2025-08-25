@@ -40,21 +40,6 @@ if ! command -v kubeseal &> /dev/null; then
     exit 1
 fi
 
-# Check if Sealed Secrets controller is running
-print_status "Checking Sealed Secrets controller..."
-if ! kubectl get pods -n kube-system | grep -q sealed-secrets-controller; then
-    print_warning "Sealed Secrets controller not found. Please install it first:"
-    echo "  kubectl apply -f https://github.com/bitnami-labs/sealed-secrets/releases/download/v0.24.0/controller.yaml"
-    exit 1
-fi
-
-# Get the namespace from command line or use default
-NAMESPACE=${1:-bruno-site}
-print_status "Creating sealed secrets for namespace: $NAMESPACE"
-
-# Create namespace if it doesn't exist
-kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
-
 # Generate secure passwords
 DB_PASSWORD=$(openssl rand -base64 32)
 REDIS_PASSWORD=$(openssl rand -base64 32)
@@ -98,6 +83,12 @@ data:
   username: $(echo -n "admin" | base64)
   password: $(echo -n "$METRICS_PASSWORD" | base64)
 EOF
+
+# Fix the namespace in the generated files
+print_status "Fixing namespace in generated files..."
+sed -i '' "s/namespace: /namespace: $NAMESPACE/g" bruno-site-db-secret.yaml
+sed -i '' "s/namespace: /namespace: $NAMESPACE/g" bruno-site-redis-secret.yaml
+sed -i '' "s/namespace: /namespace: $NAMESPACE/g" bruno-site-metrics-secret.yaml
 
 print_success "Sealed secrets created successfully!"
 print_status "Files created:"

@@ -19,6 +19,8 @@ spec:
     serviceAccount:
       create: true
       name: sealed-secrets
+    rbac:
+      create: true
     resources:
       limits:
         cpu: 500m
