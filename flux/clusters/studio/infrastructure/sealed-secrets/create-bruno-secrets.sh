@@ -40,12 +40,14 @@ if ! command -v kubeseal &> /dev/null; then
     exit 1
 fi
 
+# Set default namespace if not provided
+NAMESPACE=${NAMESPACE:-bruno}
+
 # Generate secure passwords
 DB_PASSWORD=$(openssl rand -base64 32)
 REDIS_PASSWORD=$(openssl rand -base64 32)
-METRICS_PASSWORD=$(openssl rand -base64 32)
 
-print_status "Generating sealed secrets..."
+print_status "Generating sealed secrets for namespace: $NAMESPACE"
 
 # Create database secret
 cat <<EOF | kubeseal --format=yaml > bruno-site-db-secret.yaml
@@ -71,40 +73,23 @@ data:
   password: $(echo -n "$REDIS_PASSWORD" | base64)
 EOF
 
-# Create metrics secret
-cat <<EOF | kubeseal --format=yaml > bruno-site-metrics-secret.yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: bruno-site-metrics-secret
-  namespace: $NAMESPACE
-type: Opaque
-data:
-  username: $(echo -n "admin" | base64)
-  password: $(echo -n "$METRICS_PASSWORD" | base64)
-EOF
 
-# Fix the namespace in the generated files
-print_status "Fixing namespace in generated files..."
-sed -i '' "s/namespace: /namespace: $NAMESPACE/g" bruno-site-db-secret.yaml
-sed -i '' "s/namespace: /namespace: $NAMESPACE/g" bruno-site-redis-secret.yaml
-sed -i '' "s/namespace: /namespace: $NAMESPACE/g" bruno-site-metrics-secret.yaml
+
+# Verify the generated files
+print_status "Verifying generated files..."
 
 print_success "Sealed secrets created successfully!"
 print_status "Files created:"
 echo "  - bruno-site-db-secret.yaml"
 echo "  - bruno-site-redis-secret.yaml"
-echo "  - bruno-site-metrics-secret.yaml"
 
 print_warning "IMPORTANT: Save these passwords securely for local development:"
 echo "  Database Password: $DB_PASSWORD"
 echo "  Redis Password: $REDIS_PASSWORD"
-echo "  Metrics Password: $METRICS_PASSWORD"
 
 print_status "Apply the sealed secrets to your cluster:"
 echo "  kubectl apply -f bruno-site-db-secret.yaml"
 echo "  kubectl apply -f bruno-site-redis-secret.yaml"
-echo "  kubectl apply -f bruno-site-metrics-secret.yaml"
 
 print_status "Or apply all at once:"
 echo "  kubectl apply -f ."
