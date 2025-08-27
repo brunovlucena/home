@@ -1,0 +1,116 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: flagger
+  namespace: flagger-system
+spec:
+  interval: 5m
+  timeout: 10m
+  chart:
+    spec:
+      chart: flagger
+      version: 1.32.0
+      sourceRef:
+        kind: HelmRepository
+        name: flagger
+        namespace: flux-system
+  values:
+    # 🔄 Flagger Configuration for Blue/Green Deployments
+    # 🎯 Progressive Delivery with Istio Service Mesh
+    
+    # Service Mesh Configuration
+    meshProvider: istio
+    
+    # Metrics Configuration
+    metricsServer: http://prometheus-operated.prometheus.svc:9090
+    
+    # Istio Configuration
+    istio:
+      enabled: true
+      gateway:
+        enabled: true
+        name: flagger-gateway
+        namespace: flagger-system
+      # 🔄 Istio Integration for Blue/Green Deployments
+      # 🎯 Traffic Management and Service Mesh
+      virtualService:
+        enabled: true
+        timeout: 30s
+        retries:
+          attempts: 3
+          perTryTimeout: 2s
+          retryOn: connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes
+        corsPolicy:
+          allowOrigins:
+          - exact: "https://bruno.dev.local"
+          - exact: "http://localhost:3000"
+          allowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+          allowHeaders:
+          - "content-type"
+          - "authorization"
+          - "x-requested-with"
+          maxAge: "24h"
+    
+    # Prometheus Configuration
+    prometheus:
+      enabled: true
+      service:
+        port: 9090
+        targetPort: 9090
+    
+    # Grafana Configuration
+    grafana:
+      enabled: true
+      host: http://grafana.grafana.svc:80
+    
+    # Slack Configuration (optional)
+    slack:
+      enabled: false
+      # url: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+      # channel: "#alerts"
+      # user: "flagger"
+    
+    # Webhook Configuration (optional)
+    webhook:
+      enabled: false
+      # url: "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+    
+    # Resource Configuration
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    
+    # Security Context
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      fsGroup: 2000
+    
+    # Service Account
+    serviceAccount:
+      create: true
+      annotations: {}
+    
+    # RBAC Configuration
+    rbac:
+      create: true
+      pspEnabled: false
+    
+    # Node Selector
+    nodeSelector: {}
+    
+    # Tolerations
+    tolerations: []
+    
+    # Affinity
+    affinity: {}

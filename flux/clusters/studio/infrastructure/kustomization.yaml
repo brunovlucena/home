@@ -9,6 +9,7 @@ resources:
   - cert-manager
   - repositories
   - nginx
+  - istio
   - prometheus-operator
   - alloy
   - loki
@@ -20,3 +21,4 @@ resources:
   - twingate
   - falco
   - falcosidekick
+  - flagger
