@@ -9,10 +9,12 @@ resources:
   - cert-manager
   - repositories
   - nginx
+  - istio
   - prometheus-operator
   - alloy
   - loki
   - tempo
   - k6-operator
   - bruno-site
-  - sealed-secrets 
+  - sealed-secrets
+  - flagger 
