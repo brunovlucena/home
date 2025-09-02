@@ -2,7 +2,7 @@
 
 ## 📋 **Executive Summary**
 
-This plan outlines the implementation of a comprehensive security monitoring and alerting system using **Falco** for runtime security monitoring, **Falcosidekick** for alert routing, and **AlertManager** for centralized alert management. The system will detect and alert on suspicious activities like the WordPress scanning recently detected in your home infrastructure. This implementation follows the GitOps approach using Flux for automated deployment and management.
+This plan outlines the implementation of a comprehensive security monitoring and alerting system using **Falco** for runtime security monitoring, **Falcosidekick** for alert routing, and **AlertManager** for centralized alert management. The system will detect and alert on suspicious activities like the WordPress scanning recently detected in your infrastructure. This implementation follows the GitOps approach using Flux for automated deployment and management.
 
 ## 🎯 **Objectives**
 
@@ -141,15 +141,15 @@ falcosidekick:
       Content-Type: "application/json"
   
   # Slack integration (optional)
-  # slack:
-  #   enabled: false
-  #   webhookurl: ""
-  #   channel: ""
+  slack:
+    enabled: false
+    webhookurl: ""
+    channel: ""
   
   # Discord integration (optional)
-  # discord:
-  #   enabled: false
-  #   webhookurl: ""
+  discord:
+    enabled: false
+    webhookurl: ""
 ```
 
 ### **Enhanced AlertManager Configuration**
@@ -180,8 +180,10 @@ kube-prometheus-stack:
           - service_key: "{{ .Values.security.pagerduty.serviceKey }}"
           
         - name: 'security-warning'
-          # TODO: Configure notification method for security warnings
-          # Options: Slack, Discord, email, webhook, etc.
+          slack_configs:
+          - channel: "#security-alerts"
+            send_resolved: true
+            api_url: "{{ .Values.security.slack.webhookUrl }}"
 ```
 
 ## 🚨 **Custom Security Rules**
