@@ -141,15 +141,15 @@ falcosidekick:
       Content-Type: "application/json"
   
   # Slack integration (optional)
-  slack:
-    enabled: false
-    webhookurl: ""
-    channel: ""
+  # slack:
+  #   enabled: false
+  #   webhookurl: ""
+  #   channel: ""
   
   # Discord integration (optional)
-  discord:
-    enabled: false
-    webhookurl: ""
+  # discord:
+  #   enabled: false
+  #   webhookurl: ""
 ```
 
 ### **Enhanced AlertManager Configuration**
@@ -180,10 +180,8 @@ kube-prometheus-stack:
           - service_key: "{{ .Values.security.pagerduty.serviceKey }}"
           
         - name: 'security-warning'
-          slack_configs:
-          - channel: "#security-alerts"
-            send_resolved: true
-            api_url: "{{ .Values.security.slack.webhookUrl }}"
+          # TODO: Configure notification method for security warnings
+          # Options: Slack, Discord, email, webhook, etc.
 ```
 
 ## 🚨 **Custom Security Rules**
@@ -417,8 +415,8 @@ kubectl get pods -n prometheus
 
 ### **External Systems**
 - **PagerDuty**: Critical alert escalation
-- **Slack**: Team notifications
 - **GitHub**: Security rule management
+- **Other**: Configure as needed (Slack, Discord, email, webhook)
 
 ## 📝 **Next Steps**
 
