@@ -9,9 +9,9 @@ resources:
   - cert-manager
   - repositories
   - nginx
-  - istio
   - prometheus-operator
   - alloy
+  - grafana-agent-operator
   - loki
   - tempo
   - k6-operator

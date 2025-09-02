@@ -1,138 +1,138 @@
-apiVersion: flagger.app/v1beta1
-kind: Canary
-metadata:
-  name: bruno-site
-  namespace: bruno
-spec:
-  # 🎯 Target Configuration
-  targetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: bruno-site
+# apiVersion: flagger.app/v1beta1
+# kind: Canary
+# metadata:
+#   name: bruno-site
+#   namespace: bruno
+# spec:
+#   # 🎯 Target Configuration
+#   targetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: bruno-site
   
-  # 🔄 Progress Tracking
-  progressDeadlineSeconds: 600
+#   # 🔄 Progress Tracking
+#   progressDeadlineSeconds: 600
   
-  # 📊 Analysis Configuration
-  analysis:
-    # ⏱️ Analysis Interval
-    interval: 30s
+#   # 📊 Analysis Configuration
+#   analysis:
+#     # ⏱️ Analysis Interval
+#     interval: 30s
     
-    # 📈 Threshold for Success
-    threshold: 10
+#     # 📈 Threshold for Success
+#     threshold: 10
     
-    # 🔄 Max Failures Before Rollback
-    maxFailures: 3
+#     # 🔄 Max Failures Before Rollback
+#     maxFailures: 3
     
-    # 📊 Metrics for Analysis
-    metrics:
-    - name: request-success-rate
-      thresholdRange:
-        min: 99
-      interval: 1m
-    - name: request-duration
-      thresholdRange:
-        max: 500
-      interval: 1m
-    - name: error-rate
-      thresholdRange:
-        max: 1
-      interval: 1m
+#     # 📊 Metrics for Analysis
+#     metrics:
+#     - name: request-success-rate
+#       thresholdRange:
+#         min: 99
+#       interval: 1m
+#     - name: request-duration
+#       thresholdRange:
+#         max: 500
+#       interval: 1m
+#     - name: error-rate
+#       thresholdRange:
+#         max: 1
+#       interval: 1m
     
-    # 🔍 Webhook for Custom Analysis
-    webhooks:
-    - name: load-test
-      url: http://k6-operator.k6-operator.svc:8080/load-test
-      timeout: 5s
-      metadata:
-        type: cmd
-        cmd: "k6 run --out influxdb=http://prometheus-operated.prometheus.svc:9090 /scripts/load-test.js"
+#     # 🔍 Webhook for Custom Analysis
+#     webhooks:
+#     - name: load-test
+#       url: http://k6-operator.k6-operator.svc:8080/load-test
+#       timeout: 5s
+#       metadata:
+#         type: cmd
+#         cmd: "k6 run --out influxdb=http://prometheus-operated.prometheus.svc:9090 /scripts/load-test.js"
   
-  # 🚦 Traffic Management
-  service:
-    port: 8080
-    targetPort: 8080
-    portDiscovery: true
+#   # 🚦 Traffic Management
+#   service:
+#     port: 8080
+#     targetPort: 8080
+#     portDiscovery: true
   
-  # 🔄 Blue/Green Strategy
-  strategy: BlueGreen
+#   # 🔄 Blue/Green Strategy
+#   strategy: BlueGreen
   
-  # 🎨 Blue/Green Configuration
-  blueGreen:
-    # 🔵 Blue Environment (Current)
-    blue:
-      replicas: 2
-      resources:
-        requests:
-          cpu: 100m
-          memory: 128Mi
-        limits:
-          cpu: 200m
-          memory: 256Mi
+#   # 🎨 Blue/Green Configuration
+#   blueGreen:
+#     # 🔵 Blue Environment (Current)
+#     blue:
+#       replicas: 2
+#       resources:
+#         requests:
+#           cpu: 100m
+#           memory: 128Mi
+#         limits:
+#           cpu: 200m
+#           memory: 256Mi
     
-    # 🟢 Green Environment (New)
-    green:
-      replicas: 2
-      resources:
-        requests:
-          cpu: 100m
-          memory: 128Mi
-        limits:
-          cpu: 200m
-          memory: 256Mi
+#     # 🟢 Green Environment (New)
+#     green:
+#       replicas: 2
+#       resources:
+#         requests:
+#           cpu: 100m
+#           memory: 128Mi
+#         limits:
+#           cpu: 200m
+#           memory: 256Mi
     
-    # 🔄 Traffic Switching
-    trafficRouting:
-      istio:
-        virtualService:
-          name: bruno-site-vs
-          routes:
-          - name: primary
-            weight: 100
-          - name: canary
-            weight: 0
+#     # 🔄 Traffic Switching
+#     trafficRouting:
+#       istio:
+#         virtualService:
+#           name: bruno-site-vs
+#           routes:
+#           - name: primary
+#             weight: 100
+#           - name: canary
+#             weight: 0
     
-    # ⏱️ Promotion Configuration
-    promotion:
-      # 🔄 Auto Promotion
-      autoPromotionEnabled: false
+#     # ⏱️ Promotion Configuration
+#     promotion:
+#       # 🔄 Auto Promotion
+#       autoPromotionEnabled: false
       
-      # ⏱️ Promotion Timeout
-      promotionTimeout: 300s
+#       # ⏱️ Promotion Timeout
+#       promotionTimeout: 300s
       
-      # 🔄 Rollback on Failure
-      rollbackOnFailure: true
+#       # 🔄 Rollback on Failure
+#       rollbackOnFailure: true
       
-      # 📊 Promotion Criteria
-      analysis:
-        interval: 30s
-        threshold: 5
-        maxFailures: 2
-        metrics:
-        - name: request-success-rate
-          thresholdRange:
-            min: 99
-          interval: 1m
-        - name: request-duration
-          thresholdRange:
-            max: 500
-          interval: 1m
+#       # 📊 Promotion Criteria
+#       analysis:
+#         interval: 30s
+#         threshold: 5
+#         maxFailures: 2
+#         metrics:
+#         - name: request-success-rate
+#           thresholdRange:
+#             min: 99
+#           interval: 1m
+#         - name: request-duration
+#           thresholdRange:
+#             max: 500
+#           interval: 1m
     
-    # 🧹 Cleanup Configuration
-    cleanup:
-      # 🗑️ Auto Cleanup Old Revisions
-      autoCleanup: true
+#     # 🧹 Cleanup Configuration
+#     cleanup:
+#       # 🗑️ Auto Cleanup Old Revisions
+#       autoCleanup: true
       
-      # ⏱️ Cleanup Delay
-      cleanupDelay: 300s
+#       # ⏱️ Cleanup Delay
+#       cleanupDelay: 300s
       
-      # 📊 Cleanup Criteria
-      analysis:
-        interval: 30s
-        threshold: 3
-        maxFailures: 1
-        metrics:
-        - name: request-success-rate
-          thresholdRange:
-            min: 95
-          interval: 1m
+#       # 📊 Cleanup Criteria
+#       analysis:
+#         interval: 30s
+#         threshold: 3
+#         maxFailures: 1
+#         metrics:
+#         - name: request-success-rate
+#           thresholdRange:
+#             min: 95
+#           interval: 1m

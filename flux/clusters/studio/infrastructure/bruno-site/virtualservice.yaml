@@ -1,78 +1,78 @@
-apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
-metadata:
-  name: bruno-site-vs
-  namespace: bruno
-spec:
-  # 🌐 Hosts Configuration
-  hosts:
-  - bruno-site.bruno.svc.cluster.local
-  - bruno.dev.local
+# apiVersion: networking.istio.io/v1beta1
+# kind: VirtualService
+# metadata:
+#   name: bruno-site-vs
+#   namespace: bruno
+# spec:
+#   # 🌐 Hosts Configuration
+#   hosts:
+#   - bruno-site.bruno.svc.cluster.local
+#   - bruno.dev.local
   
-  # 🚦 Gateway Configuration
-  gateways:
-  - flagger-gateway.flagger-system.svc.cluster.local
+#   # 🚦 Gateway Configuration
+#   gateways:
+#   - flagger-gateway.flagger-system.svc.cluster.local
   
-  # 🛣️ HTTP Routes
-  http:
-  # 🔵 Primary Route (Blue Environment)
-  - name: primary
-    match:
-    - uri:
-        prefix: /
-    route:
-    - destination:
-        host: bruno-site.bruno.svc.cluster.local
-        port:
-          number: 8080
-        subset: blue
-        weight: 100
-    - destination:
-        host: bruno-site.bruno.svc.cluster.local
-        port:
-          number: 8080
-        subset: green
-        weight: 0
+#   # 🛣️ HTTP Routes
+#   http:
+#   # 🔵 Primary Route (Blue Environment)
+#   - name: primary
+#     match:
+#     - uri:
+#         prefix: /
+#     route:
+#     - destination:
+#         host: bruno-site.bruno.svc.cluster.local
+#         port:
+#           number: 8080
+#         subset: blue
+#         weight: 100
+#     - destination:
+#         host: bruno-site.bruno.svc.cluster.local
+#         port:
+#           number: 8080
+#         subset: green
+#         weight: 0
     
-    # 🔄 Retry Configuration
-    retries:
-      attempts: 3
-      perTryTimeout: 2s
-      retryOn: connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes
-      retriableStatusCodes:
-      - 500
-      - 502
-      - 503
-      - 504
+#     # 🔄 Retry Configuration
+#     retries:
+#       attempts: 3
+#       perTryTimeout: 2s
+#       retryOn: connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes
+#       retriableStatusCodes:
+#       - 500
+#       - 502
+#       - 503
+#       - 504
     
-    # ⏱️ Timeout Configuration
-    timeout: 30s
+#     # ⏱️ Timeout Configuration
+#     timeout: 30s
     
-    # 🔌 Fault Injection (for testing)
-    fault:
-      # 🚫 Disabled by default
-      delay:
-        percentage:
-          value: 0
-        fixedDelay: 1s
-      abort:
-        percentage:
-          value: 0
-        httpStatus: 500
+#     # 🔌 Fault Injection (for testing)
+#     fault:
+#       # 🚫 Disabled by default
+#       delay:
+#         percentage:
+#           value: 0
+#         fixedDelay: 1s
+#       abort:
+#         percentage:
+#           value: 0
+#         httpStatus: 500
     
-    # 📊 CORS Configuration
-    corsPolicy:
-      allowOrigins:
-      - exact: "https://bruno.dev.local"
-      - exact: "http://localhost:3000"
-      allowMethods:
-      - GET
-      - POST
-      - PUT
-      - DELETE
-      - OPTIONS
-      allowHeaders:
-      - "content-type"
-      - "authorization"
-      - "x-requested-with"
-      maxAge: "24h"
+#     # 📊 CORS Configuration
+#     corsPolicy:
+#       allowOrigins:
+#       - exact: "https://bruno.dev.local"
+#       - exact: "http://localhost:3000"
+#       allowMethods:
+#       - GET
+#       - POST
+#       - PUT
+#       - DELETE
+#       - OPTIONS
+#       allowHeaders:
+#       - "content-type"
+#       - "authorization"
+#       - "x-requested-with"
+#       maxAge: "24h"
