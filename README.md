@@ -148,8 +148,9 @@ The infrastructure includes a Cloudflare Tunnel deployment for secure external a
 
 **Quick Setup:**
 1. Create tunnel in [Cloudflare Zero Trust Dashboard](https://one.dash.cloudflare.com/)
-2. Run: `./flux/clusters/studio/infrastructure/cloudflare-tunnel/create-tunnel-secret.sh <token>`
-3. Configure routes in Cloudflare dashboard
+2. Run: `./flux/clusters/studio/infrastructure/cloudflare-tunnel/create-tunnel-sealed-secret.sh <token>`
+3. Uncomment sealed secret in kustomization.yaml
+4. Configure routes in Cloudflare dashboard
 
 See [Cloudflare Tunnel Setup Guide](flux/clusters/studio/infrastructure/cloudflare-tunnel/SETUP.md) for detailed instructions.
 

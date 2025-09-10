@@ -33,14 +33,14 @@ The Cloudflare Tunnel deployment provides:
 
 ```
 cloudflare-tunnel/
-├── 📄 README.md                    # 📖 This documentation
-├── 📄 namespace.yaml               # 🏷️  Namespace definition
-├── 📄 deployment.yaml              # 🚀 cloudflared deployment
-├── 📄 service.yaml                 # 🌐 Metrics service
-├── 📄 kustomization.yaml           # ⚙️  Kustomize configuration
-├── 📄 example-service.yaml         # 🧪 Test service (httpbin)
-├── 📄 secret-template.yaml         # 🔐 Secret template
-└── 📄 create-tunnel-secret.sh      # 🛠️  Secret creation script
+├── 📄 README.md                           # 📖 This documentation
+├── 📄 SETUP.md                            # 🚀 Quick setup guide
+├── 📄 namespace.yaml                      # 🏷️  Namespace definition
+├── 📄 deployment.yaml                     # 🚀 cloudflared deployment
+├── 📄 service.yaml                        # 🌐 Metrics service
+├── 📄 kustomization.yaml                  # ⚙️  Kustomize configuration
+├── 📄 example-service.yaml                # 🧪 Test service (httpbin)
+└── 📄 create-tunnel-sealed-secret.sh      # 🔐 Sealed secret creation script
 ```
 
 ## 🚀 Quick Start
@@ -61,24 +61,30 @@ cloudflare-tunnel/
 6. Click **Save tunnel**
 7. **Copy the tunnel token** (starts with `eyJhIjoi...`)
 
-### Step 2: Create Tunnel Secret
+### Step 2: Create Tunnel Sealed Secret
 
-Use the provided script to create the tunnel token secret:
+Use the provided script to create the tunnel token sealed secret:
 
 ```bash
 cd flux/clusters/studio/infrastructure/cloudflare-tunnel
-./create-tunnel-secret.sh "your_tunnel_token_here"
+./create-tunnel-sealed-secret.sh "your_tunnel_token_here"
 ```
 
-Or manually create the secret:
+This will create a `tunnel-token-sealed-secret.yaml` file that can be safely committed to Git.
 
-```bash
-kubectl create secret generic tunnel-token \
-  --from-literal=token="your_tunnel_token_here" \
-  --namespace=cloudflare-tunnel
+### Step 3: Include Sealed Secret in Kustomization
+
+After creating the sealed secret, uncomment the line in `kustomization.yaml`:
+
+```yaml
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  - tunnel-token-sealed-secret.yaml  # Uncomment this line
 ```
 
-### Step 3: Deploy Tunnel
+### Step 4: Deploy Tunnel
 
 The tunnel will be automatically deployed by Flux GitOps. If you want to deploy manually:
 
@@ -86,7 +92,7 @@ The tunnel will be automatically deployed by Flux GitOps. If you want to deploy 
 kubectl apply -k flux/clusters/studio/infrastructure/cloudflare-tunnel/
 ```
 
-### Step 4: Verify Deployment
+### Step 5: Verify Deployment
 
 Check that the tunnel pods are running:
 
@@ -95,7 +101,7 @@ kubectl get pods -n cloudflare-tunnel
 kubectl logs -n cloudflare-tunnel -l app=cloudflared
 ```
 
-### Step 5: Configure Tunnel Routes
+### Step 6: Configure Tunnel Routes
 
 1. Go back to the Cloudflare Zero Trust dashboard
 2. Navigate to **Networks** > **Tunnels**
@@ -163,9 +169,10 @@ The deployment includes:
 
 ### Secret Management
 
-- Tunnel tokens are stored as Kubernetes secrets
-- Secrets are not included in Git (use the provided script)
-- Consider using external secret management (e.g., Sealed Secrets, External Secrets Operator)
+- Tunnel tokens are stored as sealed secrets (encrypted and Git-safe)
+- Use the provided script to create sealed secrets
+- Sealed secrets are automatically decrypted by the controller in the cluster
+- No sensitive data is stored in plain text in Git
 
 ### Network Security
 

@@ -18,14 +18,25 @@
 3. Name: `home-infrastructure`
 4. **Save tunnel** → **Copy the token** (starts with `eyJhIjoi...`)
 
-### 2. Create Secret (1 minute)
+### 2. Create Sealed Secret (1 minute)
 
 ```bash
 cd flux/clusters/studio/infrastructure/cloudflare-tunnel
-./create-tunnel-secret.sh "your_tunnel_token_here"
+./create-tunnel-sealed-secret.sh "your_tunnel_token_here"
 ```
 
-### 3. Deploy (automatic with Flux)
+This creates an encrypted secret that's safe to commit to Git.
+
+### 3. Include Sealed Secret (30 seconds)
+
+Uncomment the sealed secret line in `kustomization.yaml`:
+
+```yaml
+resources:
+  - tunnel-token-sealed-secret.yaml  # Uncomment this line
+```
+
+### 4. Deploy (automatic with Flux)
 
 The tunnel will be deployed automatically by Flux GitOps. To check status:
 
@@ -33,7 +44,7 @@ The tunnel will be deployed automatically by Flux GitOps. To check status:
 kubectl get pods -n cloudflare-tunnel
 ```
 
-### 4. Configure First Route (2 minutes)
+### 5. Configure First Route (2 minutes)
 
 1. Back to Cloudflare dashboard → Your tunnel
 2. **Public hostnames** → **Add a public hostname**

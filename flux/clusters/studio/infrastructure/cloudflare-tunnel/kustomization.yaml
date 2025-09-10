@@ -11,7 +11,9 @@ resources:
   - service.yaml
   # Uncomment the line below to include the example service for testing
   # - example-service.yaml
+  # Uncomment the line below to include the sealed secret (after running create-tunnel-sealed-secret.sh)
+  # - tunnel-token-sealed-secret.yaml
 
-# Note: The tunnel-token secret is not included in this kustomization
-# because it contains sensitive data. Use the create-tunnel-secret.sh script
-# to create the secret manually, or manage it through your secret management system.
+# Note: The tunnel-token sealed secret is not included by default.
+# Run ./create-tunnel-sealed-secret.sh <tunnel_token> to create it,
+# then uncomment the line above to include it in the kustomization.
