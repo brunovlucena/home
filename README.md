@@ -116,6 +116,7 @@ make up-studio
 - **Cert Manager**: SSL certificate management
 - **External DNS**: Automatic DNS record management
 - **Cloudflare DDNS**: Dynamic DNS updates
+- **Cloudflare Tunnel**: Secure tunnel for external access without exposing ports
 
 ### Security & Secrets
 
@@ -136,6 +137,21 @@ The infrastructure is configured to work with:
 - **Local Development**: Kind cluster on Mac Studio
 - **External Access**: Cloudflare DNS and tunneling
 - **Container Registry**: GitHub Container Registry (GHCR.io)
+
+### Cloudflare Tunnel
+
+The infrastructure includes a Cloudflare Tunnel deployment for secure external access:
+- **No Inbound Ports**: Services are accessible without opening firewall ports
+- **Zero Trust Security**: Integrates with Cloudflare Access for authentication
+- **High Availability**: Multiple replicas with health checks
+- **Monitoring**: Built-in metrics and logging
+
+**Quick Setup:**
+1. Create tunnel in [Cloudflare Zero Trust Dashboard](https://one.dash.cloudflare.com/)
+2. Run: `./flux/clusters/studio/infrastructure/cloudflare-tunnel/create-tunnel-secret.sh <token>`
+3. Configure routes in Cloudflare dashboard
+
+See [Cloudflare Tunnel Setup Guide](flux/clusters/studio/infrastructure/cloudflare-tunnel/SETUP.md) for detailed instructions.
 
 ## 🔄 GitOps Workflow
 
