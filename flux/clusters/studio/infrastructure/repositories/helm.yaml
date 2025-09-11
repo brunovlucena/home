@@ -69,4 +69,4 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1h0m0s
-  url: https://helm.twingate.com
+  url: https://twingate.github.io/helm-charts
