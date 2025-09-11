@@ -15,4 +15,6 @@ resources:
   - tempo
   - k6-operator
   - bruno-site
-  - sealed-secrets 
+  - sealed-secrets
+  - cloudflare-tunnel
+  - twingate 

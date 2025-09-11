@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared-deployment
+  namespace: cloudflare-tunnel
+  labels:
+    app.kubernetes.io/name: cloudflare-tunnel
+    app.kubernetes.io/component: tunnel
+    app.kubernetes.io/part-of: home-infrastructure
+    app.kubernetes.io/version: "latest"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cloudflared
+  template:
+    metadata:
+      labels:
+        app: cloudflared
+        app.kubernetes.io/name: cloudflare-tunnel
+        app.kubernetes.io/component: tunnel
+        app.kubernetes.io/part-of: home-infrastructure
+    spec:
+      securityContext:
+        sysctls:
+        # Allows ICMP traffic (ping, traceroute) to resources behind cloudflared
+        - name: net.ipv4.ping_group_range
+          value: "65532 65532"
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            # Defines an environment variable for the tunnel token
+            - name: TUNNEL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: tunnel-token
+                  key: token
+          command:
+            # Configures tunnel run parameters
+            - cloudflared
+            - tunnel
+            - --no-autoupdate
+            - --loglevel
+            - info
+            - --metrics
+            - 0.0.0.0:2000
+            - run
+          ports:
+            - name: metrics
+              containerPort: 2000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              # Cloudflared has a /ready endpoint which returns 200 if and only if
+              # it has an active connection to Cloudflare's network
+              path: /ready
+              port: 2000
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 2000
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65532
+            capabilities:
+              drop:
+                - ALL
