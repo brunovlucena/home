@@ -61,3 +61,12 @@ metadata:
 spec:
   interval: 1h0m0s
   url: https://actions-runner-controller.github.io/actions-runner-controller 
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: twingate
+  namespace: flux-system
+spec:
+  interval: 1h0m0s
+  url: https://helm.twingate.com
