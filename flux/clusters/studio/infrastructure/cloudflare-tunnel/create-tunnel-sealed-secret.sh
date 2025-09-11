@@ -40,14 +40,15 @@ if ! command -v kubeseal &> /dev/null; then
     exit 1
 fi
 
-# Check if tunnel token is provided
-if [ $# -eq 0 ]; then
-    print_error "Tunnel token is required!"
+# Check if tunnel token is provided via environment variable
+if [ -z "$CLOUDFLARE_TOKEN" ]; then
+    print_error "CLOUDFLARE_TOKEN environment variable is required!"
     echo ""
-    echo "Usage: $0 <tunnel_token>"
+    echo "Usage: export CLOUDFLARE_TOKEN=\"your_tunnel_token\" && $0"
     echo ""
     echo "Example:"
-    echo "  $0 \"eyJhIjoiNWFiNGU5Z...\""
+    echo "  export CLOUDFLARE_TOKEN=\"eyJhIjoiNWFiNGU5Z...\""
+    echo "  $0"
     echo ""
     echo "To get your tunnel token:"
     echo "  1. Go to Cloudflare Zero Trust dashboard"
@@ -57,7 +58,7 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-TUNNEL_TOKEN="$1"
+TUNNEL_TOKEN="$CLOUDFLARE_TOKEN"
 NAMESPACE="cloudflare-tunnel"
 SECRET_NAME="tunnel-token"
 
