@@ -64,7 +64,7 @@ spec:
     service:
       type: ClusterIP
     ingress:
-      enabled: true
+      enabled: false
       ingressClassName: nginx
       hosts:
         - alloy.dev.local
