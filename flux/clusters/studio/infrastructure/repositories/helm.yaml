@@ -52,7 +52,6 @@ spec:
   interval: 1h0m0s
   url: https://charts.jetstack.io
 ---
-
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
@@ -70,3 +69,12 @@ metadata:
 spec:
   interval: 1h0m0s
   url: https://twingate.github.io/helm-charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: falcosecurity
+  namespace: flux-system
+spec:
+  interval: 1h0m0s
+  url: https://falcosecurity.github.io/charts

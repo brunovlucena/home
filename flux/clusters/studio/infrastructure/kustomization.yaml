@@ -17,4 +17,6 @@ resources:
   - bruno-site
   - sealed-secrets
   - cloudflare-tunnel
-  - twingate 
+  - twingate
+  - falco
+  - falcosidekick
