@@ -79,12 +79,20 @@ func main() {
 			return err
 		}
 
+		// Install Istio with ambient profile
+		istio, err := local.NewCommand(ctx, "install-istio", &local.CommandArgs{
+			Create: pulumi.String(fmt.Sprintf("istioctl install --context kind-%s --set profile=ambient --skip-confirmation", clusterName)),
+		}, pulumi.DependsOn([]pulumi.Resource{flux}))
+		if err != nil {
+			return err
+		}
+
 		// Create the GitHub secret using kubectl (with cleanup to handle existing secrets)
 		createSecret, err := local.NewCommand(ctx, "create-github-secret", &local.CommandArgs{
 			Create: pulumi.String(fmt.Sprintf(`kubectl --context kind-%s delete secret home --namespace=flux-system --ignore-not-found=true && \
 kubectl --context kind-%s create secret generic home --namespace=flux-system --from-literal=username=%s --from-literal=password=%s`,
 				clusterName, clusterName, githubUsername, githubToken)),
-		}, pulumi.DependsOn([]pulumi.Resource{flux}))
+		}, pulumi.DependsOn([]pulumi.Resource{istio}))
 		if err != nil {
 			return err
 		}
@@ -99,7 +107,7 @@ kubectl --context kind-%s create secret docker-registry ghcr-secret \
     --docker-password=%s \
     --namespace=bruno`,
 				clusterName, clusterName, clusterName, githubUsername, githubToken)),
-		}, pulumi.DependsOn([]pulumi.Resource{flux}))
+		}, pulumi.DependsOn([]pulumi.Resource{istio}))
 		if err != nil {
 			return err
 		}
@@ -109,7 +117,7 @@ kubectl --context kind-%s create secret docker-registry ghcr-secret \
 			Create: pulumi.String(fmt.Sprintf(`kubectl --context kind-%s create namespace cloudflare-ddns --dry-run=client -o yaml | kubectl apply -f - && \
 kubectl --context kind-%s create namespace external-dns --dry-run=client -o yaml | kubectl apply -f -`,
 				clusterName, clusterName)),
-		}, pulumi.DependsOn([]pulumi.Resource{flux}))
+		}, pulumi.DependsOn([]pulumi.Resource{istio}))
 		if err != nil {
 			return err
 		}
@@ -143,6 +151,7 @@ kubectl --context kind-%s create secret generic cloudflare-api-token --namespace
 		ctx.Export("certManagerDeployed", pulumi.String("deployed"))
 		ctx.Export("fluxOperatorInstalled", pulumi.String("installed"))
 		ctx.Export("fluxInstanceDeployed", pulumi.String("deployed"))
+		ctx.Export("istioInstalled", pulumi.String("installed"))
 		ctx.Export("observabilityComponents", pulumi.String("deployed"))
 		ctx.Export("infrastructureResources", infrastructureResources.Resources)
 

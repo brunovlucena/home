@@ -11,6 +11,7 @@ resources:
   - nginx
   - prometheus-operator
   - alloy
+  - grafana-agent-operator
   - loki
   - tempo
   - k6-operator
@@ -20,3 +21,4 @@ resources:
   - twingate
   - falco
   - falcosidekick
+  - flagger

@@ -59,7 +59,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1h0m0s
-  url: https://actions-runner-controller.github.io/actions-runner-controller 
+  url: https://actions-runner-controller.github.io/actions-runner-controller
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
@@ -73,8 +73,26 @@ spec:
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
+  name: flagger
+  namespace: flux-system
+spec:
+  interval: 1h0m0s
+  url: https://flagger.app
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
   name: falcosecurity
   namespace: flux-system
 spec:
   interval: 1h0m0s
   url: https://falcosecurity.github.io/charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: istio
+  namespace: flux-system
+spec:
+  interval: 1h0m0s
+  url: https://istio-release.storage.googleapis.com/charts
