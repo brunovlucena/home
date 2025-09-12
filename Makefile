@@ -158,7 +158,7 @@ metadata:
 spec:
   mtls:
     mode: STRICT
-EOF
+	EOF
 	@echo "✅ mTLS enabled for all services in the mesh"
 
 disable-mtls: ## Disable mTLS for service-to-service communication
@@ -172,6 +172,6 @@ metadata:
 spec:
   mtls:
     mode: PERMISSIVE
-EOF
+	EOF
 	@echo "✅ mTLS disabled (permissive mode)"
 	
