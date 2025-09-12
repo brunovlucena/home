@@ -7,7 +7,7 @@ metadata:
 
 resources:
   - namespace.yaml
-  - deployment.yaml
+  # - deployment.yaml
   - service.yaml
   - tunnel-token-sealed-secret.yaml
   # Uncomment the line below to include the example service for testing

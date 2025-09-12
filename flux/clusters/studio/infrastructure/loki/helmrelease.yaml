@@ -41,6 +41,8 @@ spec:
     monitoring:
       selfMonitoring:
         enabled: false
+        grafanaAgent:
+          installOperator: false
     minio:
       enabled: true
       auth:
