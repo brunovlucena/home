@@ -1,0 +1,44 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: knative-operator
+  namespace: knative-operator
+spec:
+  interval: 10m
+  timeout: 15m
+  chart:
+    spec:
+      chart: knative-operator
+      version: 1.18.0
+      sourceRef:
+        kind: HelmRepository
+        name: knative-operator
+        namespace: flux-system
+  install:
+    createNamespace: true
+  values:
+    # Based on notifi configuration - using similar resource allocation
+    resources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+      limits:
+        cpu: 1000m
+        memory: 1000Mi
+    # Node selector for knative workloads (similar to notifi setup)
+    nodeSelector:
+      knative: "true"
+    tolerations:
+      - key: knative
+        operator: Equal
+        value: "true"
+        effect: NoSchedule
+    # Security context (based on notifi configuration)
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      capabilities:
+        drop:
+          - ALL

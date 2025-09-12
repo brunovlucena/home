@@ -22,3 +22,6 @@ resources:
   - falco
   - falcosidekick
   - flagger
+  - knative-operator
+  - rabbitmq-operator
+  - rabbitmq-cluster
