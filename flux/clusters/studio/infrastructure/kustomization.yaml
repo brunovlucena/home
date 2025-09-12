@@ -8,7 +8,8 @@ metadata:
 resources:
   - cert-manager
   - repositories
-  - nginx
+  # - nginx
+  - istio
   - prometheus-operator
   - alloy
   - grafana-agent-operator
@@ -22,6 +23,6 @@ resources:
   - falco
   - falcosidekick
   - flagger
-  - knative-operator
-  - rabbitmq-operator
-  - rabbitmq-cluster
+  # - knative-operator
+  # - rabbitmq-operator
+  # - rabbitmq-cluster

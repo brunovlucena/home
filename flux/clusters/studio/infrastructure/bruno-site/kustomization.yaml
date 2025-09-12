@@ -4,5 +4,4 @@ resources:
   - namespace.yaml
   - helmrelease.yaml
   # - canary.yaml
-  # - virtualservice.yaml
   # - destinationrule.yaml

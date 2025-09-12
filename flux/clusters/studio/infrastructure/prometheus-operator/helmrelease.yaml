@@ -45,7 +45,7 @@ spec:
         type: ClusterIP
       ingress:
         enabled: true
-        ingressClassName: nginx
+        ingressClassName: istio # cloudflare and flagger
         hosts:
           - grafana.lucena.cloud
         path: /

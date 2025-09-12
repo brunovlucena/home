@@ -17,6 +17,6 @@ spec:
   values:
     ingress:
       enabled: true
-      className: nginx
+      className: ngrok
       hosts:
         - host: lucena.cloud
