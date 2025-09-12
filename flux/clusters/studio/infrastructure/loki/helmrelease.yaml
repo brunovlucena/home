@@ -38,6 +38,9 @@ spec:
         replicas: 1
       write:
         replicas: 1
+    monitoring:
+      selfMonitoring:
+        enabled: false
     minio:
       enabled: true
       auth:
