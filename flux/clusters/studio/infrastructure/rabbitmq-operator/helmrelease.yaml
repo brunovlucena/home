@@ -22,22 +22,22 @@ spec:
     useCertManager: true
     
     # Tolerations for node scheduling (matching notifi setup)
-    tolerations:
-      - key: "knative"
-        operator: Equal
-        value: "true"
-        effect: NoSchedule
+    # tolerations:
+    #   - key: "knative"
+    #     operator: Equal
+    #     value: "true"
+    #     effect: NoSchedule
     
     # Cluster operator configuration
     clusterOperator:
       # Resource allocation similar to notifi (low CPU as per user preference)
-      resources:
-        requests:
-          cpu: 100m
-          memory: 100Mi
-        limits:
-          cpu: 1000m
-          memory: 1000Mi
+      # resources:
+      #   requests:
+      #     cpu: 100m
+      #     memory: 100Mi
+      #   limits:
+      #     cpu: 1000m
+      #     memory: 1000Mi
       
       # Metrics configuration (matching notifi setup)
       metrics:

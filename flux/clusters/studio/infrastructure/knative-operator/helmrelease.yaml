@@ -19,21 +19,21 @@ spec:
     createNamespace: true
   values:
     # Based on notifi configuration - using similar resource allocation
-    resources:
-      requests:
-        cpu: 100m
-        memory: 100Mi
-      limits:
-        cpu: 1000m
-        memory: 1000Mi
+    # resources:
+    #   requests:
+    #     cpu: 100m
+    #     memory: 100Mi
+    #   limits:
+    #     cpu: 1000m
+    #     memory: 1000Mi
     # Node selector for knative workloads (similar to notifi setup)
-    nodeSelector:
-      knative: "true"
-    tolerations:
-      - key: knative
-        operator: Equal
-        value: "true"
-        effect: NoSchedule
+    # nodeSelector:
+    #   knative: "true"
+    # tolerations:
+    #   - key: knative
+    #     operator: Equal
+    #     value: "true"
+    #     effect: NoSchedule
     # Security context (based on notifi configuration)
     securityContext:
       allowPrivilegeEscalation: false

@@ -16,13 +16,13 @@ spec:
   image: rabbitmq:3.12-management-alpine
   
   # Resource configuration (matching notifi local/dev setup)
-  resources:
-    requests:
-      cpu: "100m"
-      memory: "512Mi"
-    limits:
-      cpu: "500m"
-      memory: "512Mi"
+  # resources:
+  #   requests:
+  #     cpu: "100m"
+  #     memory: "512Mi"
+  #   limits:
+  #     cpu: "500m"
+  #     memory: "512Mi"
   
   # Persistence configuration
   persistence:
@@ -30,11 +30,11 @@ spec:
     storage: 1Gi
   
   # Tolerations for node scheduling (matching notifi setup)
-  tolerations:
-    - key: "knative"
-      operator: Equal
-      value: "true"
-      effect: NoSchedule
+  # tolerations:
+  #   - key: "knative"
+  #     operator: Equal
+  #     value: "true"
+  #     effect: NoSchedule
   
   # RabbitMQ configuration
   rabbitmq:
