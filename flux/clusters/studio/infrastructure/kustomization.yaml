@@ -12,7 +12,7 @@ resources:
   - istio
   - prometheus-operator
   - alloy
-  - grafana-agent-operator
+  # - grafana-agent-operator
   - loki
   - tempo
   - k6-operator

@@ -36,7 +36,7 @@ spec:
             cpu: 1000m
             memory: 1Gi
     grafana:
-      adminPassword: admin # TODO: Sealed Secrets
+      adminPassword: adminbubs # TODO: Sealed Secrets
       persistence:
         enabled: true
         storageClassName: standard
@@ -44,7 +44,7 @@ spec:
       service:
         type: ClusterIP
       ingress:
-        enabled: true
+        enabled: false
         ingressClassName: istio # cloudflare and flagger
         hosts:
           - grafana.lucena.cloud
