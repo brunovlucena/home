@@ -7,6 +7,6 @@ metadata:
 
 resources:
   - namespace.yaml
-  - helmrelease.yaml
+  # - helmrelease.yaml
   - security-alerts.yaml
   - security-dashboard.yaml

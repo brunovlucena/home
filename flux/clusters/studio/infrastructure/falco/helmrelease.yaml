@@ -16,7 +16,7 @@ spec:
   values:
     falco:
       # Enable Falco
-      enabled: true
+      enabled: false
       
       # Custom rules configuration
       customRules:
