@@ -2,8 +2,8 @@
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
-  name: bruno-site-gateway
-  namespace: istio-ingress
+  name: grafana-gateway
+  namespace: prometheus
 spec:
   selector:
     istio: ingressgateway
@@ -13,8 +13,7 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "bruno.lucena.cloud"
-    - "*.lucena.cloud"
+    - "grafana.lucena.cloud"
     tls:
       httpsRedirect: true
   - port:
@@ -22,8 +21,7 @@ spec:
       name: https
       protocol: HTTPS
     hosts:
-    - "bruno.lucena.cloud"
-    - "*.lucena.cloud"
+    - "grafana.lucena.cloud"
     tls:
       mode: SIMPLE
-      credentialName: bruno-site-tls
+      credentialName: grafana-tls
