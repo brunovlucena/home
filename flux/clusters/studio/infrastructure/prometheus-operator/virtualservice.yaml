@@ -21,7 +21,7 @@ spec:
         prefix: /
     route:
     - destination:
-        host: grafana-frontend.bruno.svc.cluster.local
+        host: prometheus-operator-grafana.prometheus.svc.cluster.local
         port:
           number: 80
     
@@ -38,7 +38,6 @@ spec:
     corsPolicy:
       allowOrigins:
       - exact: "https://grafana.lucena.cloud"
-      - exact: "http://localhost:3000"
       allowMethods:
       - GET
       - POST
