@@ -12,6 +12,7 @@ resources:
   - istio
   - prometheus-operator
   - prometheus-mcp
+  - metrics-server
   - alloy
   # - grafana-agent-operator
   - loki
