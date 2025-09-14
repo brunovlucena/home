@@ -11,6 +11,7 @@ resources:
   # - nginx
   - istio
   - prometheus-operator
+  - prometheus-mcp
   - alloy
   # - grafana-agent-operator
   - loki
@@ -23,6 +24,7 @@ resources:
   - falco
   - falcosidekick
   - flagger
+  - metrics-server
   # - knative-operator
   # - rabbitmq-operator
   # - rabbitmq-cluster

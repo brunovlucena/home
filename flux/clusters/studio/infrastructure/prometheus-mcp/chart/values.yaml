@@ -1,0 +1,68 @@
+# Prometheus MCP Server Configuration
+# Based on: https://awslabs.github.io/mcp/servers/prometheus-mcp-server/
+
+# Image configuration
+image:
+  repository: pab1it0/prometheus-mcp
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Prometheus Configuration
+prometheus:
+  url: "http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090"
+
+# Server Configuration
+server:
+  port: 8000
+  logLevel: "INFO"
+  fastMCPLogLevel: "INFO"
+
+# Resources
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Replica count
+replicaCount: 1
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8000
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Pod security context
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Service account
+serviceAccount:
+  create: true
+  name: "prometheus-mcp"
+  annotations: {}
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod labels
+podLabels: {}
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}

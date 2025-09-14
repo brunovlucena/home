@@ -1,0 +1,81 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: prometheus-mcp
+  namespace: prometheus-mcp
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: ./chart
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: flux-system
+  values:
+    # Image configuration
+    image:
+      repository: pab1it0/prometheus-mcp
+      tag: latest
+      pullPolicy: IfNotPresent
+
+    # Prometheus URL - pointing to the kube-prometheus-stack Prometheus service
+    prometheus:
+      url: "http://prometheus-operated.prometheus.svc.cluster.local:9090"
+
+    # Server Configuration
+    server:
+      port: 8000
+      logLevel: "INFO"
+      fastMCPLogLevel: "INFO"
+
+    # Resources - following user preference for low CPU allocation
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m  # User prefers very low CPU allocation
+        memory: 128Mi
+
+    # Replica count
+    replicaCount: 1
+
+    # Service configuration
+    service:
+      type: ClusterIP
+      port: 8000
+
+    # Security context - non-root execution
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      fsGroup: 1000
+
+    # Pod security context
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      fsGroup: 1000
+
+    # Service account
+    serviceAccount:
+      create: true
+      name: "prometheus-mcp"
+      annotations: {}
+
+    # Pod annotations
+    podAnnotations: {}
+
+    # Pod labels
+    podLabels: {}
+
+    # Node selector
+    nodeSelector: {}
+
+    # Tolerations
+    tolerations: []
+
+    # Affinity
+    affinity: {}
