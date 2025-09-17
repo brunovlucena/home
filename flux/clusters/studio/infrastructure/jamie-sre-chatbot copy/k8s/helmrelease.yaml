@@ -1,0 +1,64 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: jamie-sre-chatbot
+  namespace: jamie-sre-chatbot
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: ./chart
+      version: 0.1.0
+      sourceRef:
+        kind: GitRepository
+        name: bruno-site
+        namespace: flux-system
+  values:
+    image:
+      repository: ghcr.io/brunovlucena/jamie-sre-chatbot
+      tag: dev
+      pullPolicy: IfNotPresent
+    
+    replicaCount: 2
+    
+    service:
+      type: ClusterIP
+      port: 8080
+      targetPort: 8080
+    
+    ingress:
+      enabled: true
+      className: ngrok
+      hosts:
+        - host: jamie-sre-chatbot.lucena.cloud
+      tls: []
+    
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "100m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+    
+    env:
+      OLLAMA_URL: "http://192.168.0.3:11434"
+      MODEL_NAME: "bruno-sre"
+      LOG_LEVEL: "INFO"
+    
+    secrets:
+      create: true
+      name: jamie-sre-chatbot-secrets
+      keys:
+        - SLACK_BOT_TOKEN
+        - SLACK_SIGNING_SECRET
+        - SLACK_APP_TOKEN
+    
+    configMap:
+      create: true
+      name: jamie-sre-chatbot-config
+      data:
+        OLLAMA_URL: "http://192.168.0.3:11434"
+        MODEL_NAME: "bruno-sre"
+        LOG_LEVEL: "INFO"

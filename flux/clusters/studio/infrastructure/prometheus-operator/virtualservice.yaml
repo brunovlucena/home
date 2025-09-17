@@ -1,0 +1,51 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: grafana-vs
+  namespace: prometheus
+spec:
+  # 🌐 Hosts Configuration
+  hosts:
+  - test.lucena.cloud
+  
+  # 🚦 Gateway Configuration
+  gateways:
+  - grafana-gateway.istio-ingress.svc.cluster.local
+  
+  # 🛣️ HTTP Routes
+  http:
+  # 🔵 Primary Route
+  - name: primary
+    match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: prometheus-operator-grafana.prometheus.svc.cluster.local
+        port:
+          number: 80
+    
+    # 🔄 Retry Configuration
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+      retryOn: connect-failure,refused-stream,unavailable,cancelled,retriable-status-codes
+    
+    # ⏱️ Timeout Configuration
+    timeout: 30s
+    
+    # 📊 CORS Configuration
+    corsPolicy:
+      allowOrigins:
+      - exact: "https://test.lucena.cloud"
+      allowMethods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+      allowHeaders:
+      - "content-type"
+      - "authorization"
+      - "x-requested-with"
+      maxAge: "24h"

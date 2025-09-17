@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chatbots
+  labels:
+    name: chatbots
+    app.kubernetes.io/name: jamie-sre-chatbot
+    app.kubernetes.io/component: slack-bot
+    app.kubernetes.io/part-of: bruno-infrastructure

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jamie-sre-chatbot-config
+  namespace: chatbots
+  labels:
+    app: jamie-sre-chatbot
+    app.kubernetes.io/name: jamie-sre-chatbot
+    app.kubernetes.io/component: slack-bot
+    app.kubernetes.io/part-of: bruno-infrastructure
+data:
+  OLLAMA_URL: "http://192.168.0.3:11434"
+  MODEL_NAME: "bruno-sre:latest"
+  LOG_LEVEL: "INFO"
+  ENVIRONMENT: "production"

@@ -1,0 +1,177 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: prometheus-operator
+  namespace: prometheus
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      version: 70.0.2
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+  values:
+    prometheus:
+      prometheusSpec:
+        retention: 7d
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: standard
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 10Gi
+    grafana:
+      adminPassword: adminbubs # TODO: Sealed Secrets
+      persistence:
+        enabled: true
+        type: pvc
+        storageClassName: standard
+        size: 20Gi
+        accessModes:
+          - ReadWriteOnce
+        annotations: {}
+        finalizers:
+          - kubernetes.io/pvc-protection
+        mountPath: /var/lib/grafana
+        subPath: ""
+        existingClaim: ""
+        readOnly: false
+      service:
+        type: ClusterIP
+      ingress:
+        enabled: false
+        ingressClassName: istio # cloudflare and flagger
+        hosts:
+          - grafana.lucena.cloud
+        path: /
+        pathType: Prefix
+      plugins:
+        - grafana-strava-datasource
+        - grafana-llm-app
+      env:
+        STRAVA_CLIENT_ID:
+          valueFrom:
+            secretKeyRef:
+              name: strava-secrets
+              key: client-id
+        STRAVA_CLIENT_SECRET:
+          valueFrom:
+            secretKeyRef:
+              name: strava-secrets
+              key: client-secret
+        STRAVA_ACCESS_TOKEN:
+          valueFrom:
+            secretKeyRef:
+              name: strava-secrets
+              key: access-token
+        STRAVA_REFRESH_TOKEN:
+          valueFrom:
+            secretKeyRef:
+              name: strava-secrets
+              key: refresh-token
+        STRAVA_EXPIRES_AT:
+          valueFrom:
+            secretKeyRef:
+              name: strava-secrets
+              key: expires-at
+        GRAFANA_LLM_OLLAMA_URL:
+          value: "http://192.168.0.3:11434"
+        GRAFANA_LLM_OLLAMA_MODEL:
+          value: "gemma3n:e4b"
+      datasources:
+        datasources.yaml:
+          apiVersion: 1
+          datasources:
+            - name: Strava
+              type: grafana-strava-datasource
+              access: proxy
+              url: https://www.strava.com
+              isDefault: false
+              editable: true
+              jsonData:
+                clientId: "${STRAVA_CLIENT_ID}"
+                clientSecret: "${STRAVA_CLIENT_SECRET}"
+                accessToken: "${STRAVA_ACCESS_TOKEN}"
+                refreshToken: "${STRAVA_REFRESH_TOKEN}"
+                expiresAt: "${STRAVA_EXPIRES_AT}"
+            - name: Loki
+              uid: loki
+              type: loki
+              access: proxy
+              url: http://loki-read.loki:3100
+              isDefault: false
+              editable: true
+              jsonData:
+                maxLines: 1000
+                timeout: 60
+                httpHeaderName1: "X-Scope-OrgID"
+              secureJsonData:
+                httpHeaderValue1: "fake"
+            - name: Tempo
+              uid: tempo
+              type: tempo
+              access: proxy
+              url: http://tempo-query-frontend.tempo:3100
+              isDefault: false
+              editable: true
+              jsonData:
+                tracesToLogs:
+                  datasourceUid: 'loki'
+                  tags: ['job', 'instance', 'pod', 'namespace']
+                  mappedTags: [{ key: 'service.name', value: 'service' }]
+                  mapTagNamesEnabled: false
+                  spanStartTimeShift: '-1h'
+                  spanEndTimeShift: '1h'
+                  filterByTraceID: false
+                  filterBySpanID: false
+                tracesToMetrics:
+                  datasourceUid: 'prometheus'
+                  tags: [{ key: 'service.name', value: 'service' }, { key: 'job' }]
+                  queries:
+                    - name: 'Sample query'
+                      query: 'sum(rate(traces_spanmetrics_latency_bucket{$$__tags}[5m]))'
+                serviceMap:
+                  datasourceUid: 'prometheus'
+                search:
+                  hide: false
+                nodeGraph:
+                  enabled: true
+    grafana.ini:
+      feature_toggles:
+        enable: "llm"
+      llm:
+        ollama:
+          url: "${GRAFANA_LLM_OLLAMA_URL}"
+          model: "${GRAFANA_LLM_OLLAMA_MODEL}"
+      database:
+        type: sqlite3
+        path: /var/lib/grafana/grafana.db
+        max_idle_conn: 2
+        max_open_conn: 0
+        conn_max_lifetime: 14400
+      log:
+        mode: console
+        level: info
+      security:
+        admin_user: admin
+        admin_password: adminbubs
+        secret_key: SW2YcwTIb9zpOOhoPsMm
+      server:
+        root_url: "%(protocol)s://%(domain)s:%(http_port)s/"
+        serve_from_sub_path: false
+    alertmanager:
+      alertmanagerSpec:
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: standard
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 10Gi
