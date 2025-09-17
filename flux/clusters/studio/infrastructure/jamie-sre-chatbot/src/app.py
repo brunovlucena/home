@@ -24,6 +24,18 @@ import logfire
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Create a proper no-op span with all needed methods
+class NoOpSpan:
+    def __enter__(self):
+        return self
+    def __exit__(self, *args):
+        pass
+    def set_attribute(self, *args, **kwargs):
+        pass
+
+def noop(*args, **kwargs):
+    pass
+
 # Configure Logfire (optional)
 logfire_token = os.environ.get("LOGFIRE_TOKEN", "").strip()
 if logfire_token:
@@ -39,21 +51,17 @@ if logfire_token:
     except Exception as e:
         logger.error(f"Failed to configure Logfire: {e}")
         # Disable logfire by replacing with no-op functions
-        def noop(*args, **kwargs):
-            pass
         logfire.info = noop
         logfire.error = noop
-        logfire.span = lambda *args, **kwargs: type('span', (), {'__enter__': lambda self: self, '__exit__': lambda self, *args: None})()
+        logfire.span = lambda *args, **kwargs: NoOpSpan()
         logfire.metric_counter = lambda *args, **kwargs: type('counter', (), {'add': noop})()
         logfire.metric_histogram = lambda *args, **kwargs: type('histogram', (), {'record': noop})()
 else:
     logger.info("No Logfire token provided, disabling Logfire")
     # Disable logfire by replacing with no-op functions
-    def noop(*args, **kwargs):
-        pass
     logfire.info = noop
     logfire.error = noop
-    logfire.span = lambda *args, **kwargs: type('span', (), {'__enter__': lambda self: self, '__exit__': lambda self, *args: None})()
+    logfire.span = lambda *args, **kwargs: NoOpSpan()
     logfire.metric_counter = lambda *args, **kwargs: type('counter', (), {'add': noop})()
     logfire.metric_histogram = lambda *args, **kwargs: type('histogram', (), {'record': noop})()
 
