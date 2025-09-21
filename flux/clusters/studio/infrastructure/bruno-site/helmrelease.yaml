@@ -26,3 +26,7 @@ spec:
         enabled: true
         servicemonitor:
           enabled: true
+      grafana:
+        enabled: true
+        dashboard:
+          enabled: true
