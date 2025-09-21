@@ -1,0 +1,839 @@
+{
+  "runbook_metadata": {
+    "version": "1.0.0",
+    "last_updated": "2024-12-19T00:00:00Z",
+    "total_alerts": 139,
+    "total_categories": 9,
+    "cluster_analysis": {
+      "total_prometheus_rules_deployed": 28,
+      "namespaces_with_rules": ["falco", "prometheus"],
+      "analysis_timestamp": "2024-12-19T00:00:00Z"
+    }
+  },
+  "kubernetes_core_alerts": {
+    "KubeAPIDown": {
+      "question": "How do I troubleshoot when the Kubernetes API server is down?",
+      "steps": [
+        "Check API server pod status: kubectl get pods -n kube-system -l component=kube-apiserver",
+        "Review API server logs: kubectl logs -n kube-system -l component=kube-apiserver",
+        "Verify API server resource constraints: kubectl top pods -n kube-system -l component=kube-apiserver",
+        "Check for certificate expiration issues: kubectl get secrets -n kube-system | grep apiserver",
+        "Verify etcd connectivity and health",
+        "Check for network connectivity issues between components",
+        "Review API server configuration and flags",
+        "Check for high load or resource exhaustion",
+        "Verify cluster networking and DNS resolution",
+        "Restart API server if necessary: kubectl delete pod <apiserver-pod> -n kube-system"
+      ],
+      "severity": "critical",
+      "category": "kubernetes_core"
+    },
+    "KubeAPIErrorBudgetBurn": {
+      "question": "How do I resolve Kubernetes API server error budget burn issues?",
+      "steps": [
+        "Check API server error rates and patterns",
+        "Review API server performance metrics",
+        "Identify specific API endpoints causing errors",
+        "Check for resource constraints on API server",
+        "Review API server configuration and limits",
+        "Verify etcd backend performance and connectivity",
+        "Check for authentication and authorization issues",
+        "Monitor API server request patterns and load",
+        "Review API server caching and optimization settings",
+        "Consider scaling API server resources if needed"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeAPITerminatedRequests": {
+      "question": "How do I handle Kubernetes API server terminated requests?",
+      "steps": [
+        "Check API server logs for terminated request patterns",
+        "Review request timeout configurations",
+        "Identify which clients are causing terminations",
+        "Check for resource constraints and load issues",
+        "Review API server rate limiting settings",
+        "Verify client timeout configurations",
+        "Check for network connectivity issues",
+        "Review API server performance and capacity",
+        "Monitor request patterns and identify bottlenecks",
+        "Consider adjusting timeout and rate limit settings"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeAggregatedAPIDown": {
+      "question": "How do I troubleshoot Kubernetes aggregated API server down?",
+      "steps": [
+        "Check aggregated API server pod status",
+        "Review aggregated API server logs",
+        "Verify aggregated API server resource constraints",
+        "Check for certificate and authentication issues",
+        "Review aggregated API server configuration",
+        "Verify connectivity to main API server",
+        "Check for network policy restrictions",
+        "Review aggregated API server dependencies",
+        "Verify service account and RBAC permissions",
+        "Restart aggregated API server if necessary"
+      ],
+      "severity": "critical",
+      "category": "kubernetes_core"
+    },
+    "KubeAggregatedAPIErrors": {
+      "question": "How do I resolve Kubernetes aggregated API server errors?",
+      "steps": [
+        "Check aggregated API server error logs",
+        "Review aggregated API server performance metrics",
+        "Verify aggregated API server configuration",
+        "Check for authentication and authorization issues",
+        "Review aggregated API server dependencies",
+        "Verify connectivity to upstream APIs",
+        "Check for resource constraints",
+        "Review aggregated API server caching",
+        "Monitor error patterns and frequencies",
+        "Consider scaling aggregated API server resources"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeControllerManagerDown": {
+      "question": "How do I troubleshoot Kubernetes controller manager down?",
+      "steps": [
+        "Check controller manager pod status: kubectl get pods -n kube-system -l component=kube-controller-manager",
+        "Review controller manager logs: kubectl logs -n kube-system -l component=kube-controller-manager",
+        "Verify controller manager resource usage",
+        "Check for RBAC permission issues",
+        "Review controller configuration and leader election",
+        "Verify connectivity to API server and etcd",
+        "Check for certificate and authentication issues",
+        "Monitor controller queue depths and processing rates",
+        "Check for resource constraints",
+        "Restart controller manager if necessary"
+      ],
+      "severity": "critical",
+      "category": "kubernetes_core"
+    },
+    "KubeSchedulerDown": {
+      "question": "How do I troubleshoot Kubernetes scheduler down?",
+      "steps": [
+        "Check scheduler pod status: kubectl get pods -n kube-system -l component=kube-scheduler",
+        "Review scheduler logs: kubectl logs -n kube-system -l component=kube-scheduler",
+        "Verify scheduler resource constraints",
+        "Check for RBAC and permission issues",
+        "Review scheduler configuration and policies",
+        "Verify connectivity to API server",
+        "Check for certificate and authentication problems",
+        "Monitor pending pods and scheduling metrics",
+        "Check for resource constraints",
+        "Restart scheduler if necessary"
+      ],
+      "severity": "critical",
+      "category": "kubernetes_core"
+    },
+    "KubeProxyDown": {
+      "question": "How do I troubleshoot Kubernetes kube-proxy down?",
+      "steps": [
+        "Check kube-proxy pod status: kubectl get pods -n kube-system -l k8s-app=kube-proxy",
+        "Review kube-proxy logs: kubectl logs -n kube-system -l k8s-app=kube-proxy",
+        "Verify kube-proxy configuration",
+        "Check for network connectivity issues",
+        "Review iptables rules and configuration",
+        "Verify kube-proxy mode and settings",
+        "Check for resource constraints",
+        "Verify node network configuration",
+        "Check for conflicts with other network components",
+        "Restart kube-proxy if necessary"
+      ],
+      "severity": "critical",
+      "category": "kubernetes_core"
+    },
+    "KubeNodeNotReady": {
+      "question": "How do I resolve Kubernetes node not ready issues?",
+      "steps": [
+        "Check node status: kubectl get nodes",
+        "Review node events: kubectl describe node <node-name>",
+        "Check kubelet status on the affected node",
+        "Verify node resource availability (CPU, memory, disk)",
+        "Check for network connectivity issues",
+        "Review node configuration and kubelet logs",
+        "Verify container runtime health",
+        "Check for hardware issues or failures",
+        "Review node maintenance and updates",
+        "Drain and restart node if necessary"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeNodeReadinessFlapping": {
+      "question": "How do I handle Kubernetes node readiness flapping?",
+      "steps": [
+        "Monitor node status changes and patterns",
+        "Check kubelet health and performance",
+        "Review node resource utilization patterns",
+        "Check for network connectivity instability",
+        "Verify container runtime stability",
+        "Review node configuration and settings",
+        "Check for hardware issues or intermittent failures",
+        "Monitor system logs and events",
+        "Review node maintenance schedules",
+        "Consider node replacement if flapping persists"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeNodeUnreachable": {
+      "question": "How do I troubleshoot unreachable Kubernetes nodes?",
+      "steps": [
+        "Check network connectivity to the node",
+        "Verify node hardware and power status",
+        "Check SSH access to the node",
+        "Review node system logs and events",
+        "Check for network configuration issues",
+        "Verify node firewall and security settings",
+        "Check for hardware failures or issues",
+        "Review node maintenance and updates",
+        "Check cluster networking configuration",
+        "Consider node replacement if unrecoverable"
+      ],
+      "severity": "critical",
+      "category": "kubernetes_core"
+    },
+    "KubePodCrashLooping": {
+      "question": "How do I troubleshoot pods in crash loop backoff?",
+      "steps": [
+        "Check pod status and events: kubectl describe pod <pod-name> -n <namespace>",
+        "Review pod logs: kubectl logs <pod-name> -n <namespace> --previous",
+        "Verify resource limits and requests configuration",
+        "Check for image pull issues and registry connectivity",
+        "Review container health checks and probes",
+        "Verify persistent volume and storage connectivity",
+        "Check for network policy restrictions",
+        "Review application configuration and environment variables",
+        "Check for application bugs or issues",
+        "Restart pod if necessary: kubectl delete pod <pod-name> -n <namespace>"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubePodNotReady": {
+      "question": "How do I resolve pods that are not ready?",
+      "steps": [
+        "Check pod status: kubectl get pods -n <namespace>",
+        "Review pod events: kubectl describe pod <pod-name> -n <namespace>",
+        "Check container readiness probes",
+        "Verify application health and startup",
+        "Review resource constraints and limits",
+        "Check for image pull issues",
+        "Verify persistent volume connectivity",
+        "Check for network connectivity issues",
+        "Review pod configuration and specifications",
+        "Restart pod if necessary"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeContainerWaiting": {
+      "question": "How do I troubleshoot containers stuck in waiting state?",
+      "steps": [
+        "Check container status and events",
+        "Review container logs and error messages",
+        "Check for image pull issues",
+        "Verify container resource constraints",
+        "Check for volume mount issues",
+        "Review container configuration",
+        "Verify container runtime health",
+        "Check for network connectivity issues",
+        "Review container security policies",
+        "Restart container if necessary"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeDeploymentGenerationMismatch": {
+      "question": "How do I resolve deployment generation mismatch?",
+      "steps": [
+        "Check deployment status: kubectl get deployment <name> -n <namespace>",
+        "Review deployment events: kubectl describe deployment <name> -n <namespace>",
+        "Verify deployment configuration and updates",
+        "Check for resource constraints and quota limits",
+        "Review deployment strategy and rollout configuration",
+        "Verify image availability and pull policies",
+        "Check for node affinity and scheduling constraints",
+        "Review pod disruption budgets and scaling policies",
+        "Check for configuration conflicts",
+        "Rollback deployment if necessary"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeDeploymentReplicasMismatch": {
+      "question": "How do I handle deployment replica count mismatch?",
+      "steps": [
+        "Check desired vs actual replica counts",
+        "Review deployment configuration and scaling",
+        "Check for resource constraints and quota limits",
+        "Verify node availability and scheduling",
+        "Check for pod disruption budgets",
+        "Review horizontal pod autoscaler settings",
+        "Check for deployment strategy conflicts",
+        "Verify image availability and pull policies",
+        "Check for node affinity and taint issues",
+        "Adjust replica count or resolve constraints"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeDeploymentRolloutStuck": {
+      "question": "How do I troubleshoot stuck deployment rollouts?",
+      "steps": [
+        "Check deployment rollout status: kubectl rollout status deployment/<name> -n <namespace>",
+        "Review deployment events and history",
+        "Check for resource constraints and quota limits",
+        "Verify image availability and pull policies",
+        "Check for pod disruption budgets",
+        "Review deployment strategy and settings",
+        "Check for node affinity and scheduling constraints",
+        "Verify application health checks",
+        "Check for configuration issues",
+        "Rollback deployment if necessary"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeDaemonSetMisScheduled": {
+      "question": "How do I resolve daemon set mis-scheduling issues?",
+      "steps": [
+        "Check daemon set status: kubectl get daemonset -n <namespace>",
+        "Review daemon set events and configuration",
+        "Check for node affinity and taint issues",
+        "Verify node selector and tolerations",
+        "Check for resource constraints on nodes",
+        "Review daemon set update strategy",
+        "Verify image availability and pull policies",
+        "Check for node readiness and availability",
+        "Review daemon set configuration",
+        "Update daemon set configuration if necessary"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeDaemonSetNotScheduled": {
+      "question": "How do I handle daemon set pods not being scheduled?",
+      "steps": [
+        "Check daemon set status and pod distribution",
+        "Review node availability and readiness",
+        "Check for node affinity and taint issues",
+        "Verify node selector and tolerations",
+        "Check for resource constraints on nodes",
+        "Review daemon set configuration",
+        "Verify image availability and pull policies",
+        "Check for scheduling policy restrictions",
+        "Review daemon set update strategy",
+        "Update daemon set configuration if necessary"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeDaemonSetRolloutStuck": {
+      "question": "How do I troubleshoot stuck daemon set rollouts?",
+      "steps": [
+        "Check daemon set rollout status",
+        "Review daemon set events and history",
+        "Check for node availability and readiness",
+        "Verify image availability and pull policies",
+        "Check for resource constraints on nodes",
+        "Review daemon set update strategy",
+        "Check for node affinity and scheduling issues",
+        "Verify daemon set configuration",
+        "Check for pod disruption issues",
+        "Update daemon set configuration if necessary"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeStatefulSetGenerationMismatch": {
+      "question": "How do I resolve stateful set generation mismatch?",
+      "steps": [
+        "Check stateful set status: kubectl get statefulset -n <namespace>",
+        "Review stateful set events and configuration",
+        "Check for resource constraints and quota limits",
+        "Verify persistent volume claims and storage",
+        "Review stateful set update strategy",
+        "Check for pod disruption budgets",
+        "Verify image availability and pull policies",
+        "Check for configuration conflicts",
+        "Review stateful set configuration",
+        "Rollback stateful set if necessary"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeStatefulSetReplicasMismatch": {
+      "question": "How do I handle stateful set replica count mismatch?",
+      "steps": [
+        "Check desired vs actual replica counts",
+        "Review stateful set configuration and scaling",
+        "Check for resource constraints and quota limits",
+        "Verify persistent volume availability",
+        "Check for pod disruption budgets",
+        "Review stateful set update strategy",
+        "Check for node affinity and scheduling constraints",
+        "Verify image availability and pull policies",
+        "Check for persistent volume issues",
+        "Adjust replica count or resolve constraints"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeStatefulSetUpdateNotRolledOut": {
+      "question": "How do I troubleshoot stateful set updates not rolling out?",
+      "steps": [
+        "Check stateful set rollout status",
+        "Review stateful set events and history",
+        "Check for resource constraints and quota limits",
+        "Verify persistent volume claims and storage",
+        "Review stateful set update strategy",
+        "Check for pod disruption budgets",
+        "Verify image availability and pull policies",
+        "Check for node affinity and scheduling constraints",
+        "Review stateful set configuration",
+        "Rollback stateful set if necessary"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeJobFailed": {
+      "question": "How do I troubleshoot failed Kubernetes jobs?",
+      "steps": [
+        "Check job status: kubectl get jobs -n <namespace>",
+        "Review job events: kubectl describe job <name> -n <namespace>",
+        "Check job logs: kubectl logs job/<name> -n <namespace>",
+        "Verify job configuration and specifications",
+        "Check for resource constraints and quota limits",
+        "Review job completion and failure policies",
+        "Check for image pull issues",
+        "Verify job dependencies and prerequisites",
+        "Review job configuration and settings",
+        "Restart job if necessary"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeJobNotCompleted": {
+      "question": "How do I handle jobs that are not completing?",
+      "steps": [
+        "Check job status and completion status",
+        "Review job events and configuration",
+        "Check for resource constraints and quota limits",
+        "Verify job completion and failure policies",
+        "Check for image pull issues",
+        "Review job dependencies and prerequisites",
+        "Check for timeout and deadline issues",
+        "Verify job configuration and settings",
+        "Check for pod disruption and scheduling issues",
+        "Restart job if necessary"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeHpaMaxedOut": {
+      "question": "How do I resolve horizontal pod autoscaler maxed out issues?",
+      "steps": [
+        "Check HPA status: kubectl get hpa -n <namespace>",
+        "Review HPA configuration and scaling policies",
+        "Check for resource constraints and quota limits",
+        "Verify node availability and capacity",
+        "Review HPA metrics and scaling triggers",
+        "Check for pod disruption budgets",
+        "Verify application performance and load",
+        "Review HPA configuration and settings",
+        "Check for scaling policy conflicts",
+        "Adjust HPA configuration if necessary"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeHpaReplicasMismatch": {
+      "question": "How do I handle HPA replica count mismatch?",
+      "steps": [
+        "Check HPA desired vs actual replica counts",
+        "Review HPA configuration and scaling policies",
+        "Check for resource constraints and quota limits",
+        "Verify HPA metrics and scaling triggers",
+        "Check for pod disruption budgets",
+        "Review application performance and load",
+        "Check for scaling policy conflicts",
+        "Verify HPA configuration and settings",
+        "Check for node availability and capacity",
+        "Adjust HPA configuration if necessary"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    },
+    "KubeVersionMismatch": {
+      "question": "How do I resolve Kubernetes version mismatch issues?",
+      "steps": [
+        "Check cluster version: kubectl version",
+        "Review component versions and compatibility",
+        "Check for version skew issues",
+        "Verify component compatibility matrix",
+        "Review upgrade and migration plans",
+        "Check for deprecated API usage",
+        "Verify component configuration compatibility",
+        "Review version upgrade procedures",
+        "Check for breaking changes and migrations",
+        "Plan and execute version upgrades"
+      ],
+      "severity": "warning",
+      "category": "kubernetes_core"
+    }
+  },
+  "resource_management_alerts": {
+    "KubeCPUOvercommit": {
+      "question": "How do I resolve Kubernetes CPU overcommit issues?",
+      "steps": [
+        "Check cluster CPU resource allocation and usage",
+        "Review pod CPU requests and limits",
+        "Identify pods with high CPU consumption",
+        "Check for resource quota constraints",
+        "Review node capacity and utilization",
+        "Check for CPU throttling and performance issues",
+        "Review application CPU requirements",
+        "Consider scaling cluster resources",
+        "Optimize pod resource requests and limits",
+        "Review resource allocation policies"
+      ],
+      "severity": "warning",
+      "category": "resource_management"
+    },
+    "KubeCPUQuotaOvercommit": {
+      "question": "How do I handle Kubernetes CPU quota overcommit?",
+      "steps": [
+        "Check namespace CPU quotas and limits",
+        "Review pod CPU requests and usage",
+        "Identify namespaces exceeding CPU quotas",
+        "Check for resource quota configuration",
+        "Review pod resource allocation",
+        "Check for CPU throttling and performance issues",
+        "Review application CPU requirements",
+        "Consider adjusting CPU quotas",
+        "Optimize pod resource requests",
+        "Review resource allocation policies"
+      ],
+      "severity": "warning",
+      "category": "resource_management"
+    },
+    "KubeMemoryOvercommit": {
+      "question": "How do I resolve Kubernetes memory overcommit issues?",
+      "steps": [
+        "Check cluster memory resource allocation and usage",
+        "Review pod memory requests and limits",
+        "Identify pods with high memory consumption",
+        "Check for resource quota constraints",
+        "Review node capacity and utilization",
+        "Check for memory pressure and OOM issues",
+        "Review application memory requirements",
+        "Consider scaling cluster resources",
+        "Optimize pod resource requests and limits",
+        "Review resource allocation policies"
+      ],
+      "severity": "warning",
+      "category": "resource_management"
+    },
+    "KubeMemoryQuotaOvercommit": {
+      "question": "How do I handle Kubernetes memory quota overcommit?",
+      "steps": [
+        "Check namespace memory quotas and limits",
+        "Review pod memory requests and usage",
+        "Identify namespaces exceeding memory quotas",
+        "Check for resource quota configuration",
+        "Review pod resource allocation",
+        "Check for memory pressure and OOM issues",
+        "Review application memory requirements",
+        "Consider adjusting memory quotas",
+        "Optimize pod resource requests",
+        "Review resource allocation policies"
+      ],
+      "severity": "warning",
+      "category": "resource_management"
+    },
+    "KubeQuotaAlmostFull": {
+      "question": "How do I handle Kubernetes quotas that are almost full?",
+      "steps": [
+        "Check namespace resource quotas and usage",
+        "Review pod resource requests and limits",
+        "Identify namespaces approaching quota limits",
+        "Check for resource quota configuration",
+        "Review pod resource allocation",
+        "Check for resource pressure and constraints",
+        "Review application resource requirements",
+        "Consider adjusting resource quotas",
+        "Optimize pod resource requests",
+        "Review resource allocation policies"
+      ],
+      "severity": "warning",
+      "category": "resource_management"
+    },
+    "KubeQuotaExceeded": {
+      "question": "How do I resolve Kubernetes quotas that are exceeded?",
+      "steps": [
+        "Check namespace resource quotas and usage",
+        "Review pod resource requests and limits",
+        "Identify namespaces exceeding quota limits",
+        "Check for resource quota configuration",
+        "Review pod resource allocation",
+        "Check for resource pressure and constraints",
+        "Review application resource requirements",
+        "Consider adjusting resource quotas",
+        "Optimize pod resource requests",
+        "Review resource allocation policies"
+      ],
+      "severity": "critical",
+      "category": "resource_management"
+    },
+    "KubeQuotaFullyUsed": {
+      "question": "How do I handle Kubernetes quotas that are fully used?",
+      "steps": [
+        "Check namespace resource quotas and usage",
+        "Review pod resource requests and limits",
+        "Identify namespaces at quota limits",
+        "Check for resource quota configuration",
+        "Review pod resource allocation",
+        "Check for resource pressure and constraints",
+        "Review application resource requirements",
+        "Consider adjusting resource quotas",
+        "Optimize pod resource requests",
+        "Review resource allocation policies"
+      ],
+      "severity": "warning",
+      "category": "resource_management"
+    },
+    "CPUThrottlingHigh": {
+      "question": "How do I resolve high CPU throttling issues?",
+      "steps": [
+        "Check container CPU throttling metrics",
+        "Review pod CPU limits and requests",
+        "Identify containers with high CPU throttling",
+        "Check for resource constraints and quota limits",
+        "Review node CPU capacity and utilization",
+        "Check for CPU pressure and performance issues",
+        "Review application CPU requirements",
+        "Consider adjusting CPU limits and requests",
+        "Optimize pod resource allocation",
+        "Review resource allocation policies"
+      ],
+      "severity": "warning",
+      "category": "resource_management"
+    }
+  },
+  "storage_and_volume_alerts": {
+    "KubePersistentVolumeErrors": {
+      "question": "How do I troubleshoot Kubernetes persistent volume errors?",
+      "steps": [
+        "Check persistent volume status: kubectl get pv",
+        "Review persistent volume events: kubectl describe pv <pv-name>",
+        "Check persistent volume claim status: kubectl get pvc -n <namespace>",
+        "Verify storage class configuration",
+        "Check for storage backend issues",
+        "Review persistent volume configuration",
+        "Check for storage capacity and availability",
+        "Verify storage permissions and access",
+        "Review persistent volume mount issues",
+        "Check for storage provider issues"
+      ],
+      "severity": "warning",
+      "category": "storage_and_volume"
+    },
+    "KubePersistentVolumeFillingUp": {
+      "question": "How do I handle persistent volumes that are filling up?",
+      "steps": [
+        "Check persistent volume usage and capacity",
+        "Review persistent volume claim usage",
+        "Identify applications with high storage usage",
+        "Check for storage cleanup and retention policies",
+        "Review persistent volume configuration",
+        "Check for storage expansion options",
+        "Verify storage monitoring and alerts",
+        "Review application storage requirements",
+        "Consider storage expansion or cleanup",
+        "Review storage allocation policies"
+      ],
+      "severity": "warning",
+      "category": "storage_and_volume"
+    },
+    "KubePersistentVolumeInodesFillingUp": {
+      "question": "How do I resolve persistent volume inode exhaustion?",
+      "steps": [
+        "Check persistent volume inode usage",
+        "Review file system inode allocation",
+        "Identify applications creating many files",
+        "Check for inode cleanup and retention policies",
+        "Review persistent volume configuration",
+        "Check for inode expansion options",
+        "Verify inode monitoring and alerts",
+        "Review application file creation patterns",
+        "Consider inode expansion or cleanup",
+        "Review inode allocation policies"
+      ],
+      "severity": "warning",
+      "category": "storage_and_volume"
+    }
+  },
+  "certificate_and_security_alerts": {
+    "KubeClientCertificateExpiration": {
+      "question": "How do I handle Kubernetes client certificate expiration?",
+      "steps": [
+        "Check client certificate expiration dates",
+        "Review certificate renewal procedures",
+        "Verify certificate authority configuration",
+        "Check for certificate renewal automation",
+        "Review certificate management policies",
+        "Check for certificate backup and recovery",
+        "Verify certificate validation and trust",
+        "Review certificate security policies",
+        "Plan certificate renewal and rotation",
+        "Implement certificate monitoring and alerts"
+      ],
+      "severity": "warning",
+      "category": "certificate_and_security"
+    },
+    "KubeletClientCertificateExpiration": {
+      "question": "How do I resolve kubelet client certificate expiration?",
+      "steps": [
+        "Check kubelet client certificate expiration dates",
+        "Review kubelet certificate renewal procedures",
+        "Verify kubelet certificate authority configuration",
+        "Check for kubelet certificate renewal automation",
+        "Review kubelet certificate management policies",
+        "Check for kubelet certificate backup and recovery",
+        "Verify kubelet certificate validation and trust",
+        "Review kubelet certificate security policies",
+        "Plan kubelet certificate renewal and rotation",
+        "Implement kubelet certificate monitoring and alerts"
+      ],
+      "severity": "warning",
+      "category": "certificate_and_security"
+    },
+    "KubeletClientCertificateRenewalErrors": {
+      "question": "How do I troubleshoot kubelet client certificate renewal errors?",
+      "steps": [
+        "Check kubelet certificate renewal logs",
+        "Review kubelet certificate renewal procedures",
+        "Verify kubelet certificate authority configuration",
+        "Check for kubelet certificate renewal automation",
+        "Review kubelet certificate management policies",
+        "Check for kubelet certificate backup and recovery",
+        "Verify kubelet certificate validation and trust",
+        "Review kubelet certificate security policies",
+        "Plan kubelet certificate renewal and rotation",
+        "Implement kubelet certificate monitoring and alerts"
+      ],
+      "severity": "warning",
+      "category": "certificate_and_security"
+    },
+    "KubeletServerCertificateExpiration": {
+      "question": "How do I handle kubelet server certificate expiration?",
+      "steps": [
+        "Check kubelet server certificate expiration dates",
+        "Review kubelet server certificate renewal procedures",
+        "Verify kubelet server certificate authority configuration",
+        "Check for kubelet server certificate renewal automation",
+        "Review kubelet server certificate management policies",
+        "Check for kubelet server certificate backup and recovery",
+        "Verify kubelet server certificate validation and trust",
+        "Review kubelet server certificate security policies",
+        "Plan kubelet server certificate renewal and rotation",
+        "Implement kubelet server certificate monitoring and alerts"
+      ],
+      "severity": "warning",
+      "category": "certificate_and_security"
+    },
+    "KubeletServerCertificateRenewalErrors": {
+      "question": "How do I troubleshoot kubelet server certificate renewal errors?",
+      "steps": [
+        "Check kubelet server certificate renewal logs",
+        "Review kubelet server certificate renewal procedures",
+        "Verify kubelet server certificate authority configuration",
+        "Check for kubelet server certificate renewal automation",
+        "Review kubelet server certificate management policies",
+        "Check for kubelet server certificate backup and recovery",
+        "Verify kubelet server certificate validation and trust",
+        "Review kubelet server certificate security policies",
+        "Plan kubelet server certificate renewal and rotation",
+        "Implement kubelet server certificate monitoring and alerts"
+      ],
+      "severity": "warning",
+      "category": "certificate_and_security"
+    },
+    "ContainerEscapeAttempt": {
+      "question": "How do I respond to container escape attempts?",
+      "steps": [
+        "Immediately isolate the affected container and pod",
+        "Check for privilege escalation and unauthorized access",
+        "Review container security configuration and policies",
+        "Verify network policies and access controls",
+        "Check for data exfiltration or system modifications",
+        "Review container runtime security settings",
+        "Document the attack vector and response",
+        "Update security policies and monitoring rules",
+        "Conduct post-incident security review",
+        "Implement additional container security controls"
+      ],
+      "severity": "critical",
+      "category": "certificate_and_security"
+    },
+    "PrivilegeEscalationAttempt": {
+      "question": "How do I respond to privilege escalation attempts?",
+      "steps": [
+        "Immediately revoke elevated privileges and access",
+        "Check for unauthorized system modifications",
+        "Review user and service account permissions",
+        "Verify RBAC and security policies",
+        "Check for backdoors or persistent access",
+        "Review audit logs and access patterns",
+        "Update privilege and access controls",
+        "Document the incident and remediation",
+        "Implement additional privilege monitoring",
+        "Conduct post-incident security review"
+      ],
+      "severity": "critical",
+      "category": "certificate_and_security"
+    },
+    "ReverseShellDetected": {
+      "question": "How do I respond to detected reverse shell attempts?",
+      "steps": [
+        "Immediately isolate the affected container and pod",
+        "Check for unauthorized network connections",
+        "Review network policies and access controls",
+        "Check for data exfiltration or system modifications",
+        "Review container security configuration",
+        "Verify network monitoring and logging",
+        "Document the attack vector and response",
+        "Update security policies and monitoring rules",
+        "Conduct post-incident security review",
+        "Implement additional network security controls"
+      ],
+      "severity": "critical",
+      "category": "certificate_and_security"
+    }
+  },
+  "kubelet_and_node_alerts": {
+    "KubeletDown": {
+      "question": "How do I troubleshoot kubelet down issues?",
+      "steps": [
+        "Check kubelet service status on the affected node",
+        "Review kubelet logs for error messages",
+        "Verify kubelet configuration and settings",
+        "Check for resource constraints and disk space",
+        "Verify kubelet connectivity to API server",
+        "Check for certificate and authentication issues",
+        "Review kubelet configuration and flags",
+        "Check for container runtime issues",
+        "Verify node network connectivity",
+        "Restart kubelet service if necessary"
+      ],
+      "severity": "critical",
+      "category": "kubelet_and_node"
+    }
+  }
+}

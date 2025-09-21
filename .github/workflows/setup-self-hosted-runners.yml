@@ -1,0 +1,208 @@
+# 🏷️ Self-Hosted Runner Setup and Validation
+#
+# This workflow ensures self-hosted runners are properly configured
+# and labeled for Dependabot and other CI/CD operations.
+
+name: "🏷️ Setup Self-Hosted Runners"
+
+on:
+  workflow_dispatch:
+    inputs:
+      runner_name:
+        description: 'Name of the self-hosted runner to configure'
+        required: true
+        default: 'studio-runner'
+      runner_labels:
+        description: 'Comma-separated labels for the runner'
+        required: true
+        default: 'self-hosted,linux,x64,dependabot'
+  schedule:
+    # Run daily at 2 AM to validate runner health
+    - cron: '0 2 * * *'
+
+jobs:
+  # 🔍 Validate Runner Configuration
+  validate-runner:
+    runs-on: [self-hosted, linux, x64]
+    steps:
+      - name: "📋 Check Runner Information"
+        run: |
+          echo "## 🏷️ Self-Hosted Runner Information" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Hostname | $(hostname) |" >> $GITHUB_STEP_SUMMARY
+          echo "| OS | $(uname -s) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Architecture | $(uname -m) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Kernel | $(uname -r) |" >> $GITHUB_STEP_SUMMARY
+          echo "| CPU Cores | $(nproc) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Memory | $(free -h | grep '^Mem:' | awk '{print $2}') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Disk Space | $(df -h / | tail -1 | awk '{print $4}') |" >> $GITHUB_STEP_SUMMARY
+
+      - name: "🔧 Check Required Tools"
+        run: |
+          echo "## 🔧 Required Tools Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Tool | Version | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          # Check Docker
+          if command -v docker &> /dev/null; then
+            DOCKER_VERSION=$(docker --version | cut -d' ' -f3 | cut -d',' -f1)
+            echo "| Docker | $DOCKER_VERSION | ✅ Available |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Docker | N/A | ❌ Missing |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check kubectl
+          if command -v kubectl &> /dev/null; then
+            KUBECTL_VERSION=$(kubectl version --client --short 2>/dev/null | cut -d' ' -f3)
+            echo "| kubectl | $KUBECTL_VERSION | ✅ Available |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| kubectl | N/A | ❌ Missing |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check Go
+          if command -v go &> /dev/null; then
+            GO_VERSION=$(go version | cut -d' ' -f3)
+            echo "| Go | $GO_VERSION | ✅ Available |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Go | N/A | ❌ Missing |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check Pulumi
+          if command -v pulumi &> /dev/null; then
+            PULUMI_VERSION=$(pulumi version)
+            echo "| Pulumi | $PULUMI_VERSION | ✅ Available |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Pulumi | N/A | ❌ Missing |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check Flux
+          if command -v flux &> /dev/null; then
+            FLUX_VERSION=$(flux version --short)
+            echo "| Flux | $FLUX_VERSION | ✅ Available |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Flux | N/A | ❌ Missing |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: "🏷️ Validate Runner Labels"
+        run: |
+          echo "## 🏷️ Current Runner Labels" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The runner should have the following labels:" >> $GITHUB_STEP_SUMMARY
+          echo "- \`self-hosted\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`linux\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`x64\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`dependabot\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** Labels are configured when setting up the runner with \`config.sh\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: "🔒 Check Security Configuration"
+        run: |
+          echo "## 🔒 Security Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          # Check if running as non-root
+          if [[ $EUID -ne 0 ]]; then
+            echo "| Non-root execution | ✅ Running as $(whoami) |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Non-root execution | ⚠️ Running as root |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check Docker daemon
+          if docker info &> /dev/null; then
+            echo "| Docker daemon | ✅ Accessible |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Docker daemon | ❌ Not accessible |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Check Kubernetes cluster access
+          if kubectl cluster-info &> /dev/null; then
+            echo "| Kubernetes cluster | ✅ Accessible |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Kubernetes cluster | ❌ Not accessible |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # 🧪 Test Dependabot Workflow Compatibility
+  test-dependabot-compatibility:
+    runs-on: [self-hosted, linux, x64]
+    needs: validate-runner
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "🧪 Test Go Module Operations"
+        working-directory: ./pulumi
+        run: |
+          echo "🔍 Testing Go module operations..."
+          go mod download
+          go mod verify
+          go mod tidy
+          echo "✅ Go module operations successful"
+
+      - name: "🧪 Test Docker Operations"
+        run: |
+          echo "🔍 Testing Docker operations..."
+          docker --version
+          docker info
+          echo "✅ Docker operations successful"
+
+      - name: "🧪 Test Kubernetes Operations"
+        run: |
+          echo "🔍 Testing Kubernetes operations..."
+          kubectl version --client
+          echo "✅ Kubernetes operations successful"
+
+      - name: "📊 Compatibility Test Results"
+        run: |
+          echo "## 🧪 Dependabot Compatibility Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Test | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Go Module Operations | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "| Docker Operations | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "| Kubernetes Operations | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Conclusion:** Self-hosted runner is ready for Dependabot operations! 🎉" >> $GITHUB_STEP_SUMMARY
+
+  # 📋 Generate Setup Instructions
+  generate-setup-instructions:
+    runs-on: [self-hosted, linux, x64]
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: "📋 Generate Runner Setup Instructions"
+        run: |
+          echo "## 🏷️ Self-Hosted Runner Setup Instructions" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 1. Download and Configure Runner" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "# Create a folder for the runner" >> $GITHUB_STEP_SUMMARY
+          echo "mkdir actions-runner && cd actions-runner" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# Download the latest runner package" >> $GITHUB_STEP_SUMMARY
+          echo "curl -o actions-runner-linux-x64-2.311.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.311.0/actions-runner-linux-x64-2.311.0.tar.gz" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# Extract the installer" >> $GITHUB_STEP_SUMMARY
+          echo "tar xzf ./actions-runner-linux-x64-2.311.0.tar.gz" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# Configure the runner with labels" >> $GITHUB_STEP_SUMMARY
+          echo "./config.sh --url https://github.com/brunovlucena/home --token \$RUNNER_TOKEN --labels ${{ github.event.inputs.runner_labels }} --name ${{ github.event.inputs.runner_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 2. Install and Start Runner" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "# Install the runner as a service" >> $GITHUB_STEP_SUMMARY
+          echo "sudo ./svc.sh install" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# Start the service" >> $GITHUB_STEP_SUMMARY
+          echo "sudo ./svc.sh start" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 3. Verify Runner Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the runner status in GitHub: Settings → Actions → Runners" >> $GITHUB_STEP_SUMMARY

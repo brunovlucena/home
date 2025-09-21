@@ -27,6 +27,7 @@ resources:
   - falcosidekick
   - flagger
   - metrics-server
+  - github-actions-runner
   # - knative-operator
   # - rabbitmq-operator
   # - rabbitmq-cluster

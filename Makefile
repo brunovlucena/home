@@ -174,4 +174,52 @@ spec:
     mode: PERMISSIVE
 	EOF
 	@echo "✅ mTLS disabled (permissive mode)"
-	
+
+# =============================================================================
+# GitHub Actions Runner Operations
+# =============================================================================
+
+github-runner-status: ## Check GitHub Actions runner status
+	@echo "🏃‍♂️ Checking GitHub Actions runner status..."
+	@echo "📊 Runner controller:"
+	kubectl get pods -n github-actions-runner
+	@echo ""
+	@echo "🏃‍♂️ Active runners:"
+	kubectl get runners -n github-actions-runner
+	@echo ""
+	@echo "📈 Runner deployment:"
+	kubectl get runnerdeployment -n github-actions-runner
+
+github-runner-logs: ## View GitHub Actions runner logs
+	@echo "📋 Viewing GitHub Actions runner logs..."
+	kubectl logs -n github-actions-runner -l app.kubernetes.io/name=github-actions-runner -f
+
+github-runner-controller-logs: ## View GitHub Actions runner controller logs
+	@echo "📋 Viewing GitHub Actions runner controller logs..."
+	kubectl logs -n github-actions-runner -l app.kubernetes.io/name=actions-runner-controller -f
+
+github-runner-scale: ## Scale GitHub Actions runners
+	@echo "🔄 Scaling GitHub Actions runners..."
+	@read -p "Enter number of replicas (default: 2): " replicas; \
+	replicas=$${replicas:-2}; \
+	kubectl scale runnerdeployment github-actions-runner-deployment -n github-actions-runner --replicas=$$replicas
+	@echo "✅ Runner scaling completed"
+
+github-runner-setup: ## Setup GitHub Actions runner secrets
+	@echo "🔐 Setting up GitHub Actions runner secrets..."
+	cd flux/clusters/studio/infrastructure/github-actions-runner && \
+	chmod +x create-secrets.sh && \
+	./create-secrets.sh
+	@echo "✅ GitHub Actions runner setup completed"
+
+github-runner-restart: ## Restart all GitHub Actions runners
+	@echo "🔄 Restarting GitHub Actions runners..."
+	kubectl delete pods -n github-actions-runner -l app.kubernetes.io/name=github-actions-runner
+	@echo "✅ GitHub Actions runners restarted"
+
+github-runner-metrics: ## Show GitHub Actions runner metrics
+	@echo "📊 GitHub Actions runner metrics..."
+	kubectl get --raw /apis/metrics.k8s.io/v1beta1/namespaces/github-actions-runner/pods
+	@echo ""
+	@echo "📈 Resource usage:"
+	kubectl top pods -n github-actions-runner

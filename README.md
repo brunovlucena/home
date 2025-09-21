@@ -161,6 +161,36 @@ See [Cloudflare Tunnel Setup Guide](flux/clusters/studio/infrastructure/cloudfla
 3. **Deployment**: Flux automatically syncs changes from Git
 4. **Monitoring**: Check Flux status and logs
 
+## 🤖 Dependabot & Self-Hosted Runners
+
+The repository includes automated dependency management using Dependabot with self-hosted runners:
+
+### 🔄 Automated Updates
+
+- **📦 Go Dependencies** - Pulumi infrastructure code
+- **🐳 Docker Dependencies** - Container configurations  
+- **📋 GitHub Actions** - CI/CD workflow dependencies
+- **🏗️ Flux Dependencies** - GitOps configurations
+- **🔧 Script Dependencies** - Automation tools
+
+### 🏷️ Self-Hosted Runner Configuration
+
+All Dependabot PRs use self-hosted runners with labels:
+- `self-hosted` - Identifies self-hosted runners
+- `linux` - Operating system requirement
+- `x64` - Architecture requirement
+- `dependabot` - Specific label for Dependabot operations
+
+### 🚀 Features
+
+- ✅ **Automatic Detection** - Identifies Dependabot PRs
+- 🧪 **Multi-Component Testing** - Tests all infrastructure components
+- 🔒 **Security Scanning** - Runs Trivy security scans
+- 📊 **Impact Analysis** - Analyzes dependency changes
+- 🤖 **Auto-merge** - Automatically merges minor updates
+
+See [`.github/README.md`](.github/README.md) for detailed setup instructions.
+
 ## 🐛 Troubleshooting
 
 ### Common Issues

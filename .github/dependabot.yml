@@ -1,0 +1,166 @@
+# 🔄 Dependabot Configuration for @home Infrastructure
+# 
+# This configuration enables automated dependency updates for the home infrastructure
+# repository, using self-hosted runners for security and performance.
+
+version: 2
+updates:
+  # 📦 Go Dependencies (Pulumi)
+  - package-ecosystem: "gomod"
+    directory: "/pulumi"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "brunovlucena"
+    assignees:
+      - "brunovlucena"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "infrastructure"
+      - "pulumi"
+    # Use self-hosted runners for Go dependency updates
+    pull-requests:
+      assignees:
+        - "brunovlucena"
+      reviewers:
+        - "brunovlucena"
+      labels:
+        - "dependencies"
+        - "infrastructure"
+        - "pulumi"
+        - "self-hosted-runner"
+
+  # 🐳 Docker Dependencies
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "brunovlucena"
+    assignees:
+      - "brunovlucena"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "infrastructure"
+    # Use self-hosted runners for Docker updates
+    pull-requests:
+      assignees:
+        - "brunovlucena"
+      reviewers:
+        - "brunovlucena"
+      labels:
+        - "dependencies"
+        - "docker"
+        - "infrastructure"
+        - "self-hosted-runner"
+
+  # 📋 GitHub Actions Dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "brunovlucena"
+    assignees:
+      - "brunovlucena"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci/cd"
+    # Use self-hosted runners for GitHub Actions updates
+    pull-requests:
+      assignees:
+        - "brunovlucena"
+      reviewers:
+        - "brunovlucena"
+      labels:
+        - "dependencies"
+        - "github-actions"
+        - "ci/cd"
+        - "self-hosted-runner"
+
+  # 🏗️ Flux Helm Dependencies
+  - package-ecosystem: "bundler"
+    directory: "/flux"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "brunovlucena"
+    assignees:
+      - "brunovlucena"
+    commit-message:
+      prefix: "flux"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "flux"
+      - "gitops"
+    # Use self-hosted runners for Flux updates
+    pull-requests:
+      assignees:
+        - "brunovlucena"
+      reviewers:
+        - "brunovlucena"
+      labels:
+        - "dependencies"
+        - "flux"
+        - "gitops"
+        - "self-hosted-runner"
+
+  # 🔧 Makefile and Script Dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "brunovlucena"
+    assignees:
+      - "brunovlucena"
+    commit-message:
+      prefix: "scripts"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "scripts"
+      - "automation"
+    # Use self-hosted runners for script dependencies
+    pull-requests:
+      assignees:
+        - "brunovlucena"
+      reviewers:
+        - "brunovlucena"
+      labels:
+        - "dependencies"
+        - "scripts"
+        - "automation"
+        - "self-hosted-runner"
