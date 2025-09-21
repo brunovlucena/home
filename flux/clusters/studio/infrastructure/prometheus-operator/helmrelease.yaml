@@ -166,6 +166,8 @@ spec:
         root_url: "%(protocol)s://%(domain)s:%(http_port)s/"
         serve_from_sub_path: false
     alertmanager:
+      enabled: true
+      replicas: 1
       alertmanagerSpec:
         storage:
           volumeClaimTemplate:
@@ -175,3 +177,77 @@ spec:
               resources:
                 requests:
                   storage: 10Gi
+        secrets:
+          - "pagerduty-secrets"
+        containers:
+        - name: alertmanager
+          env:
+          - name: PAGERDUTY_SERVICE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: pagerduty-secrets
+                key: pagerduty-service-key
+          - name: SLACK_WEBHOOK_URL
+            valueFrom:
+              secretKeyRef:
+                name: pagerduty-secrets
+                key: slack-webhook-url
+      config:
+        global:
+          resolve_timeout: 5m
+          smtp_smarthost: 'localhost:587'
+          smtp_from: 'alertmanager@lucena.cloud'
+        
+        route:
+          group_by: ['alertname', 'cluster', 'service']
+          group_wait: 10s
+          group_interval: 10s
+          repeat_interval: 1h
+          receiver: 'default'
+          routes:
+          - match:
+              severity: critical
+            receiver: 'pagerduty-critical'
+            group_wait: 10s
+            repeat_interval: 5m
+          - match:
+              severity: warning
+            receiver: 'slack-warnings'
+            group_wait: 30s
+            repeat_interval: 30m
+          - match:
+              alertname: Info
+            receiver: 'null'
+        
+        receivers:
+        - name: 'default'
+          slack_configs:
+          - api_url: '${SLACK_WEBHOOK_URL}'
+            channel: '#alerts'
+            title: 'Alertmanager'
+            text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        
+        - name: 'pagerduty-critical'
+          pagerduty_configs:
+          - service_key: '${PAGERDUTY_SERVICE_KEY}'
+            description: '{{ .GroupLabels.alertname }} - {{ .GroupLabels.cluster }}'
+            details:
+              firing: '{{ .Alerts.Firing | len }}'
+              resolved: '{{ .Alerts.Resolved | len }}'
+              num_firing: '{{ .Alerts.Firing | len }}'
+              num_resolved: '{{ .Alerts.Resolved | len }}'
+              cluster: '{{ .GroupLabels.cluster }}'
+              service: '{{ .GroupLabels.service }}'
+              summary: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+              description: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+              runbook_url: '{{ range .Alerts }}{{ .Annotations.runbook_url }}{{ end }}'
+              dashboard_url: '{{ range .Alerts }}{{ .Annotations.dashboard_url }}{{ end }}'
+        
+        - name: 'slack-warnings'
+          slack_configs:
+          - api_url: '${SLACK_WEBHOOK_URL}'
+            channel: '#alerts'
+            title: '{{ .GroupLabels.alertname }}'
+            text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        
+        - name: 'null'
