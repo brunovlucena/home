@@ -20,3 +20,9 @@ spec:
       className: ngrok
       hosts:
         - host: lucena.cloud
+    monitoring:
+      enabled: true
+      prometheus:
+        enabled: true
+        servicemonitor:
+          enabled: true
