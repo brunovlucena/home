@@ -305,10 +305,15 @@ def chat_endpoint():
                        duration_ms=round(duration * 1000, 2),
                        conversation_id=conversation_id)
             
-            # Record metrics (Logfire handles OpenTelemetry export automatically)
+            # Record metrics (both Logfire and Prometheus)
             logfire.metric_counter("api.chat_requests.total").add(1)
             logfire.metric_histogram("api.chat_requests.duration").record(duration)
             logfire.metric_histogram("api.chat_requests.response_length").record(len(response))
+            
+            # Record Prometheus metrics
+            api_chat_requests_total.labels(status='success').inc()
+            api_chat_requests_duration.observe(duration)
+            api_chat_requests_response_length.observe(len(response))
             
             span.set_attribute("message_length", len(message))
             span.set_attribute("response_length", len(response))
@@ -332,9 +337,13 @@ def chat_endpoint():
                          error_type=type(e).__name__,
                          duration_ms=round(duration * 1000, 2))
             
-            # Record error metrics
+            # Record error metrics (both Logfire and Prometheus)
             logfire.metric_counter("api.chat_requests.errors").add(1)
             logfire.metric_counter("api.chat_requests.error_rate").add(1)
+            
+            # Record Prometheus metrics
+            api_chat_requests_total.labels(status='error').inc()
+            api_chat_requests_errors.inc()
             
             span.set_attribute("error", str(e))
             span.set_attribute("error_type", type(e).__name__)
@@ -431,10 +440,15 @@ def handle_mention(event, say):
                        response_length=len(response),
                        duration_ms=round(duration * 1000, 2))
             
-            # Record metrics (Logfire handles OpenTelemetry export automatically)
+            # Record metrics (both Logfire and Prometheus)
             logfire.metric_counter("slack.mentions.total").add(1)
             logfire.metric_histogram("slack.mentions.duration").record(duration)
             logfire.metric_histogram("slack.mentions.response_length").record(len(response))
+            
+            # Record Prometheus metrics
+            slack_mentions_total.labels(status='success').inc()
+            slack_mentions_duration.observe(duration)
+            slack_mentions_response_length.observe(len(response))
             
             span.set_attribute("question_length", len(question))
             span.set_attribute("response_length", len(response))
@@ -451,9 +465,13 @@ def handle_mention(event, say):
                      channel=channel,
                      duration_ms=round(duration * 1000, 2))
             
-            # Record error metrics
+            # Record error metrics (both Logfire and Prometheus)
             logfire.metric_counter("slack.mentions.errors").add(1)
             logfire.metric_counter("slack.mentions.error_rate").add(1)
+            
+            # Record Prometheus metrics
+            slack_mentions_total.labels(status='error').inc()
+            slack_mentions_errors.inc()
             
             span.set_attribute("error", str(e))
             span.set_attribute("error_type", type(e).__name__)
@@ -508,10 +526,15 @@ def handle_ask_jamie_command(ack, respond, command):
                        response_length=len(response),
                        duration_ms=round(duration * 1000, 2))
             
-            # Record metrics (Logfire handles OpenTelemetry export automatically)
+            # Record metrics (both Logfire and Prometheus)
             logfire.metric_counter("slack.slash_commands.total").add(1)
             logfire.metric_histogram("slack.slash_commands.duration").record(duration)
             logfire.metric_histogram("slack.slash_commands.response_length").record(len(response))
+            
+            # Record Prometheus metrics
+            slack_slash_commands_total.labels(status='success').inc()
+            slack_slash_commands_duration.observe(duration)
+            slack_slash_commands_response_length.observe(len(response))
             
             span.set_attribute("question_length", len(question))
             span.set_attribute("response_length", len(response))
@@ -528,9 +551,13 @@ def handle_ask_jamie_command(ack, respond, command):
                      channel_id=command.get("channel_id"),
                      duration_ms=round(duration * 1000, 2))
             
-            # Record error metrics
+            # Record error metrics (both Logfire and Prometheus)
             logfire.metric_counter("slack.slash_commands.errors").add(1)
             logfire.metric_counter("slack.slash_commands.error_rate").add(1)
+            
+            # Record Prometheus metrics
+            slack_slash_commands_total.labels(status='error').inc()
+            slack_slash_commands_errors.inc()
             
             span.set_attribute("error", str(e))
             span.set_attribute("error_type", type(e).__name__)
@@ -582,10 +609,15 @@ def handle_message_events(event, say):
                        response_length=len(response),
                        duration_ms=round(duration * 1000, 2))
             
-            # Record metrics (Logfire handles OpenTelemetry export automatically)
+            # Record metrics (both Logfire and Prometheus)
             logfire.metric_counter("slack.direct_messages.total").add(1)
             logfire.metric_histogram("slack.direct_messages.duration").record(duration)
             logfire.metric_histogram("slack.direct_messages.response_length").record(len(response))
+            
+            # Record Prometheus metrics
+            slack_direct_messages_total.labels(status='success').inc()
+            slack_direct_messages_duration.observe(duration)
+            slack_direct_messages_response_length.observe(len(response))
             
             span.set_attribute("message_length", len(text))
             span.set_attribute("response_length", len(response))
@@ -601,9 +633,13 @@ def handle_message_events(event, say):
                      user_id=event.get("user"),
                      duration_ms=round(duration * 1000, 2))
             
-            # Record error metrics
+            # Record error metrics (both Logfire and Prometheus)
             logfire.metric_counter("slack.direct_messages.errors").add(1)
             logfire.metric_counter("slack.direct_messages.error_rate").add(1)
+            
+            # Record Prometheus metrics
+            slack_direct_messages_total.labels(status='error').inc()
+            slack_direct_messages_errors.inc()
             
             span.set_attribute("error", str(e))
             span.set_attribute("error_type", type(e).__name__)
