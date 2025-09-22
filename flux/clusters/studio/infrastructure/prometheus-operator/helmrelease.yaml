@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: 70.0.2
+      version: 77.10.0
       sourceRef:
         kind: HelmRepository
         name: prometheus-community
@@ -28,6 +28,8 @@ spec:
                   storage: 10Gi
     grafana:
       adminPassword: adminbubs # TODO: Sealed Secrets
+      initChownData:
+        enabled: false
       persistence:
         enabled: true
         type: pvc
@@ -166,9 +168,16 @@ spec:
                   storage: 10Gi
         secrets:
           - "pagerduty-secrets"
+        configSecret: "alertmanager-prometheus-operator-kube-p-alertmanager"
         containers:
         - name: alertmanager
           args:
+          - --config.file=/etc/alertmanager/config_out/alertmanager.env.yaml
+          - --storage.path=/alertmanager
+          - --web.external-url=http://alertmanager-prometheus-operator-kube-p-alertmanager-0:9093
+          - --web.route-prefix=/
+          - --cluster.listen-address=0.0.0.0:9094
+          - --cluster.advertise-address=$(POD_IP):9094
           - --log.level=debug
           - --log.format=json
           env:
@@ -182,38 +191,6 @@ spec:
               secretKeyRef:
                 name: pagerduty-secrets
                 key: slack-webhook-url
-      config:
-        global:
-          resolve_timeout: 5m
-        route:
-          group_by: ['alertname']
-          group_wait: 10s
-          group_interval: 10s
-          repeat_interval: 1h
-          receiver: 'pagerduty-critical'
-          routes:
-          - match:
-              severity: critical
-            receiver: 'pagerduty-critical'
-        receivers:
-        - name: 'pagerduty-critical'
-          pagerduty_configs:
-          - service_key: '${PAGERDUTY_SERVICE_KEY}'
-            description: '{{ .GroupLabels.alertname }}'
-            details:
-              summary: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
-        inhibit_rules:
-        - target_matchers:
-          - severity =~ warning|info
-          source_matchers:
-          - severity = critical
-          equal:
-          - namespace
-          - alertname
-        - target_matchers:
-          - severity = info
-          source_matchers:
-          - severity = warning
-          equal:
-          - namespace
-          - alertname
+      alertmanagerConfigSelector:
+        matchLabels:
+          app: kube-prometheus-stack-alertmanager
