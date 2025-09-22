@@ -16,7 +16,7 @@ data:
     # Routes alerts based on severity and labels
     
     # Root Policy - Default routing
-    receiver: slack-info
+    receiver: email-bruno
     groupBy: ['alertname', 'severity', 'namespace']
     groupWait: 10s
     groupInterval: 10s

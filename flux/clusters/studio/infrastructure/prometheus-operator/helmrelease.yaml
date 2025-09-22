@@ -62,6 +62,23 @@ spec:
         provisioning:
           contactpoints: true
           notification_policies: true
+      sidecar:
+        datasources:
+          enabled: true
+          label: grafana_datasource
+          labelValue: "1"
+        dashboards:
+          enabled: true
+          label: grafana_dashboard
+          labelValue: "1"
+        contactpoints:
+          enabled: true
+          label: grafana_contact_points
+          labelValue: "true"
+        notification_policies:
+          enabled: true
+          label: grafana_notification_policies
+          labelValue: "true"
       env:
         STRAVA_CLIENT_ID:
           valueFrom:

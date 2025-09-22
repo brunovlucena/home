@@ -138,6 +138,27 @@ data:
         iconEmoji: ":rotating_light:"
         sendResolved: true
     
+    # Email Contact Point for Bruno
+    - uid: email-bruno
+      name: Email Bruno
+      type: email
+      settings:
+        addresses: "bruno@lucena.cloud"
+        subject: "🚨 {{ .Labels.severity | upper }} Alert: {{ .GroupLabels.alertname }}"
+        message: |
+          Alert: {{ .GroupLabels.alertname }}
+          Severity: {{ .GroupLabels.severity }}
+          Namespace: {{ .GroupLabels.namespace }}
+          Instance: {{ .GroupLabels.instance }}
+          
+          Summary: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+          Description: {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+          
+          Runbook: {{ range .Alerts }}{{ .Annotations.runbook_url }}{{ end }}
+          Dashboard: {{ range .Alerts }}{{ .Annotations.dashboard_url }}{{ end }}
+        singleEmail: true
+        disableResolveMessage: false
+    
     # Alertmanager Contact Point for Integration
     - uid: alertmanager-integration
       name: Alertmanager Integration
