@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: jamie-sre-chatbot
     app.kubernetes.io/component: sre-chatbot
     app.kubernetes.io/part-of: bruno-infrastructure
-    release: prometheus
+    release: prometheus-operator
 spec:
   selector:
     matchLabels:
