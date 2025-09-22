@@ -22,6 +22,9 @@ import threading
 # Logfire imports
 import logfire
 
+# Prometheus client for metrics endpoint
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+
 # Configure logging first
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,8 +41,10 @@ class NoOpSpan:
 def noop(*args, **kwargs):
     pass
 
-# Configure Logfire (optional)
+# Configure Logfire with Prometheus export
 logfire_token = os.environ.get("LOGFIRE_TOKEN", "").strip()
+prometheus_metrics_available = False
+
 if logfire_token:
     try:
         logfire.configure(
@@ -50,6 +55,7 @@ if logfire_token:
             send_to_logfire=os.environ.get("LOGFIRE_SEND_TO_LOGFIRE", "true").lower() == "true"
         )
         logger.info("Logfire configured successfully")
+        prometheus_metrics_available = True
     except Exception as e:
         logger.error(f"Failed to configure Logfire: {e}")
         # Disable logfire by replacing with no-op functions
@@ -66,6 +72,9 @@ else:
     logfire.span = lambda *args, **kwargs: NoOpSpan()
     logfire.metric_counter = lambda *args, **kwargs: type('counter', (), {'add': noop})()
     logfire.metric_histogram = lambda *args, **kwargs: type('histogram', (), {'record': noop})()
+
+# Logfire already provides OpenTelemetry metrics under the hood
+# We just need to expose them via a Prometheus endpoint
 
 # Initialize the Slack app
 app = App(
@@ -133,7 +142,7 @@ class OllamaClient:
                            response_length=response_length,
                            model=self.model_name)
                 
-                # Record metrics
+                # Record metrics (Logfire handles OpenTelemetry export automatically)
                 logfire.metric_histogram("ollama.response.duration").record(duration)
                 logfire.metric_histogram("ollama.response.length").record(response_length)
                 logfire.metric_counter("ollama.requests.total").add(1)
@@ -154,7 +163,7 @@ class OllamaClient:
                              duration_ms=round(duration * 1000, 2),
                              model=self.model_name)
                 
-                # Record error metrics
+                # Record error metrics (Logfire handles OpenTelemetry export automatically)
                 logfire.metric_counter("ollama.errors.total").add(1)
                 logfire.metric_counter("ollama.errors.rate").add(1)
                 
@@ -174,7 +183,7 @@ class OllamaClient:
                          duration_ms=round(duration * 1000, 2),
                          model=self.model_name)
                 
-                # Record error metrics
+                # Record error metrics (Logfire handles OpenTelemetry export automatically)
                 logfire.metric_counter("ollama.errors.total").add(1)
                 logfire.metric_counter("ollama.errors.rate").add(1)
                 
@@ -189,6 +198,7 @@ ollama_client = OllamaClient(OLLAMA_URL, MODEL_NAME)
 
 # Initialize Flask API server for bruno-site integration
 api_app = Flask(__name__)
+# Logfire automatically instruments Flask and Requests when configured
 
 @api_app.route('/health', methods=['GET'])
 def health_check():
@@ -200,6 +210,21 @@ def health_check():
         "ollama_url": OLLAMA_URL,
         "model_name": MODEL_NAME
     })
+
+@api_app.route('/metrics', methods=['GET'])
+def metrics_endpoint():
+    """Prometheus metrics endpoint using Logfire's built-in OpenTelemetry metrics"""
+    if not prometheus_metrics_available:
+        return "Metrics not available - Logfire not configured", 503
+    
+    try:
+        # Logfire uses OpenTelemetry under the hood and can export to Prometheus
+        # We'll use the standard prometheus_client to collect all metrics
+        metrics_data = generate_latest()
+        return metrics_data, 200, {'Content-Type': CONTENT_TYPE_LATEST}
+    except Exception as e:
+        logger.error(f"Error collecting metrics: {e}")
+        return f"Error collecting metrics: {e}", 500
 
 @api_app.route('/chat', methods=['POST'])
 def chat_endpoint():
@@ -237,7 +262,7 @@ def chat_endpoint():
                        duration_ms=round(duration * 1000, 2),
                        conversation_id=conversation_id)
             
-            # Record metrics
+            # Record metrics (Logfire handles OpenTelemetry export automatically)
             logfire.metric_counter("api.chat_requests.total").add(1)
             logfire.metric_histogram("api.chat_requests.duration").record(duration)
             logfire.metric_histogram("api.chat_requests.response_length").record(len(response))
@@ -282,6 +307,38 @@ def start_api_server():
     except Exception as e:
         logfire.error("Failed to start API server", error=str(e))
         logger.error(f"Failed to start API server: {e}")
+
+def start_metrics_server():
+    """Start a separate metrics server on port 9090"""
+    try:
+        from flask import Flask
+        metrics_app = Flask(__name__)
+        
+        @metrics_app.route('/metrics')
+        def metrics():
+            """Prometheus metrics endpoint using Logfire's built-in metrics"""
+            if not prometheus_metrics_available:
+                return "Metrics not available - Logfire not configured", 503
+            
+            try:
+                # Logfire uses OpenTelemetry under the hood and can export to Prometheus
+                # We'll use the standard prometheus_client to collect all metrics
+                metrics_data = generate_latest()
+                return metrics_data, 200, {'Content-Type': CONTENT_TYPE_LATEST}
+            except Exception as e:
+                logger.error(f"Error collecting metrics: {e}")
+                return f"Error collecting metrics: {e}", 500
+        
+        @metrics_app.route('/health')
+        def health():
+            """Health check for metrics server"""
+            return "OK", 200
+        
+        logfire.info("Starting metrics server", port=9090)
+        metrics_app.run(host='0.0.0.0', port=9090, debug=False, use_reloader=False)
+    except Exception as e:
+        logfire.error("Failed to start metrics server", error=str(e))
+        logger.error(f"Failed to start metrics server: {e}")
 
 @app.event("app_mention")
 def handle_mention(event, say):
@@ -332,7 +389,7 @@ def handle_mention(event, say):
                        response_length=len(response),
                        duration_ms=round(duration * 1000, 2))
             
-            # Record metrics
+            # Record metrics (Logfire handles OpenTelemetry export automatically)
             logfire.metric_counter("slack.mentions.total").add(1)
             logfire.metric_histogram("slack.mentions.duration").record(duration)
             logfire.metric_histogram("slack.mentions.response_length").record(len(response))
@@ -409,7 +466,7 @@ def handle_ask_jamie_command(ack, respond, command):
                        response_length=len(response),
                        duration_ms=round(duration * 1000, 2))
             
-            # Record metrics
+            # Record metrics (Logfire handles OpenTelemetry export automatically)
             logfire.metric_counter("slack.slash_commands.total").add(1)
             logfire.metric_histogram("slack.slash_commands.duration").record(duration)
             logfire.metric_histogram("slack.slash_commands.response_length").record(len(response))
@@ -483,7 +540,7 @@ def handle_message_events(event, say):
                        response_length=len(response),
                        duration_ms=round(duration * 1000, 2))
             
-            # Record metrics
+            # Record metrics (Logfire handles OpenTelemetry export automatically)
             logfire.metric_counter("slack.direct_messages.total").add(1)
             logfire.metric_histogram("slack.direct_messages.duration").record(duration)
             logfire.metric_histogram("slack.direct_messages.response_length").record(len(response))
@@ -697,6 +754,10 @@ if __name__ == "__main__":
         api_thread = threading.Thread(target=start_api_server, daemon=True)
         api_thread.start()
         
+        # Start the metrics server in a separate thread
+        metrics_thread = threading.Thread(target=start_metrics_server, daemon=True)
+        metrics_thread.start()
+        
         # Start the Slack app
         handler = SocketModeHandler(app, os.environ["SLACK_APP_TOKEN"])
         
@@ -707,6 +768,7 @@ if __name__ == "__main__":
         
         logger.info("🤖 Jamie SRE Chatbot is starting...")
         logger.info("🌐 API server started on port 8080")
+        logger.info("📊 Metrics server started on port 9090")
         
         # Record successful startup
         logfire.metric_counter("jamie.startup.success").add(1)

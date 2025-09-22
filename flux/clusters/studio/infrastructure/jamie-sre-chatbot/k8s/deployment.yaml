@@ -31,6 +31,9 @@ spec:
         - containerPort: 8080
           name: http
           protocol: TCP
+        - containerPort: 9090
+          name: metrics
+          protocol: TCP
         env:
         - name: OLLAMA_URL
           valueFrom:
