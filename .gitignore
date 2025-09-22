@@ -39,3 +39,10 @@ build/
 # Temporary files
 *.tmp
 *.temp
+
+# Sealed Secrets Backups (CRITICAL: Never commit these!)
+flux/clusters/*/infrastructure/sealed-secrets/backups/
+flux/clusters/*/infrastructure/sealed-secrets/*.yaml.backup
+flux/clusters/*/infrastructure/sealed-secrets/*.pem.backup
+sealed-secrets-key-backup.yaml
+sealed-secrets-public-cert.pem
