@@ -23,7 +23,7 @@ import threading
 import logfire
 
 # Prometheus client for metrics endpoint
-from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST, Counter, Histogram, Gauge
 
 # Configure logging first
 logging.basicConfig(level=logging.INFO)
@@ -45,8 +45,39 @@ def noop(*args, **kwargs):
 logfire_token = os.environ.get("LOGFIRE_TOKEN", "").strip()
 prometheus_metrics_available = False
 
+# Prometheus metrics definitions
+ollama_requests_total = Counter('ollama_requests_total', 'Total number of Ollama requests', ['model', 'status'])
+ollama_errors_total = Counter('ollama_errors_total', 'Total number of Ollama errors', ['error_type'])
+ollama_response_duration = Histogram('ollama_response_duration_seconds', 'Ollama response duration in seconds', ['model'])
+ollama_response_length = Histogram('ollama_response_length_bytes', 'Ollama response length in bytes', ['model'])
+
+api_chat_requests_total = Counter('api_chat_requests_total', 'Total number of API chat requests', ['status'])
+api_chat_requests_errors = Counter('api_chat_requests_errors', 'Total number of API chat errors')
+api_chat_requests_duration = Histogram('api_chat_requests_duration_seconds', 'API chat request duration in seconds')
+api_chat_requests_response_length = Histogram('api_chat_requests_response_length_bytes', 'API chat response length in bytes')
+
+slack_mentions_total = Counter('slack_mentions_total', 'Total number of Slack mentions', ['status'])
+slack_mentions_errors = Counter('slack_mentions_errors', 'Total number of Slack mention errors')
+slack_mentions_duration = Histogram('slack_mentions_duration_seconds', 'Slack mention processing duration in seconds')
+slack_mentions_response_length = Histogram('slack_mentions_response_length_bytes', 'Slack mention response length in bytes')
+
+slack_slash_commands_total = Counter('slack_slash_commands_total', 'Total number of Slack slash commands', ['status'])
+slack_slash_commands_errors = Counter('slack_slash_commands_errors', 'Total number of Slack slash command errors')
+slack_slash_commands_duration = Histogram('slack_slash_commands_duration_seconds', 'Slack slash command processing duration in seconds')
+slack_slash_commands_response_length = Histogram('slack_slash_commands_response_length_bytes', 'Slack slash command response length in bytes')
+
+slack_direct_messages_total = Counter('slack_direct_messages_total', 'Total number of Slack direct messages', ['status'])
+slack_direct_messages_errors = Counter('slack_direct_messages_errors', 'Total number of Slack direct message errors')
+slack_direct_messages_duration = Histogram('slack_direct_messages_duration_seconds', 'Slack direct message processing duration in seconds')
+slack_direct_messages_response_length = Histogram('slack_direct_messages_response_length_bytes', 'Slack direct message response length in bytes')
+
+jamie_startup_attempts = Counter('jamie_startup_attempts_total', 'Total number of Jamie startup attempts')
+jamie_startup_success = Counter('jamie_startup_success_total', 'Total number of successful Jamie startups')
+jamie_startup_failures = Counter('jamie_startup_failures_total', 'Total number of failed Jamie startups')
+
 if logfire_token:
     try:
+        # Configure Logfire for observability
         logfire.configure(
             service_name="jamie-sre-chatbot",
             service_version="1.0.0",
@@ -142,10 +173,15 @@ class OllamaClient:
                            response_length=response_length,
                            model=self.model_name)
                 
-                # Record metrics (Logfire handles OpenTelemetry export automatically)
+                # Record metrics (both Logfire and Prometheus)
                 logfire.metric_histogram("ollama.response.duration").record(duration)
                 logfire.metric_histogram("ollama.response.length").record(response_length)
                 logfire.metric_counter("ollama.requests.total").add(1)
+                
+                # Record Prometheus metrics
+                ollama_requests_total.labels(model=self.model_name, status='success').inc()
+                ollama_response_duration.labels(model=self.model_name).observe(duration)
+                ollama_response_length.labels(model=self.model_name).observe(response_length)
                 
                 span.set_attribute("response_length", response_length)
                 span.set_attribute("duration_ms", round(duration * 1000, 2))
@@ -163,9 +199,13 @@ class OllamaClient:
                              duration_ms=round(duration * 1000, 2),
                              model=self.model_name)
                 
-                # Record error metrics (Logfire handles OpenTelemetry export automatically)
+                # Record error metrics (both Logfire and Prometheus)
                 logfire.metric_counter("ollama.errors.total").add(1)
                 logfire.metric_counter("ollama.errors.rate").add(1)
+                
+                # Record Prometheus metrics
+                ollama_requests_total.labels(model=self.model_name, status='error').inc()
+                ollama_errors_total.labels(error_type=type(e).__name__).inc()
                 
                 span.set_attribute("error", str(e))
                 span.set_attribute("error_type", type(e).__name__)
@@ -183,9 +223,13 @@ class OllamaClient:
                          duration_ms=round(duration * 1000, 2),
                          model=self.model_name)
                 
-                # Record error metrics (Logfire handles OpenTelemetry export automatically)
+                # Record error metrics (both Logfire and Prometheus)
                 logfire.metric_counter("ollama.errors.total").add(1)
                 logfire.metric_counter("ollama.errors.rate").add(1)
+                
+                # Record Prometheus metrics
+                ollama_requests_total.labels(model=self.model_name, status='error').inc()
+                ollama_errors_total.labels(error_type=type(e).__name__).inc()
                 
                 span.set_attribute("error", str(e))
                 span.set_attribute("error_type", type(e).__name__)
@@ -218,8 +262,7 @@ def metrics_endpoint():
         return "Metrics not available - Logfire not configured", 503
     
     try:
-        # Logfire uses OpenTelemetry under the hood and can export to Prometheus
-        # We'll use the standard prometheus_client to collect all metrics
+        # Collect all Prometheus metrics
         metrics_data = generate_latest()
         return metrics_data, 200, {'Content-Type': CONTENT_TYPE_LATEST}
     except Exception as e:
@@ -321,8 +364,7 @@ def start_metrics_server():
                 return "Metrics not available - Logfire not configured", 503
             
             try:
-                # Logfire uses OpenTelemetry under the hood and can export to Prometheus
-                # We'll use the standard prometheus_client to collect all metrics
+                # Collect all Prometheus metrics
                 metrics_data = generate_latest()
                 return metrics_data, 200, {'Content-Type': CONTENT_TYPE_LATEST}
             except Exception as e:
