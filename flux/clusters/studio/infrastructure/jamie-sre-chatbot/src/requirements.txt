@@ -10,6 +10,7 @@ flask==3.0.0
 # Logging and monitoring
 structlog==23.2.0
 logfire==0.30.0
+prometheus-client>=0.19.0
 
 # Async support
 aiohttp==3.9.1
