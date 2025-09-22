@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jamie-sre-chatbot
+  namespace: chatbots
+  labels:
+    app: jamie-sre-chatbot
+    app.kubernetes.io/name: jamie-sre-chatbot
+    app.kubernetes.io/component: sre-chatbot
+    app.kubernetes.io/part-of: bruno-infrastructure
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+      name: metrics
+  selector:
+    app: jamie-sre-chatbot

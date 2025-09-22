@@ -27,6 +27,10 @@ spec:
       - name: jamie-sre-chatbot
         image: ghcr.io/brunovlucena/jamie-sre-chatbot:dev
         imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
         env:
         - name: OLLAMA_URL
           valueFrom:
@@ -68,6 +72,30 @@ spec:
             configMapKeyRef:
               name: jamie-sre-chatbot-config
               key: ENVIRONMENT
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
         resources:
           requests:
             memory: "512Mi"

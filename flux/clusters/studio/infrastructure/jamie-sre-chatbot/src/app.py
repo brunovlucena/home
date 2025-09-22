@@ -16,6 +16,8 @@ from slack_sdk.errors import SlackApiError
 import requests
 import json
 from typing import Dict, Any, Optional
+from flask import Flask, request, jsonify
+import threading
 
 # Logfire imports
 import logfire
@@ -184,6 +186,102 @@ class OllamaClient:
 
 # Initialize Ollama client
 ollama_client = OllamaClient(OLLAMA_URL, MODEL_NAME)
+
+# Initialize Flask API server for bruno-site integration
+api_app = Flask(__name__)
+
+@api_app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for Kubernetes"""
+    return jsonify({
+        "status": "healthy",
+        "service": "jamie-sre-chatbot",
+        "timestamp": datetime.now().isoformat(),
+        "ollama_url": OLLAMA_URL,
+        "model_name": MODEL_NAME
+    })
+
+@api_app.route('/chat', methods=['POST'])
+def chat_endpoint():
+    """Chat endpoint for bruno-site integration"""
+    start_time = time.time()
+    
+    with logfire.span("api.chat_endpoint") as span:
+        try:
+            data = request.get_json()
+            if not data or 'message' not in data:
+                return jsonify({"error": "Message is required"}), 400
+            
+            message = data['message'].strip()
+            context = data.get('context', '')
+            conversation_id = data.get('conversation_id', '')
+            
+            logfire.info("Processing API chat request",
+                        message_preview=message[:100] + "..." if len(message) > 100 else message,
+                        context_preview=context[:100] + "..." if len(context) > 100 else context,
+                        conversation_id=conversation_id)
+            
+            if not message:
+                return jsonify({"error": "Message cannot be empty"}), 400
+            
+            # Get response from Ollama
+            response = ollama_client.generate_response(message, context)
+            
+            # Calculate metrics
+            duration = time.time() - start_time
+            
+            # Log success
+            logfire.info("API chat request processed successfully",
+                       message_length=len(message),
+                       response_length=len(response),
+                       duration_ms=round(duration * 1000, 2),
+                       conversation_id=conversation_id)
+            
+            # Record metrics
+            logfire.metric_counter("api.chat_requests.total").add(1)
+            logfire.metric_histogram("api.chat_requests.duration").record(duration)
+            logfire.metric_histogram("api.chat_requests.response_length").record(len(response))
+            
+            span.set_attribute("message_length", len(message))
+            span.set_attribute("response_length", len(response))
+            span.set_attribute("duration_ms", round(duration * 1000, 2))
+            span.set_attribute("conversation_id", conversation_id)
+            span.set_attribute("success", True)
+            
+            return jsonify({
+                "response": response,
+                "model": MODEL_NAME,
+                "timestamp": datetime.now().isoformat(),
+                "processing_time": duration,
+                "conversation_id": conversation_id
+            })
+            
+        except Exception as e:
+            duration = time.time() - start_time
+            
+            logfire.error("Error processing API chat request",
+                         error=str(e),
+                         error_type=type(e).__name__,
+                         duration_ms=round(duration * 1000, 2))
+            
+            # Record error metrics
+            logfire.metric_counter("api.chat_requests.errors").add(1)
+            logfire.metric_counter("api.chat_requests.error_rate").add(1)
+            
+            span.set_attribute("error", str(e))
+            span.set_attribute("error_type", type(e).__name__)
+            span.set_attribute("success", False)
+            
+            return jsonify({"error": "Internal server error"}), 500
+
+def start_api_server():
+    """Start the Flask API server in a separate thread"""
+    try:
+        logfire.info("Starting Jamie API server", port=8080)
+        api_app.run(host='0.0.0.0', port=8080, debug=False, use_reloader=False)
+    except Exception as e:
+        logfire.error("Failed to start API server", error=str(e))
+        logger.error(f"Failed to start API server: {e}")
 
 @app.event("app_mention")
 def handle_mention(event, say):
@@ -595,7 +693,11 @@ if __name__ == "__main__":
     logfire.metric_histogram("jamie.startup.timestamp").record(time.time())
     
     try:
-        # Start the app
+        # Start the API server in a separate thread
+        api_thread = threading.Thread(target=start_api_server, daemon=True)
+        api_thread.start()
+        
+        # Start the Slack app
         handler = SocketModeHandler(app, os.environ["SLACK_APP_TOKEN"])
         
         logfire.info("Jamie SRE Chatbot started successfully",
@@ -604,6 +706,7 @@ if __name__ == "__main__":
                    model_name=os.environ.get("MODEL_NAME", "bruno-sre"))
         
         logger.info("🤖 Jamie SRE Chatbot is starting...")
+        logger.info("🌐 API server started on port 8080")
         
         # Record successful startup
         logfire.metric_counter("jamie.startup.success").add(1)
