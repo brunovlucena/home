@@ -9,6 +9,7 @@ metadata:
   labels:
     app: kube-prometheus-stack-grafana
     grafana_notification_policies: "true"
+    grafana_datasource: "1"
 data:
   notification-policies.yaml: |
     # Grafana Notification Policies

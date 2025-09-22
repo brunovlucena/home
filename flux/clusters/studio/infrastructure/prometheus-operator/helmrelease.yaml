@@ -56,6 +56,9 @@ spec:
       plugins:
         - grafana-strava-datasource
         - grafana-llm-app
+      grafana.ini:
+        unified_alerting:
+          enabled: true
       env:
         STRAVA_CLIENT_ID:
           valueFrom:
