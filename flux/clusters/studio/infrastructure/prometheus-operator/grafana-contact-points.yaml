@@ -1,0 +1,108 @@
+# Grafana Contact Points Configuration
+# This file defines contact points for Grafana alerting integration
+# with PagerDuty, Slack, and Alertmanager
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-contact-points
+  namespace: prometheus
+  labels:
+    app: kube-prometheus-stack-grafana
+    grafana_contact_points: "true"
+data:
+  contact-points.yaml: |
+    # Grafana Contact Points Configuration
+    # Integrated with PagerDuty, Slack, and Alertmanager
+    
+    # PagerDuty Contact Point for Critical Alerts
+    - uid: pagerduty-critical
+      name: PagerDuty Critical
+      type: pagerduty
+      settings:
+        integrationKey: ${PAGERDUTY_SERVICE_KEY}
+        severity: critical
+        component: Grafana Alerts
+        group: Infrastructure
+        class: Monitoring
+        customDetails: |
+          {
+            "alertname": "{{ .Labels.alertname }}",
+            "severity": "{{ .Labels.severity }}",
+            "namespace": "{{ .Labels.namespace }}",
+            "instance": "{{ .Labels.instance }}",
+            "summary": "{{ .Annotations.summary }}",
+            "description": "{{ .Annotations.description }}",
+            "runbook_url": "{{ .Annotations.runbook_url }}"
+          }
+        client: Grafana
+        clientURL: "{{ .ExternalURL }}"
+        dedupKey: "{{ .GroupKey }}"
+        source: Grafana
+        summary: "{{ .GroupLabels.alertname }}"
+        description: "{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
+    
+    # Slack Contact Point for Warning Alerts
+    - uid: slack-warning
+      name: Slack Warning
+      type: slack
+      settings:
+        url: ${SLACK_WEBHOOK_URL}
+        channel: "#jamie-sre-chatbot"
+        title: "⚠️ Warning Alert: {{ .GroupLabels.alertname }}"
+        text: |
+          *Alert:* {{ .GroupLabels.alertname }}
+          *Severity:* {{ .GroupLabels.severity }}
+          *Namespace:* {{ .GroupLabels.namespace }}
+          *Instance:* {{ .GroupLabels.instance }}
+          
+          *Summary:* {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+          *Description:* {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+          
+          *Runbook:* {{ range .Alerts }}{{ .Annotations.runbook_url }}{{ end }}
+        username: Grafana Alerts
+        iconEmoji: ":warning:"
+        sendResolved: true
+    
+    # Slack Contact Point for Info Alerts
+    - uid: slack-info
+      name: Slack Info
+      type: slack
+      settings:
+        url: ${SLACK_WEBHOOK_URL}
+        channel: "#jamie-sre-chatbot"
+        title: "ℹ️ Info Alert: {{ .GroupLabels.alertname }}"
+        text: |
+          *Alert:* {{ .GroupLabels.alertname }}
+          *Severity:* {{ .GroupLabels.severity }}
+          *Namespace:* {{ .GroupLabels.namespace }}
+          *Instance:* {{ .GroupLabels.instance }}
+          
+          *Summary:* {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+          *Description:* {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+        username: Grafana Alerts
+        iconEmoji: ":information_source:"
+        sendResolved: true
+    
+    # Alertmanager Contact Point for Integration
+    - uid: alertmanager-integration
+      name: Alertmanager Integration
+      type: alertmanager
+      settings:
+        url: "http://alertmanager-operated.prometheus:9093"
+        basicAuthUser: ""
+        basicAuthPassword: ""
+        apiKey: ""
+        apiKeyHeader: "Authorization"
+        title: "Grafana Alert: {{ .GroupLabels.alertname }}"
+        message: "{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
+        tags: "grafana,{{ .GroupLabels.severity }},{{ .GroupLabels.namespace }}"
+        details: |
+          {
+            "alertname": "{{ .GroupLabels.alertname }}",
+            "severity": "{{ .GroupLabels.severity }}",
+            "namespace": "{{ .GroupLabels.namespace }}",
+            "instance": "{{ .GroupLabels.instance }}",
+            "summary": "{{ .Annotations.summary }}",
+            "description": "{{ .Annotations.description }}"
+          }

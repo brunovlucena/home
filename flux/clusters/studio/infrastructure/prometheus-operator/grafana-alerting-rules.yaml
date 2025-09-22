@@ -1,0 +1,292 @@
+# Grafana Alerting Rules Configuration
+# This file defines alerting rules that integrate with Prometheus metrics
+# and route through Grafana's alerting system
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-alerting-rules
+  namespace: prometheus
+  labels:
+    app: kube-prometheus-stack-grafana
+    grafana_alerting_rules: "true"
+data:
+  alerting-rules.yaml: |
+    # Grafana Alerting Rules
+    # These rules complement Prometheus alerting and provide
+    # additional routing and notification capabilities
+    
+    # High-level Infrastructure Alerts
+    - uid: infrastructure-health
+      title: "Infrastructure Health Check"
+      condition: "C"
+      data:
+        - refId: "A"
+          queryType: ""
+          relativeTimeRange:
+            from: 300
+            to: 0
+          datasource:
+            type: prometheus
+            uid: prometheus
+          model:
+            expr: "up{job=\"kubernetes-pods\"}"
+            interval: ""
+            legendFormat: "{{instance}}"
+            refId: "A"
+        - refId: "B"
+          queryType: ""
+          relativeTimeRange:
+            from: 0
+            to: 0
+          datasource:
+            type: __expr__
+            uid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params: [0.5]
+                  type: "lt"
+                operator:
+                  type: "and"
+                query:
+                  params: ["A"]
+                reducer:
+                  params: []
+                  type: "last"
+                type: "query"
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: "A"
+            hide: false
+            intervalMs: 1000
+            maxDataPoints: 43200
+            reducer: "last"
+            refId: "B"
+            type: "reduce"
+        - refId: "C"
+          queryType: ""
+          relativeTimeRange:
+            from: 0
+            to: 0
+          datasource:
+            type: __expr__
+            uid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params: [0.5]
+                  type: "lt"
+                operator:
+                  type: "and"
+                query:
+                  params: ["B"]
+                reducer:
+                  params: []
+                  type: "last"
+                type: "query"
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: "B"
+            hide: false
+            intervalMs: 1000
+            maxDataPoints: 43200
+            reducer: "last"
+            refId: "C"
+            type: "threshold"
+      noDataState: "NoData"
+      execErrState: "Alerting"
+      for: "0s"
+      annotations:
+        summary: "Infrastructure health check failed"
+        description: "One or more infrastructure components are down"
+        runbook_url: "https://github.com/your-org/runbooks/blob/main/infrastructure/health-check.md"
+      labels:
+        severity: "critical"
+        category: "infrastructure"
+        source: "grafana"
+    
+    # Pod Restart Alert
+    - uid: pod-restart-frequent
+      title: "Frequent Pod Restarts"
+      condition: "C"
+      data:
+        - refId: "A"
+          queryType: ""
+          relativeTimeRange:
+            from: 300
+            to: 0
+          datasource:
+            type: prometheus
+            uid: prometheus
+          model:
+            expr: "rate(kube_pod_container_status_restarts_total[5m]) > 0.1"
+            interval: ""
+            legendFormat: "{{namespace}}/{{pod}}"
+            refId: "A"
+        - refId: "C"
+          queryType: ""
+          relativeTimeRange:
+            from: 0
+            to: 0
+          datasource:
+            type: __expr__
+            uid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params: [0]
+                  type: "gt"
+                operator:
+                  type: "and"
+                query:
+                  params: ["A"]
+                reducer:
+                  params: []
+                  type: "last"
+                type: "query"
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: "A"
+            hide: false
+            intervalMs: 1000
+            maxDataPoints: 43200
+            reducer: "last"
+            refId: "C"
+            type: "threshold"
+      noDataState: "NoData"
+      execErrState: "Alerting"
+      for: "2m"
+      annotations:
+        summary: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} is restarting frequently"
+        description: "Pod {{ $labels.pod }} has restarted {{ $value }} times in the last 5 minutes"
+        runbook_url: "https://github.com/your-org/runbooks/blob/main/kubernetes/pod-restarts.md"
+      labels:
+        severity: "warning"
+        category: "kubernetes"
+        source: "grafana"
+    
+    # High Memory Usage Alert
+    - uid: high-memory-usage
+      title: "High Memory Usage"
+      condition: "C"
+      data:
+        - refId: "A"
+          queryType: ""
+          relativeTimeRange:
+            from: 300
+            to: 0
+          datasource:
+            type: prometheus
+            uid: prometheus
+          model:
+            expr: "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100"
+            interval: ""
+            legendFormat: "{{instance}}"
+            refId: "A"
+        - refId: "C"
+          queryType: ""
+          relativeTimeRange:
+            from: 0
+            to: 0
+          datasource:
+            type: __expr__
+            uid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params: [85]
+                  type: "gt"
+                operator:
+                  type: "and"
+                query:
+                  params: ["A"]
+                reducer:
+                  params: []
+                  type: "last"
+                type: "query"
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: "A"
+            hide: false
+            intervalMs: 1000
+            maxDataPoints: 43200
+            reducer: "last"
+            refId: "C"
+            type: "threshold"
+      noDataState: "NoData"
+      execErrState: "Alerting"
+      for: "5m"
+      annotations:
+        summary: "High memory usage on node {{ $labels.instance }}"
+        description: "Memory usage is {{ $value }}% on node {{ $labels.instance }}"
+        runbook_url: "https://github.com/your-org/runbooks/blob/main/infrastructure/memory-usage.md"
+      labels:
+        severity: "warning"
+        category: "infrastructure"
+        source: "grafana"
+    
+    # Disk Space Alert
+    - uid: disk-space-low
+      title: "Low Disk Space"
+      condition: "C"
+      data:
+        - refId: "A"
+          queryType: ""
+          relativeTimeRange:
+            from: 300
+            to: 0
+          datasource:
+            type: prometheus
+            uid: prometheus
+          model:
+            expr: "(1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100"
+            interval: ""
+            legendFormat: "{{instance}}:{{mountpoint}}"
+            refId: "A"
+        - refId: "C"
+          queryType: ""
+          relativeTimeRange:
+            from: 0
+            to: 0
+          datasource:
+            type: __expr__
+            uid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params: [90]
+                  type: "gt"
+                operator:
+                  type: "and"
+                query:
+                  params: ["A"]
+                reducer:
+                  params: []
+                  type: "last"
+                type: "query"
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: "A"
+            hide: false
+            intervalMs: 1000
+            maxDataPoints: 43200
+            reducer: "last"
+            refId: "C"
+            type: "threshold"
+      noDataState: "NoData"
+      execErrState: "Alerting"
+      for: "2m"
+      annotations:
+        summary: "Low disk space on {{ $labels.instance }}:{{ $labels.mountpoint }}"
+        description: "Disk usage is {{ $value }}% on {{ $labels.instance }}:{{ $labels.mountpoint }}"
+        runbook_url: "https://github.com/your-org/runbooks/blob/main/infrastructure/disk-space.md"
+      labels:
+        severity: "critical"
+        category: "infrastructure"
+        source: "grafana"
