@@ -59,6 +59,9 @@ spec:
       grafana.ini:
         unified_alerting:
           enabled: true
+        provisioning:
+          contactpoints: true
+          notification_policies: true
       env:
         STRAVA_CLIENT_ID:
           valueFrom:

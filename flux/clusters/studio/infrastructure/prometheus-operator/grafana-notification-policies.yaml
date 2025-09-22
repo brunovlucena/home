@@ -79,6 +79,31 @@ data:
             match: "falco"
             matchType: "="
       
+      # All Critical Alerts - Route to PagerDuty All
+      - receiver: pagerduty-all
+        groupBy: ['alertname', 'severity']
+        groupWait: 0s
+        groupInterval: 5s
+        repeatInterval: 30m
+        matchers:
+          - label: severity
+            match: "critical"
+            matchType: "="
+      
+      # High Priority Warning Alerts - Route to PagerDuty All
+      - receiver: pagerduty-all
+        groupBy: ['alertname', 'priority']
+        groupWait: 10s
+        groupInterval: 10s
+        repeatInterval: 1h
+        matchers:
+          - label: priority
+            match: "high"
+            matchType: "="
+          - label: severity
+            match: "warning"
+            matchType: "="
+      
       # Kubernetes Alerts - Route based on severity
       - receiver: slack-warning
         groupBy: ['alertname', 'namespace']

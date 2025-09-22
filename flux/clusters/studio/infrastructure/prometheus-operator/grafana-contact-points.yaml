@@ -43,6 +43,35 @@ data:
         summary: "{{ .GroupLabels.alertname }}"
         description: "{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
     
+    # PagerDuty Contact Point for All Alerts
+    - uid: pagerduty-all
+      name: PagerDuty All Alerts
+      type: pagerduty
+      settings:
+        integrationKey: ${PAGERDUTY_SERVICE_KEY}
+        severity: "{{ .Labels.severity }}"
+        component: "{{ .Labels.component | default \"Grafana Alerts\" }}"
+        group: "{{ .Labels.group | default \"Infrastructure\" }}"
+        class: "{{ .Labels.class | default \"Monitoring\" }}"
+        customDetails: |
+          {
+            "alertname": "{{ .Labels.alertname }}",
+            "severity": "{{ .Labels.severity }}",
+            "namespace": "{{ .Labels.namespace }}",
+            "instance": "{{ .Labels.instance }}",
+            "summary": "{{ .Annotations.summary }}",
+            "description": "{{ .Annotations.description }}",
+            "runbook_url": "{{ .Annotations.runbook_url }}",
+            "dashboard_url": "{{ .Annotations.dashboard_url }}",
+            "panel_id": "{{ .Labels.panel_id }}"
+          }
+        client: Grafana
+        clientURL: "{{ .ExternalURL }}"
+        dedupKey: "{{ .GroupKey }}"
+        source: Grafana
+        summary: "{{ .GroupLabels.alertname }} - {{ .Labels.severity | upper }}"
+        description: "{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
+    
     # Slack Contact Point for Warning Alerts
     - uid: slack-warning
       name: Slack Warning
@@ -83,6 +112,30 @@ data:
           *Description:* {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
         username: Grafana Alerts
         iconEmoji: ":information_source:"
+        sendResolved: true
+    
+    # Slack Contact Point for All Alerts
+    - uid: slack-all
+      name: Slack All Alerts
+      type: slack
+      settings:
+        url: ${SLACK_WEBHOOK_URL}
+        channel: "#jamie-sre-chatbot"
+        title: "🚨 {{ .Labels.severity | upper }} Alert: {{ .GroupLabels.alertname }}"
+        text: |
+          *Alert:* {{ .GroupLabels.alertname }}
+          *Severity:* {{ .GroupLabels.severity }}
+          *Namespace:* {{ .GroupLabels.namespace }}
+          *Instance:* {{ .GroupLabels.instance }}
+          *Component:* {{ .Labels.component | default "Unknown" }}
+          
+          *Summary:* {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+          *Description:* {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+          
+          *Runbook:* {{ range .Alerts }}{{ .Annotations.runbook_url }}{{ end }}
+          *Dashboard:* {{ range .Alerts }}{{ .Annotations.dashboard_url }}{{ end }}
+        username: Grafana Alerts
+        iconEmoji: ":rotating_light:"
         sendResolved: true
     
     # Alertmanager Contact Point for Integration
