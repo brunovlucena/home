@@ -135,6 +135,64 @@ istio-proxy-status: ## Check Istio proxy status for all pods
 	kubectl exec -n istio-system deploy/istiod -- istioctl analyze
 
 # =============================================================================
+# Linkerd Service Mesh Operations
+# =============================================================================
+
+linkerd-status: ## Check Linkerd service mesh status
+	@echo "🔍 Checking Linkerd service mesh status..."
+	@echo "📊 Linkerd components:"
+	kubectl get pods -n linkerd
+	@echo ""
+	@echo "🚦 Linkerd services:"
+	kubectl get svc -n linkerd
+	@echo ""
+	@echo "🌐 Linkerd dashboard:"
+	kubectl get svc -n linkerd -l app=linkerd-web
+	@echo ""
+	@echo "📈 Linkerd metrics:"
+	kubectl get svc -n linkerd -l app=prometheus
+
+linkerd-logs: ## View Linkerd control plane logs
+	@echo "📋 Viewing Linkerd control plane logs..."
+	kubectl logs -n linkerd -l app=linkerd-controller -f
+
+linkerd-proxy-status: ## Check Linkerd proxy status for all pods
+	@echo "🔍 Checking Linkerd proxy status..."
+	kubectl get pods --all-namespaces -o jsonpath='{range .items[*]}{.metadata.namespace}{"\t"}{.metadata.name}{"\t"}{.spec.containers[*].name}{"\n"}{end}' | grep linkerd-proxy
+
+linkerd-dashboard: ## Port forward to Linkerd dashboard
+	@echo "🌐 Opening Linkerd dashboard..."
+	@echo "Dashboard will be available at: http://localhost:8084"
+	kubectl port-forward -n linkerd svc/linkerd-web 8084:8084
+
+linkerd-inject: ## Inject Linkerd proxy into a namespace
+	@echo "💉 Injecting Linkerd proxy..."
+	@read -p "Enter namespace name: " namespace; \
+	kubectl get namespace $$namespace -o yaml | linkerd inject - | kubectl apply -f -
+	@echo "✅ Linkerd proxy injected into namespace: $$namespace"
+
+linkerd-uninject: ## Remove Linkerd proxy from a namespace
+	@echo "🚫 Removing Linkerd proxy..."
+	@read -p "Enter namespace name: " namespace; \
+	kubectl get namespace $$namespace -o yaml | linkerd uninject - | kubectl apply -f -
+	@echo "✅ Linkerd proxy removed from namespace: $$namespace"
+
+linkerd-check: ## Run Linkerd health checks
+	@echo "🏥 Running Linkerd health checks..."
+	linkerd check
+
+linkerd-version: ## Check Linkerd version
+	@echo "📋 Linkerd version information..."
+	linkerd version
+
+linkerd-metrics: ## Show Linkerd metrics
+	@echo "📊 Linkerd metrics..."
+	kubectl get --raw /apis/metrics.k8s.io/v1beta1/namespaces/linkerd/pods
+	@echo ""
+	@echo "📈 Resource usage:"
+	kubectl top pods -n linkerd
+
+# =============================================================================
 # Service Mesh Traffic Management
 # =============================================================================
 

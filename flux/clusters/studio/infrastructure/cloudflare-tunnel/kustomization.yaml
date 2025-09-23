@@ -9,7 +9,6 @@ resources:
   - namespace.yaml
   - deployment.yaml
   - service.yaml
-  - tunnel-token-sealed-secret.yaml
   - prometheus-rule.yaml
   - servicemonitor.yaml
   - canary-monitoring.yaml

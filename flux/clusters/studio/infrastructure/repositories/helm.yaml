@@ -105,3 +105,12 @@ metadata:
 spec:
   interval: 1h0m0s
   url: https://knative.github.io/operator
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: linkerd
+  namespace: flux-system
+spec:
+  interval: 1h0m0s
+  url: https://helm.linkerd.io/stable
