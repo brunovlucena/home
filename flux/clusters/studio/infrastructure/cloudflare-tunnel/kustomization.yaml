@@ -10,5 +10,13 @@ resources:
   - deployment.yaml
   - service.yaml
   - tunnel-token-sealed-secret.yaml
+  - prometheus-rule.yaml
+  - servicemonitor.yaml
+  - canary-monitoring.yaml
   # Uncomment the line below to include the example service for testing
   # - example-service.yaml
+
+# Documentation files (not deployed to cluster)
+# - README.md
+# - SETUP.md
+# - MONITORING.md
