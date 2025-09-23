@@ -114,3 +114,21 @@ metadata:
 spec:
   interval: 1h0m0s
   url: https://helm.linkerd.io/stable
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: buoyant
+  namespace: flux-system
+spec:
+  interval: 1h0m0s
+  url: https://helm.buoyant.cloud
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: linkerd-edge
+  namespace: flux-system
+spec:
+  interval: 1h0m0s
+  url: https://helm.linkerd.io/edge

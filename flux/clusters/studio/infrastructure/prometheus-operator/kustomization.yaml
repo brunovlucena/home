@@ -3,6 +3,6 @@ kind: Kustomization
 resources:
   - helmrelease.yaml
   - namespace.yaml 
-  - gateway.yaml
-  - virtualservice.yaml
+  # - gateway.yaml  # Disabled - istio not enabled
+  # - virtualservice.yaml  # Disabled - istio not enabled
   - pagerduty-sealed-secret.yaml

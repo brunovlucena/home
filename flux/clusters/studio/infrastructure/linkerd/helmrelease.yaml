@@ -7,60 +7,40 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: linkerd-control-plane
-      version: "1.14.0"
+      chart: linkerd-enterprise-control-plane
+      version: "2.18.0"
       sourceRef:
         kind: HelmRepository
-        name: linkerd
+        name: buoyant
         namespace: flux-system
   values:
-    # Linkerd control plane configuration
-    controllerImage: cr.l5d.io/linkerd/controller
-    debugContainer:
-      image:
-        name: cr.l5d.io/linkerd/debug
-    destinationResources:
-      requests:
-        cpu: 10m
-        memory: 20Mi
-    destinationProxyResources:
-      requests:
-        cpu: 10m
-        memory: 20Mi
-    identityResources:
-      requests:
-        cpu: 10m
-        memory: 20Mi
-    identityProxyResources:
-      requests:
-        cpu: 10m
-        memory: 20Mi
-    proxyInjectorResources:
-      requests:
-        cpu: 10m
-        memory: 20Mi
-    proxyInjectorProxyResources:
-      requests:
-        cpu: 10m
-        memory: 20Mi
-    spValidatorResources:
-      requests:
-        cpu: 10m
-        memory: 20Mi
-    spValidatorProxyResources:
-      requests:
-        cpu: 10m
-        memory: 20Mi
-    tapResources:
-      requests:
-        cpu: 10m
-        memory: 20Mi
-    tapProxyResources:
-      requests:
-        cpu: 10m
-        memory: 20Mi
-    # Disable automatic trust anchor generation for now
-    # This will be handled by the Linkerd CLI
+    # Use cert-manager for certificate management
     identity:
+      externalCA: true
       issuer:
         scheme: kubernetes.io/tls
+        tls:
+          crtPEM: ""
+          keyPEM: ""
+    # Trust anchor from cert-manager ConfigMap (automatically populated by trust-manager)
+    identityTrustAnchorsPEM: ""
+    # Use cert-manager CA injector for webhooks
+    proxyInjector:
+      externalSecret: true
+      injectCaFrom: linkerd/linkerd-trust-anchor
+    profileValidator:
+      externalSecret: true
+      injectCaFrom: linkerd/linkerd-trust-anchor
+    policyValidator:
+      externalSecret: true
+      injectCaFrom: linkerd/linkerd-trust-anchor
+    licenseSecret: buoyant-license        
+    # High Availability configuration
+    controllerReplicas: 3
+    proxyInjectorReplicas: 3
+    spValidatorReplicas: 3
+    policyValidatorReplicas: 3
+    
+    # Enable enterprise features
+    enterprise: true
+    highAvailability: true
