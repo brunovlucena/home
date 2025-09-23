@@ -1,0 +1,144 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cloudflare-tunnel-alerts
+  namespace: cloudflare-tunnel
+  labels:
+    app: kube-prometheus-stack
+    release: prometheus-operator
+    component: cloudflare-tunnel
+spec:
+  groups:
+  - name: cloudflare-tunnel.rules
+    rules:
+    # Cloudflare Tunnel Pod Down
+    - alert: CloudflareTunnelDown
+      expr: up{job="cloudflare-tunnel", namespace="cloudflare-tunnel"} == 0
+      for: 1m
+      labels:
+        severity: critical
+        category: connectivity
+        component: cloudflare-tunnel
+      annotations:
+        summary: "Cloudflare Tunnel pod is down"
+        description: "Cloudflare Tunnel pod {{ $labels.instance }} has been down for more than 1 minute. This may cause external connectivity issues."
+        runbook_url: "https://github.com/brunolucena/home/blob/main/flux/clusters/studio/infrastructure/cloudflare-tunnel/README.md#troubleshooting"
+        dashboard_url: "https://grafana.home.local/d/cloudflare-tunnel"
+
+    # Cloudflare Tunnel High Restart Rate
+    - alert: CloudflareTunnelHighRestartRate
+      expr: rate(kube_pod_container_status_restarts_total{namespace="cloudflare-tunnel", container="cloudflared"}[15m]) > 0.1
+      for: 5m
+      labels:
+        severity: warning
+        category: stability
+        component: cloudflare-tunnel
+      annotations:
+        summary: "Cloudflare Tunnel experiencing high restart rate"
+        description: "Cloudflare Tunnel pod {{ $labels.pod }} has restarted {{ $value }} times per minute in the last 15 minutes."
+        runbook_url: "https://github.com/brunolucena/home/blob/main/flux/clusters/studio/infrastructure/cloudflare-tunnel/README.md#troubleshooting"
+
+    # Cloudflare Tunnel Memory Usage High
+    - alert: CloudflareTunnelHighMemoryUsage
+      expr: (container_memory_working_set_bytes{namespace="cloudflare-tunnel", container="cloudflared"} / container_spec_memory_limit_bytes{namespace="cloudflare-tunnel", container="cloudflared"}) > 0.8
+      for: 5m
+      labels:
+        severity: warning
+        category: resources
+        component: cloudflare-tunnel
+      annotations:
+        summary: "Cloudflare Tunnel high memory usage"
+        description: "Cloudflare Tunnel pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of its memory limit."
+        runbook_url: "https://github.com/brunolucena/home/blob/main/flux/clusters/studio/infrastructure/cloudflare-tunnel/README.md#troubleshooting"
+
+    # Cloudflare Tunnel CPU Usage High
+    - alert: CloudflareTunnelHighCPUUsage
+      expr: (rate(container_cpu_usage_seconds_total{namespace="cloudflare-tunnel", container="cloudflared"}[5m]) / on(pod) group_left() kube_pod_container_resource_limits{namespace="cloudflare-tunnel", resource="cpu", container="cloudflared"}) > 0.8
+      for: 5m
+      labels:
+        severity: warning
+        category: resources
+        component: cloudflare-tunnel
+      annotations:
+        summary: "Cloudflare Tunnel high CPU usage"
+        description: "Cloudflare Tunnel pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of its CPU limit."
+        runbook_url: "https://github.com/brunolucena/home/blob/main/flux/clusters/studio/infrastructure/cloudflare-tunnel/README.md#troubleshooting"
+
+    # Cloudflare Tunnel Not Ready
+    - alert: CloudflareTunnelNotReady
+      expr: kube_pod_status_ready{namespace="cloudflare-tunnel", condition="True"} == 0
+      for: 2m
+      labels:
+        severity: critical
+        category: readiness
+        component: cloudflare-tunnel
+      annotations:
+        summary: "Cloudflare Tunnel pod not ready"
+        description: "Cloudflare Tunnel pod {{ $labels.pod }} has been not ready for more than 2 minutes."
+        runbook_url: "https://github.com/brunolucena/home/blob/main/flux/clusters/studio/infrastructure/cloudflare-tunnel/README.md#troubleshooting"
+
+    # Cloudflare Tunnel Health Check Failing
+    - alert: CloudflareTunnelHealthCheckFailing
+      expr: probe_success{job="cloudflare-tunnel-health", namespace="cloudflare-tunnel"} == 0
+      for: 1m
+      labels:
+        severity: critical
+        category: health
+        component: cloudflare-tunnel
+      annotations:
+        summary: "Cloudflare Tunnel health check failing"
+        description: "Cloudflare Tunnel health check is failing for {{ $labels.instance }}. The tunnel may not be functioning properly."
+        runbook_url: "https://github.com/brunolucena/home/blob/main/flux/clusters/studio/infrastructure/cloudflare-tunnel/README.md#troubleshooting"
+
+    # Cloudflare Tunnel Metrics Not Available
+    - alert: CloudflareTunnelMetricsDown
+      expr: up{job="cloudflare-tunnel-metrics", namespace="cloudflare-tunnel"} == 0
+      for: 2m
+      labels:
+        severity: warning
+        category: monitoring
+        component: cloudflare-tunnel
+      annotations:
+        summary: "Cloudflare Tunnel metrics endpoint is down"
+        description: "Cannot scrape metrics from Cloudflare Tunnel pod {{ $labels.instance }}. Monitoring data may be incomplete."
+        runbook_url: "https://github.com/brunolucena/home/blob/main/flux/clusters/studio/infrastructure/cloudflare-tunnel/README.md#troubleshooting"
+
+    # Multiple Tunnel Pods Down
+    - alert: CloudflareTunnelMultiplePodsDown
+      expr: (count(up{job="cloudflare-tunnel", namespace="cloudflare-tunnel"} == 1) < 1)
+      for: 1m
+      labels:
+        severity: critical
+        category: availability
+        component: cloudflare-tunnel
+      annotations:
+        summary: "Multiple Cloudflare Tunnel pods are down"
+        description: "{{ $value }} Cloudflare Tunnel pods are down. External connectivity may be severely impacted."
+        runbook_url: "https://github.com/brunolucena/home/blob/main/flux/clusters/studio/infrastructure/cloudflare-tunnel/README.md#troubleshooting"
+
+    # Cloudflare Tunnel Connection Errors
+    - alert: CloudflareTunnelConnectionErrors
+      expr: increase(cloudflared_tunnel_conns{event="connection_error"}[5m]) > 0
+      for: 2m
+      labels:
+        severity: warning
+        category: connectivity
+        component: cloudflare-tunnel
+      annotations:
+        summary: "Cloudflare Tunnel connection errors detected"
+        description: "Cloudflare Tunnel has experienced {{ $value }} connection errors in the last 5 minutes."
+        runbook_url: "https://github.com/brunolucena/home/blob/main/flux/clusters/studio/infrastructure/cloudflare-tunnel/README.md#troubleshooting"
+
+    # Cloudflare Tunnel High Latency
+    - alert: CloudflareTunnelHighLatency
+      expr: cloudflared_tunnel_conns{event="latency"} > 1000
+      for: 5m
+      labels:
+        severity: warning
+        category: performance
+        component: cloudflare-tunnel
+      annotations:
+        summary: "Cloudflare Tunnel high latency detected"
+        description: "Cloudflare Tunnel latency is {{ $value }}ms, which is above the 1000ms threshold."
+        runbook_url: "https://github.com/brunovlucena/home/blob/main/flux/clusters/studio/infrastructure/cloudflare-tunnel/README.md#troubleshooting"
