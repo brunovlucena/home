@@ -55,7 +55,7 @@ This configuration depends on:
 
 The configuration will be automatically deployed by Flux when committed to the repository. The RabbitMQ cluster will be available at:
 
-- **Management UI**: http://rabbitmq-cluster-studio.rabbitmq-studio.svc.cluster.local:15672
+- **Management UI**: http://rabbitmq-cluster-studio.rabbitmq.svc.cluster.local:15672
 - **AMQP Port**: 5672
 - **Management Port**: 15672
 
@@ -72,22 +72,22 @@ After deployment, verify the installation:
 
 ```bash
 # Check cluster status
-kubectl get rabbitmqcluster -n rabbitmq-studio
+kubectl get rabbitmqcluster -n rabbitmq
 
 # Check pods
-kubectl get pods -n rabbitmq-studio
+kubectl get pods -n rabbitmq
 
 # Check users
-kubectl get users -n rabbitmq-studio
+kubectl get users -n rabbitmq
 
 # Check queues
-kubectl get queues -n rabbitmq-studio
+kubectl get queues -n rabbitmq
 
 # Check permissions
-kubectl get permissions -n rabbitmq-studio
+kubectl get permissions -n rabbitmq
 
 # Port forward for management UI
-kubectl port-forward -n rabbitmq-studio svc/rabbitmq-cluster-studio 15672:15672
+kubectl port-forward -n rabbitmq svc/rabbitmq-cluster-studio 15672:15672
 ```
 
 ## Monitoring

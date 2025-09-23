@@ -3,14 +3,14 @@ apiVersion: rabbitmq.com/v1beta1
 kind: RabbitmqCluster
 metadata:
   name: rabbitmq-cluster-studio
-  namespace: rabbitmq-studio
+  namespace: rabbitmq
   labels:
     app: rabbitmq
     environment: studio
     tier: messaging
     purpose: development
   annotations:
-    rabbitmq.com/topology-allowed-namespaces: "knative-serving,knative-eventing,rabbitmq-studio"
+    rabbitmq.com/topology-allowed-namespaces: "knative-serving,knative-eventing,rabbitmq"
 spec:
   replicas: 1
   image: rabbitmq:3.12-management-alpine

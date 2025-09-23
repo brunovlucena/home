@@ -18,7 +18,7 @@ apiVersion: rabbitmq.com/v1beta1
 kind: Queue
 metadata:
   name: kaniko-jobs
-  namespace: rabbitmq-studio
+  namespace: rabbitmq
   labels:
     app: rabbitmq
     environment: studio
@@ -54,7 +54,7 @@ apiVersion: rabbitmq.com/v1beta1
 kind: Queue
 metadata:
   name: kaniko-jobs-dlq
-  namespace: rabbitmq-studio
+  namespace: rabbitmq
   labels:
     app: rabbitmq
     environment: studio
@@ -76,7 +76,7 @@ apiVersion: rabbitmq.com/v1beta1
 kind: Exchange
 metadata:
   name: dlx
-  namespace: rabbitmq-studio
+  namespace: rabbitmq
   labels:
     app: rabbitmq
     environment: studio
@@ -97,7 +97,7 @@ apiVersion: rabbitmq.com/v1beta1
 kind: Binding
 metadata:
   name: kaniko-jobs-binding
-  namespace: rabbitmq-studio
+  namespace: rabbitmq
   labels:
     app: rabbitmq
     environment: studio
@@ -118,7 +118,7 @@ apiVersion: rabbitmq.com/v1beta1
 kind: Binding
 metadata:
   name: kaniko-jobs-dlq-binding
-  namespace: rabbitmq-studio
+  namespace: rabbitmq
   labels:
     app: rabbitmq
     environment: studio
@@ -139,7 +139,7 @@ apiVersion: rabbitmq.com/v1beta1
 kind: Policy
 metadata:
   name: kaniko-jobs-policy
-  namespace: rabbitmq-studio
+  namespace: rabbitmq
   labels:
     app: rabbitmq
     environment: studio

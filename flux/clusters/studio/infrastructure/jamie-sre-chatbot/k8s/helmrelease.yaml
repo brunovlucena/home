@@ -3,7 +3,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: jamie-sre-chatbot
-  namespace: jamie-sre-chatbot
+  namespace: chatbots
 spec:
   interval: 5m
   chart:

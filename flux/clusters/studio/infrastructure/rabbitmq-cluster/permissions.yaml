@@ -3,14 +3,14 @@ apiVersion: rabbitmq.com/v1beta1
 kind: Permission
 metadata:
   name: admin-full-access-studio
-  namespace: rabbitmq-studio
+  namespace: rabbitmq
 spec:
   vhost: /
   userReference:
     name: admin
   rabbitmqClusterReference:
     name: rabbitmq-cluster-studio
-    namespace: rabbitmq-studio
+    namespace: rabbitmq
   permissions:
     configure: ".*"
     read:      ".*"
@@ -20,14 +20,14 @@ apiVersion: rabbitmq.com/v1beta1
 kind: Permission
 metadata:
   name: notifi-full-access-studio
-  namespace: rabbitmq-studio
+  namespace: rabbitmq
 spec:
   vhost: /
   userReference:
     name: notifi-studio
   rabbitmqClusterReference:
     name: rabbitmq-cluster-studio
-    namespace: rabbitmq-studio
+    namespace: rabbitmq
   permissions:
     configure: ".*"
     read:      ".*"
