@@ -8,8 +8,10 @@ metadata:
 resources:
   - cert-manager
   - repositories
-  # - nginx
   # - istio
+  # - flagger
+  # - nginx
+  # - k6-operator
   - linkerd
   - prometheus-operator
   - metrics-server
@@ -17,7 +19,6 @@ resources:
   # - grafana-agent-operator
   - loki
   - tempo
-  - k6-operator
   - bruno-site
   - jamie-sre-chatbot
   - sealed-secrets
@@ -25,8 +26,7 @@ resources:
   - twingate
   - falco
   - falcosidekick
-  # - flagger
   - github-actions-runner
-  # - knative-operator
-  # - rabbitmq-operator
-  # - rabbitmq-cluster
+  - knative-operator
+  - rabbitmq-operator
+  - rabbitmq-cluster

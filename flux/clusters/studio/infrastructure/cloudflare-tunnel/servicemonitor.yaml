@@ -36,10 +36,8 @@ metadata:
 spec:
   jobName: cloudflare-tunnel-health
   prober:
-    http:
-      preferredScheme: http
+    url: http://cloudflared-metrics.cloudflare-tunnel.svc.cluster.local:2000/ready
   targets:
     staticConfig:
       static:
       - cloudflared-metrics.cloudflare-tunnel.svc.cluster.local:2000
-  module: http_2xx

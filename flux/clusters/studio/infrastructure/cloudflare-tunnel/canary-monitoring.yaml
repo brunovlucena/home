@@ -124,13 +124,11 @@ metadata:
 spec:
   jobName: lucena-cloud-http
   prober:
-    http:
-      preferredScheme: http
+    url: http://lucena.cloud
   targets:
     staticConfig:
       static:
       - lucena.cloud
-  module: http_2xx
   interval: 30s
 
 ---
@@ -146,13 +144,11 @@ metadata:
 spec:
   jobName: lucena-cloud-https
   prober:
-    http:
-      preferredScheme: https
+    url: https://lucena.cloud
   targets:
     staticConfig:
       static:
       - lucena.cloud
-  module: http_2xx
   interval: 30s
 
 ---
@@ -168,13 +164,9 @@ metadata:
 spec:
   jobName: lucena-cloud-dns
   prober:
-    dns:
-      queryName: lucena.cloud
-      queryType: A
-      validRcodes:
-      - NOERROR
+    url: dns://1.1.1.1:53
   targets:
     staticConfig:
       static:
-      - 1.1.1.1:53
+      - lucena.cloud
   interval: 30s

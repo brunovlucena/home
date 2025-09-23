@@ -35,15 +35,11 @@ spec:
       requests:
         cpu: 10m
         memory: 20Mi
-    policyResources:
-      requests:
-        cpu: 10m
-        memory: 20Mi
-    policyProxyResources:
-      requests:
-        cpu: 10m
-        memory: 20Mi
     proxyInjectorResources:
+      requests:
+        cpu: 10m
+        memory: 20Mi
+    proxyInjectorProxyResources:
       requests:
         cpu: 10m
         memory: 20Mi
@@ -51,56 +47,20 @@ spec:
       requests:
         cpu: 10m
         memory: 20Mi
-    # Enable high availability
-    highAvailability: false
-    # Configure proxy settings
-    proxy:
-      image:
-        name: cr.l5d.io/linkerd/proxy
-      resources:
-        cpu:
-          limit: 100m
-          request: 10m
-        memory:
-          limit: 250Mi
-          request: 20Mi
-    # Configure identity settings
+    spValidatorProxyResources:
+      requests:
+        cpu: 10m
+        memory: 20Mi
+    tapResources:
+      requests:
+        cpu: 10m
+        memory: 20Mi
+    tapProxyResources:
+      requests:
+        cpu: 10m
+        memory: 20Mi
+    # Disable automatic trust anchor generation for now
+    # This will be handled by the Linkerd CLI
     identity:
       issuer:
         scheme: kubernetes.io/tls
-    # Configure policy
-    policy:
-      enabled: true
-    # Configure destination
-    destination:
-      enabled: true
-    # Configure proxy injector
-    proxyInjector:
-      enabled: true
-    # Configure service profile validator
-    spValidator:
-      enabled: true
-    # Configure heartbeat
-    heartbeat:
-      enabled: true
-    # Configure tap
-    tap:
-      enabled: true
-    # Configure dashboard
-    dashboard:
-      enabled: true
-      replicas: 1
-    # Configure Grafana
-    grafana:
-      enabled: true
-      replicas: 1
-    # Configure Prometheus
-    prometheus:
-      enabled: true
-      replicas: 1
-    # Configure webhook
-    webhook:
-      enabled: true
-    # Configure debug
-    debug:
-      enabled: true
