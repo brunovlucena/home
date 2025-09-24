@@ -1,0 +1,251 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: bruno-site-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: bruno-site
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+    release: prometheus-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bruno-site
+      app.kubernetes.io/component: api
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    scheme: http
+    honorLabels: true
+    # No authentication for metrics endpoint
+    # Relabeling rules for better metric organization
+    relabelings:
+    - sourceLabels: [__meta_kubernetes_pod_name]
+      targetLabel: pod
+    - sourceLabels: [__meta_kubernetes_pod_node_name]
+      targetLabel: node
+    - sourceLabels: [__meta_kubernetes_namespace]
+      targetLabel: namespace
+    - sourceLabels: [__meta_kubernetes_service_name]
+      targetLabel: service
+    - sourceLabels: [__meta_kubernetes_pod_container_name]
+      targetLabel: container
+    # Add custom labels for better organization
+    - targetLabel: environment
+      replacement: {{ .Values.environment | default "production" }}
+    - targetLabel: cluster
+      replacement: {{ .Values.cluster | default "default" }}
+    - targetLabel: team
+      replacement: "sre"
+    - targetLabel: application
+      replacement: "bruno-site"
+  # Namespace selector to limit which namespaces to scrape
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: bruno-site-postgres
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: bruno-site
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+    release: prometheus-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bruno-site
+      app.kubernetes.io/component: postgres
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    scheme: http
+    honorLabels: true
+    # Relabeling rules for PostgreSQL metrics
+    relabelings:
+    - sourceLabels: [__meta_kubernetes_pod_name]
+      targetLabel: pod
+    - sourceLabels: [__meta_kubernetes_pod_node_name]
+      targetLabel: node
+    - sourceLabels: [__meta_kubernetes_namespace]
+      targetLabel: namespace
+    - sourceLabels: [__meta_kubernetes_service_name]
+      targetLabel: service
+    - sourceLabels: [__meta_kubernetes_pod_container_name]
+      targetLabel: container
+    - targetLabel: environment
+      replacement: {{ .Values.environment | default "production" }}
+    - targetLabel: cluster
+      replacement: {{ .Values.cluster | default "default" }}
+    - targetLabel: team
+      replacement: "sre"
+    - targetLabel: application
+      replacement: "bruno-site"
+    - targetLabel: database
+      replacement: "postgresql"
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: bruno-site-redis
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: bruno-site
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+    release: prometheus-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bruno-site
+      app.kubernetes.io/component: redis
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    scheme: http
+    honorLabels: true
+    # Relabeling rules for Redis metrics
+    relabelings:
+    - sourceLabels: [__meta_kubernetes_pod_name]
+      targetLabel: pod
+    - sourceLabels: [__meta_kubernetes_pod_node_name]
+      targetLabel: node
+    - sourceLabels: [__meta_kubernetes_namespace]
+      targetLabel: namespace
+    - sourceLabels: [__meta_kubernetes_service_name]
+      targetLabel: service
+    - sourceLabels: [__meta_kubernetes_pod_container_name]
+      targetLabel: container
+    - targetLabel: environment
+      replacement: {{ .Values.environment | default "production" }}
+    - targetLabel: cluster
+      replacement: {{ .Values.cluster | default "default" }}
+    - targetLabel: team
+      replacement: "sre"
+    - targetLabel: application
+      replacement: "bruno-site"
+    - targetLabel: database
+      replacement: "redis"
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: bruno-site-ollama
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: bruno-site
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+    release: prometheus-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bruno-site
+      app.kubernetes.io/component: ollama
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    scheme: http
+    honorLabels: true
+    # Relabeling rules for Ollama metrics
+    relabelings:
+    - sourceLabels: [__meta_kubernetes_pod_name]
+      targetLabel: pod
+    - sourceLabels: [__meta_kubernetes_pod_node_name]
+      targetLabel: node
+    - sourceLabels: [__meta_kubernetes_namespace]
+      targetLabel: namespace
+    - sourceLabels: [__meta_kubernetes_service_name]
+      targetLabel: service
+    - sourceLabels: [__meta_kubernetes_pod_container_name]
+      targetLabel: container
+    - targetLabel: environment
+      replacement: {{ .Values.environment | default "production" }}
+    - targetLabel: cluster
+      replacement: {{ .Values.cluster | default "default" }}
+    - targetLabel: team
+      replacement: "sre"
+    - targetLabel: application
+      replacement: "bruno-site"
+    - targetLabel: service_type
+      replacement: "llm"
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: bruno-site-frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: bruno-site
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+    release: prometheus-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bruno-site
+      app.kubernetes.io/component: frontend
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    scheme: http
+    honorLabels: true
+    # Relabeling rules for Frontend metrics
+    relabelings:
+    - sourceLabels: [__meta_kubernetes_pod_name]
+      targetLabel: pod
+    - sourceLabels: [__meta_kubernetes_pod_node_name]
+      targetLabel: node
+    - sourceLabels: [__meta_kubernetes_namespace]
+      targetLabel: namespace
+    - sourceLabels: [__meta_kubernetes_service_name]
+      targetLabel: service
+    - sourceLabels: [__meta_kubernetes_pod_container_name]
+      targetLabel: container
+    - targetLabel: environment
+      replacement: {{ .Values.environment | default "production" }}
+    - targetLabel: cluster
+      replacement: {{ .Values.cluster | default "default" }}
+    - targetLabel: team
+      replacement: "sre"
+    - targetLabel: application
+      replacement: "bruno-site"
+    - targetLabel: service_type
+      replacement: "frontend"
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+{{- end }}

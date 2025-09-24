@@ -1,0 +1,32 @@
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: User
+metadata:
+  name: test-studio
+  namespace: rabbitmq
+spec:
+  rabbitmqClusterReference:
+    name: rabbitmq-cluster-studio
+    namespace: rabbitmq
+  tags:
+    - administrator
+    - policymaker
+    - management
+  importCredentialsSecret:
+    name: test-credentials-studio
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: User
+metadata:
+  name: notifi-studio
+  namespace: rabbitmq
+spec:
+  rabbitmqClusterReference:
+    name: rabbitmq-cluster-studio
+    namespace: rabbitmq
+  tags:
+    - administrator
+    - policymaker
+    - management
+  importCredentialsSecret:
+    name: notifi-credentials-studio

@@ -46,3 +46,22 @@ flux/clusters/*/infrastructure/sealed-secrets/*.yaml.backup
 flux/clusters/*/infrastructure/sealed-secrets/*.pem.backup
 sealed-secrets-key-backup.yaml
 sealed-secrets-public-cert.pem
+sealed-secrets-private-key.pem
+**/sealed-secrets-key-backup.yaml
+**/sealed-secrets-public-cert.pem
+**/sealed-secrets-private-key.pem
+
+# Regular Secrets (CRITICAL: Never commit unencrypted secrets!)
+**/secrets.yaml
+**/secrets/*.yaml
+**/secrets/*.yml
+**/sealed-secrets/*.yaml.bak
+**/sealed-secrets/*.yml.bak
+**/sealed-secrets/*.backup
+**/sealed-secrets/*.yaml.backup
+
+# Temporary secret files
+/tmp/*secret*.yaml
+/tmp/*secret*.yml
+*.secret.yaml
+*.secret.yml

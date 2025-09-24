@@ -1,0 +1,127 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: bruno-postgres
+    environment:
+      POSTGRES_DB: bruno_site
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secure-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "0.0.0.0:5432:5432"
+    networks:
+      - bruno-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d bruno_site"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Redis Cache
+  redis:
+    image: redis:7.2-alpine
+    container_name: bruno-redis
+    ports:
+      - "0.0.0.0:6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - bruno-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Database Migration Service
+  db-migrate:
+    image: postgres:16-alpine
+    container_name: bruno-db-migrate
+    environment:
+      - PGPASSWORD=${POSTGRES_PASSWORD:-secure-password}
+    volumes:
+      - ./api/migrations:/migrations
+    command: >
+      sh -c "
+        echo 'Waiting for PostgreSQL to be ready...'
+        until pg_isready -h postgres -p 5432 -U postgres; do
+          echo 'PostgreSQL is not ready yet. Waiting...'
+          sleep 2
+        done
+        echo 'PostgreSQL is ready. Running migrations...'
+        psql -h postgres -p 5432 -U postgres -d bruno_site -f /migrations/001_complete_schema.sql
+        echo 'Migrations completed successfully!'
+      "
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bruno-network
+    restart: "no"
+
+  # Bruno Site API Backend
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    container_name: bruno-api
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-secure-password}@postgres:5432/bruno_site?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - PORT=8080
+      - CORS_ORIGIN=http://localhost:3000
+      - GEMMA_MODEL=gemma3n:e4b
+      - OLLAMA_URL=http://192.168.0.3:11434
+      - METRICS_USERNAME=${METRICS_USERNAME:-admin}
+      - METRICS_PASSWORD=${METRICS_PASSWORD:-secure_password_change_me}
+    ports:
+      - "0.0.0.0:8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      db-migrate:
+        condition: service_completed_successfully
+    networks:
+      - bruno-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Bruno Site Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: bruno-frontend
+    environment:
+      # 🌐 Frontend API base URL - configures where the React app makes API calls to the backend
+      - VITE_API_URL=/api
+      - VITE_APP_ENV=development
+    ports:
+      - "0.0.0.0:3000:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - bruno-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:    # PostgreSQL database storage
+  redis_data:       # Redis cache storage
+
+networks:
+  bruno-network:
+    driver: bridge
