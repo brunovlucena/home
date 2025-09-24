@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: linkerd-viz
+  labels:
+    name: linkerd-viz
+    linkerd.io/is-control-plane: "true"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: linkerd
+  labels:
+    name: linkerd
+    linkerd.io/is-control-plane: "true"

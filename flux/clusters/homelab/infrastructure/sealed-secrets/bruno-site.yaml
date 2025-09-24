@@ -1,0 +1,64 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: postgres
+  namespace: bruno
+spec:
+  encryptedData:
+    password: AgBUXuIYmeeaOtOOSCq77/gJeDhjJbe1tom44CVjqKzlQZr6MJCo9LYGZh+qhYaW2unzcTE7IkQaBHHmRMluB4I8Fdlr8ahokiiQ6ehp2zafXhg/y2+JaiB3hs7wreOslS8x9fzecv8dh7QkuDJuP9WhGJxKDAelLvbwlZyjXM2OMBsHu3I8S5Zw7QYTTCq1yjjDdtcX2mgRMB5YfkW+O7Qc0yIdgF+KyNEOPsOuWtTkd0zW+S5HuiJNZ5r+1V0ISFEMd7HFu18p/h0nKS0JZoVyHdgph8q+oh/feXBXRVpm5qrbIjDvijv4IpZ7kOMATElnAAec5WF5L688X1kEJvm2xn7N3Q4W50B31YHmDwO+VD+kEvBukWZEtB1k+hH0uT40FHscZLZBrvboSZyJGItwi5qmW/DbgUyDC4/OYSoWRWhiB4BGelyCFj46nS9iFS/WF9mrCF/PjeXVCAmdY49+fLS3MS/RpQidEkJ5SpJMB7MHq18FoN6rx5rdGqf5J1SqtYYBeDlCyra+Rr2GChRMEDkcy9KlNgrbEaDAfUmf9fqp+S6IbxMx5UxYboGgbQT5hy0T2ACcSWvKRkSlxrX1a5VbMKqODFmPT4D3oUtJcFAljk5BSMVQnhoAjQxlwGVOqoiDDEar2g02B+UGVmitmtM96bUKVDhRLWQpFcD1WObKbxY7D3HUHfywgmg0j3qshB9CcwLCc/0Y6cmnWg==
+  template:
+    metadata:
+      creationTimestamp: null
+      name: postgres
+      namespace: bruno
+    type: Opaque
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: bruno-site-db-secret
+  namespace: bruno
+spec:
+  encryptedData:
+    password: AgAvgBPFR682oro/J/Oc5X8Z5CHcp9P3pSmTyJoEYJzmQfQStzrA3xNIpC7A/G6fWwMZL0hTo8NGqHmiyJd7/QMDPSLFFm9E14/puz7s4rc+EnFSDsEncnjVFBri2etDwhUzS82H3IAIGe6ieHBE+NL58HShaLNge2nKJb+G/yl/mIe5cXJNxeV/B8s2w50VF+cEMOiyUcy2j9gh13lL1/wIf+k3jPPPepykfLeFsGEdSuoKsKZjphdi3p91+FScn2jcI9XoBINqlSjvBNfWn0yPZJpaApQLiNOO9SBrHZBIfSPW32bYLMiu5nSNx1oY9gsH0VK4e/YRZe7AAzvjp5Ink32N6Re+ZD9i0KXzWdVqrvzqemIKPynrNpz5CVjlrVgK3cXMJo4mwkSry+kxFlH/b7CKOpLosPYLqXKgK7pV9sbdBGLyhikgvpajY9OlXMVOwbvh9l0onrRXI8Kku0hlME+O27iJzeSYstaV3rM2WI+79FAVG9r/3PBCsyHpzx991cxn0qtHNpBUCxmnCR+HTqbM6nHPQTGUe5uoD/TTyUgMfMRqKQ412EBYgk+p8FhOgMre6Ehfx40IalRMtG9pBXyDKek4cgq7zkuvgx0dc9j2DHtXDSogyE7zVPEqRHGz7HLCoLwrDjM1Jxr2CbMkHSYPuyQ5bu27jrfbtYc3ZgAzYA87gh4KIBwgGitU/T1ml04OdH1S+VzgadJ//w==
+  template:
+    metadata:
+      creationTimestamp: null
+      name: bruno-site-db-secret
+      namespace: bruno
+    type: Opaque
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: bruno-site-redis-secret
+  namespace: bruno
+spec:
+  encryptedData:
+    password: AgAQM1zGE5SyJOzHO2uRGATL5LtsXsXK/7UoZtG8Z6av0qzxibU9EuEwLmSXq8c7Pr5ZmgIUikHDXsczKjOiyaY1xP81un56c3bO7TLG4/tZuuE+fTM4F6+Sm9lHzlX2eXRBlyo2UZRupwYvrTl23S4UGcsYFLV11Rr8vKZNUsVyplawtCBRLkeba92k7TTuBW3uGsYKoiUuLZaitIr3NExt1vlfljU3bIrghq/3rBma6q87oU43hgRmluzXshwWytUPgcSgIPQHbkey5dfB5MBMgwlAjY/k7Eh0+1Pm9dCgcQoONeY9wvWwTJI1NK7aMDei54Z3vvH136bWpkTXaxD8I+6EVYHDxHNVx/1ze78gevZmCGMhYtipj3hgGl71TSjzNxzP3vmMLkr6RzC9aNhrQHLYGJAVITycX3UpefW/gC8in3X4+nFMtf9+roeISvf2EmF6RLez50EPeqfQ9l+EgiT6JUXptHLMK0KYnpwdr1VdgJalARSDocCriPurirysk2wVInOz8ib9G8JI5pTgC0jduxO1q/jEqSNOO/v689HCJ/s2bYGfMYL4zJB8Ojt6gHjPtP2FaRVLgt+a2gWaDubaCpAX2YrAD3Np3OdCUne4hWkY9NYcLn06hScFxxNvR97TRMuLgzxl7VT9jK6wOnSJvhwY1bB3Rl5CCTbW92b8SLSlCVfTdbY8RD5/gSogvsrBuyO1w05KAMco9g==
+  template:
+    metadata:
+      creationTimestamp: null
+      name: bruno-site-redis-secret
+      namespace: bruno
+    type: Opaque
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: redis
+  namespace: bruno
+spec:
+  encryptedData:
+    password: AgCSABaNW2kWMrSxmqcmC6/SwBr+VpZUlAw4+USAfIlOUP4LFRFT7LAJJr+ExaLkMcnvYxxpIsAIE8JHBZQ7l4ONSaEK7ubXX9su699ZZXVwJ1CZrMtFK/liy0Tvjq2DukYKjnXLDOj/lGcxVZ6UqmL2WwPfDXBSaCl2/lYvovsyu4Dy1b7TZR+53kKNJ5nz9mikUgFmYoQHVGQz9qJEnn9F4DJWm8MSRnUN5Zaok+FpR0cBs6ohR8plOfXCEcSusvEgGEBygV5NSvmbIk9a6DL9OL3LjHdPCjXOqGYRfslL7JdYKj16k0/ZOkovAQ6Txbi8K4VICI35y9uHlXgLmuqKFrmz/XP64OElV3l8y4bPwUk2xVQ/q9LMibajRPIxeGKXYfDEE6Igg1nn4LqoxCJFao2PjI96OrXmmsfOrKokwlMouNwKRWpA9yNpV7kowagUWL4z5zCvDmWsCZohk8yg2beYVh54RAqK1DLtvX3dYwl0bcg7RRvheYPmKMOs4Q4iLsWIWjamFR8FsnAEzj76IsKjiOVPoVQ4cY+o8gTJZXgT15G50R9kCIfsoSvVHAp4MIobcRhfzS85KZu3QDAu7DQLZtFzTM9sG/rDoW6hVQQJFBLOu/G1gDUA6t7zSpqsp+BgyNu/p+GW0PpTaItLRqsi30LlkMGxJjXViZX/WZ3NzrFuLZl2CWcyaFy9FvqK6wwGx2XZjg4L0Z3Abw==
+  template:
+    metadata:
+      creationTimestamp: null
+      name: redis
+      namespace: bruno
+    type: Opaque
+---

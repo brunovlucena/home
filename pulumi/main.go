@@ -23,8 +23,11 @@ func main() {
 		case "studio":
 			clusterName = "studio"
 			clusterConfigFile = "../flux/clusters/studio/kind.yaml"
+		case "homelab":
+			clusterName = "homelab"
+			clusterConfigFile = "../flux/clusters/homelab/kind.yaml"
 		default:
-			return fmt.Errorf("unsupported stack: %s. Use 'studio'", stack)
+			return fmt.Errorf("unsupported stack: %s. Use 'studio' or 'homelab'", stack)
 		}
 
 		// Create Kind cluster using Pulumi command provider (with cleanup)

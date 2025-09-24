@@ -1,0 +1,114 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: linkerd-trust-anchor
+  namespace: linkerd
+spec:
+  secretName: linkerd-trust-anchor
+  issuerRef:
+    name: linkerd-trust-anchor
+    kind: ClusterIssuer
+  commonName: identity.linkerd.cluster.local
+  dnsNames:
+    - identity.linkerd.cluster.local
+  duration: 87600h # 10 years
+  renewBefore: 720h # 30 days
+  isCA: true
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: linkerd-identity-issuer
+  namespace: linkerd
+spec:
+  secretName: linkerd-identity-issuer
+  issuerRef:
+    name: linkerd-trust-anchor
+    kind: ClusterIssuer
+  commonName: identity.linkerd.cluster.local
+  dnsNames:
+    - identity.linkerd.cluster.local
+    - identity.linkerd.cluster.local.svc
+    - identity.linkerd.cluster.local.svc.cluster.local
+  duration: 8760h # 1 year
+  renewBefore: 720h # 30 days
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: linkerd-policy-validator-k8s-tls
+  namespace: linkerd
+spec:
+  secretName: linkerd-policy-validator-k8s-tls
+  issuerRef:
+    name: linkerd-trust-anchor
+    kind: ClusterIssuer
+  commonName: linkerd-policy-validator.linkerd.svc
+  dnsNames:
+    - linkerd-policy-validator.linkerd.svc
+    - linkerd-policy-validator.linkerd.svc.cluster.local
+  duration: 8760h # 1 year
+  renewBefore: 720h # 30 days
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: linkerd-sp-validator-k8s-tls
+  namespace: linkerd
+spec:
+  secretName: linkerd-sp-validator-k8s-tls
+  issuerRef:
+    name: linkerd-trust-anchor
+    kind: ClusterIssuer
+  commonName: linkerd-sp-validator.linkerd.svc
+  dnsNames:
+    - linkerd-sp-validator.linkerd.svc
+    - linkerd-sp-validator.linkerd.svc.cluster.local
+  duration: 8760h # 1 year
+  renewBefore: 720h # 30 days
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: linkerd-proxy-injector-k8s-tls
+  namespace: linkerd
+spec:
+  secretName: linkerd-proxy-injector-k8s-tls
+  issuerRef:
+    name: linkerd-trust-anchor
+    kind: ClusterIssuer
+  commonName: linkerd-proxy-injector.linkerd.svc
+  dnsNames:
+    - linkerd-proxy-injector.linkerd.svc
+    - linkerd-proxy-injector.linkerd.svc.cluster.local
+  duration: 8760h # 1 year
+  renewBefore: 720h # 30 days
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: linkerd-identity-trust-roots
+  namespace: linkerd
+data:
+  ca-bundle.crt: |
+    -----BEGIN CERTIFICATE-----
+    MIIDSTCCAjGgAwIBAgIQfS+AAIShqZKqwtRkt0QSnDANBgkqhkiG9w0BAQsFADAp
+    MScwJQYDVQQDEx5pZGVudGl0eS5saW5rZXJkLmNsdXN0ZXIubG9jYWwwHhcNMjUw
+    OTI0MDEzMTM0WhcNMzUwOTIyMDEzMTM0WjApMScwJQYDVQQDEx5pZGVudGl0eS5s
+    aW5rZXJkLmNsdXN0ZXIubG9jYWwwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK
+    AoIBAQCuGneKJhE+yz6sdDN+wO67cAT7XbeYIk4CpvTbMiRI9WMqM1MqP1ypExOC
+    hWmmx0tZa3ae1oojH255ejKNIOY7tZGB0OyXtReNO/YPSI2KtP6NsEIeDj86gZnj
+    sCeWkgzctbUcc4H+gp8AnuRNuktuhYMl5hFm41CkLHMR5NMsRiM4QoY6Y9k0Wlne
+    j+Dbta0/+OKB5SheptdncQKv1zYHQVIGyebmZ2XAaf9mx1+RDbx2v2XK5CFH5YUr
+    n/+PIL33HScAWj+O30RJV6dcv7T8zyVDnQHutEnkmbadQUydwjpx86AAfNObyM1h
+    Itjj2epZiNZDe+zBvXiiqCOJv9SvAgMBAAGjbTBrMA4GA1UdDwEB/wQEAwICpDAP
+    BgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBTjqs0MWNCRiXAb0xfsEHH+rCKKmzAp
+    BgNVHREEIjAggh5pZGVudGl0eS5saW5rZXJkLmNsdXN0ZXIubG9jYWwwDQYJKoZI
+    hvcNAQELBQADggEBABVTxuaPXwjc6N3nWR1ci+zRqmud3TKBsQMl1HhKb+zgYe7f
+    lmkJcwbIq5dLYYCn2L+b09vHgiXI58+bRupS+aqB9nnXWGICiFS9g5POWBGWQYCb
+    u1StWtJVTXGIsoyIU8ZdtkInJfB4DVwh3dBUy+XopiyVB/MSewdi1kpvZUMFKi2I
+    ozxnTxpr/aYdAFRRB096SbryJ6w8glp32CMGxeBADuk56A6lt+mEfzwP1aeU210F
+    dwb4Lfdaj1iGbvyeBXLJjp2pi3gTxgdTu+zCLmmuyhxUdLyKyFUN1xYTDo8Skai6
+    utYQILkG/JersyhjLijiYs+hZ5TN03oxSK00xgc=
+    -----END CERTIFICATE-----
