@@ -1,0 +1,413 @@
+# Network Policies for Notifi Namespace Services
+# These policies provide network isolation and security for different service categories
+
+---
+# Default deny all policy for notifi namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: notifi-default-deny-all
+  namespace: mocks
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+
+---
+# Core Management Services Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: notifi-core-management
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: core-management
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from all notifi services
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: mocks
+  # Allow ingress from management gateway
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: management-gateway
+  egress:
+  # Allow egress to all notifi services
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: mocks
+  # Allow egress to external APIs (HTTPS)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+  # Allow egress to databases
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 5432  # PostgreSQL
+    - protocol: TCP
+      port: 6379  # Redis
+    - protocol: TCP
+      port: 9000  # ClickHouse
+
+---
+# Blockchain Services Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: notifi-blockchain-services
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: blockchain
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from event processor and blockchain manager
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: event-processor
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: blockchain-manager
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: scheduler
+  egress:
+  # Allow egress to blockchain RPC endpoints
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 8545  # Ethereum RPC
+    - protocol: TCP
+      port: 8546  # Ethereum WebSocket
+    - protocol: TCP
+      port: 8899  # Solana RPC
+    - protocol: TCP
+      port: 9000  # Solana WebSocket
+  # Allow egress to other notifi services
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: mocks
+
+---
+# Messaging Services Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: notifi-messaging-services
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: messaging
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from scheduler and fusion manager
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: scheduler
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: fusion-manager
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: management-gateway
+  egress:
+  # Allow egress to external messaging APIs
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 5222  # XMPP
+    - protocol: TCP
+      port: 8080  # FCM
+  # Allow egress to other notifi services
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: mocks
+
+---
+# Data Processing Services Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: notifi-data-processing
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: data-processing
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from event processor and scheduler
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: event-processor
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: scheduler
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: blockchain-manager
+  egress:
+  # Allow egress to databases
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 5432  # PostgreSQL
+    - protocol: TCP
+      port: 6379  # Redis
+    - protocol: TCP
+      port: 9000  # ClickHouse
+  # Allow egress to other notifi services
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: mocks
+
+---
+# Infrastructure Services Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: notifi-infrastructure
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: infrastructure
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from all notifi services
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: mocks
+  egress:
+  # Allow egress to all notifi services
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: mocks
+  # Allow egress to external monitoring and logging
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 9090  # Prometheus
+    - protocol: TCP
+      port: 3100  # Loki
+
+---
+# Management Gateway Network Policy (Most Permissive)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: notifi-management-gateway
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: management-gateway
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from external sources (load balancer)
+  - from: []
+    ports:
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 443
+  # Allow ingress from internal services
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: mocks
+  egress:
+  # Allow egress to all notifi services
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: mocks
+  # Allow egress to external APIs
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 5432  # PostgreSQL
+    - protocol: TCP
+      port: 6379  # Redis
+
+---
+# Event Processor Network Policy (High Traffic)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: notifi-event-processor
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: event-processor
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from blockchain services
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/component: blockchain
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: scheduler
+  egress:
+  # Allow egress to all notifi services
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: mocks
+  # Allow egress to external blockchain APIs
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+
+---
+# Scheduler Network Policy (Central Orchestrator)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: notifi-scheduler
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: scheduler
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from management gateway and monitor
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: management-gateway
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: monitor
+  egress:
+  # Allow egress to all notifi services
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: mocks
+  # Allow egress to external APIs
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+
+---
+# Monitor Service Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: notifi-monitor
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: monitor
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Allow ingress from management gateway
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: management-gateway
+  egress:
+  # Allow egress to all notifi services for monitoring
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: mocks
+  # Allow egress to external monitoring endpoints
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 9090  # Prometheus
+    - protocol: TCP
+      port: 3100  # Loki
+
+---
+# DNS Resolution Policy (Required for all services)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: notifi-dns-resolution
+  namespace: mocks
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+

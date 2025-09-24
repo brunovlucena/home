@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bruno-site-test-pod
+  namespace: bruno
+spec:
+  containers:
+  - name: test-container
+    image: postgres:16-alpine
+    command: ["/bin/sh", "-c"]
+    args:
+    - |
+      echo "🔍 Testing environment variables..."
+      echo "PGPASSWORD: $PGPASSWORD"
+      echo "DATABASE_PASSWORD: $DATABASE_PASSWORD"
+      echo "POSTGRES_PASSWORD: $POSTGRES_PASSWORD"
+      echo ""
+      echo "🔍 Testing database connection..."
+      if [ -n "$PGPASSWORD" ]; then
+        echo "✅ PGPASSWORD is set"
+        pg_isready -h bruno-site-postgres -p 5432 -U postgres
+      else
+        echo "❌ PGPASSWORD is not set"
+      fi
+      echo ""
+      echo "🔍 Testing with psql..."
+      if [ -n "$PGPASSWORD" ]; then
+        psql -h bruno-site-postgres -p 5432 -U postgres -d postgres -c "SELECT version();"
+      else
+        echo "❌ Cannot test psql without PGPASSWORD"
+      fi
+      echo ""
+      echo "✅ Test completed"
+      sleep 3600
+    env:
+    - name: PGPASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: bruno-site-db-secret
+          key: password
+  restartPolicy: Never

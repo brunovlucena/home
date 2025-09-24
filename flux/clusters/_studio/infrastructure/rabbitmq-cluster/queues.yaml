@@ -1,0 +1,160 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+#	📋 RABBITMQ QUEUES - Queue definitions for the RabbitMQ cluster
+#
+#	🎯 Purpose: Define queues for different event types and processing
+#	💡 Features: Queue configuration, bindings, and routing
+#
+#	🏛️ ARCHITECTURE:
+#	🎯 Event Queues - Queues for different event types
+#	🔗 Queue Bindings - Bindings to exchanges
+#	📊 Queue Properties - Durability, TTL, and limits
+#
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+---
+# 🚀 Kaniko Jobs Queue - For job start events
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: kaniko-jobs
+  namespace: rabbitmq
+  labels:
+    app: rabbitmq
+    environment: studio
+    tier: messaging
+    app.kubernetes.io/component: queue
+    queue.type: kaniko-jobs
+  annotations:
+    rabbitmq.com/queue-type: quorum
+    rabbitmq.com/queue-arguments: |
+      {
+        "x-message-ttl": 86400000,
+        "x-max-length": 10000,
+        "x-overflow": "drop-head",
+        "x-dead-letter-exchange": "dlx",
+        "x-dead-letter-routing-key": "kaniko-jobs.dlq"
+      }
+spec:
+  rabbitmqClusterReference:
+    name: rabbitmq-cluster-studio
+  name: kaniko-jobs
+  durable: true
+  autoDelete: false
+  arguments:
+    x-message-ttl: 86400000  # 24 hours in milliseconds
+    x-max-length: 10000      # Maximum 10,000 messages
+    x-overflow: drop-head     # Drop oldest messages when full
+    x-dead-letter-exchange: dlx
+    x-dead-letter-routing-key: kaniko-jobs.dlq
+
+---
+# 🚀 Kaniko Jobs Dead Letter Queue - For failed job start events
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: kaniko-jobs-dlq
+  namespace: rabbitmq
+  labels:
+    app: rabbitmq
+    environment: studio
+    tier: messaging
+    app.kubernetes.io/component: queue
+    queue.type: dead-letter
+  annotations:
+    rabbitmq.com/queue-type: quorum
+spec:
+  rabbitmqClusterReference:
+    name: rabbitmq-cluster-studio
+  name: kaniko-jobs.dlq
+  durable: true
+  autoDelete: false
+
+---
+# 🔄 Dead Letter Exchange - For routing failed messages
+apiVersion: rabbitmq.com/v1beta1
+kind: Exchange
+metadata:
+  name: dlx
+  namespace: rabbitmq
+  labels:
+    app: rabbitmq
+    environment: studio
+    tier: messaging
+    app.kubernetes.io/component: exchange
+    exchange.type: dead-letter
+spec:
+  rabbitmqClusterReference:
+    name: rabbitmq-cluster-studio
+  name: dlx
+  type: direct
+  durable: true
+  autoDelete: false
+
+---
+# 🔗 Queue Binding - Bind kaniko-jobs queue to default exchange
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: kaniko-jobs-binding
+  namespace: rabbitmq
+  labels:
+    app: rabbitmq
+    environment: studio
+    tier: messaging
+    app.kubernetes.io/component: binding
+spec:
+  rabbitmqClusterReference:
+    name: rabbitmq-cluster-studio
+  source: amq.default
+  destination: kaniko-jobs
+  destinationType: queue
+  routingKey: network.notifi.lambda.job.start
+  arguments: {}
+
+---
+# 🔗 Dead Letter Queue Binding - Bind DLQ to dead letter exchange
+apiVersion: rabbitmq.com/v1beta1
+kind: Binding
+metadata:
+  name: kaniko-jobs-dlq-binding
+  namespace: rabbitmq
+  labels:
+    app: rabbitmq
+    environment: studio
+    tier: messaging
+    app.kubernetes.io/component: binding
+spec:
+  rabbitmqClusterReference:
+    name: rabbitmq-cluster-studio
+  source: dlx
+  destination: kaniko-jobs.dlq
+  destinationType: queue
+  routingKey: kaniko-jobs.dlq
+  arguments: {}
+
+---
+# 📊 Queue Policy - For monitoring and management
+apiVersion: rabbitmq.com/v1beta1
+kind: Policy
+metadata:
+  name: kaniko-jobs-policy
+  namespace: rabbitmq
+  labels:
+    app: rabbitmq
+    environment: studio
+    tier: messaging
+    app.kubernetes.io/component: policy
+spec:
+  rabbitmqClusterReference:
+    name: rabbitmq-cluster-studio
+  name: kaniko-jobs-policy
+  pattern: "^kaniko-jobs$"
+  applyTo: queues
+  priority: 1
+  definition:
+    ha-mode: all
+    ha-sync-mode: automatic
+    message-ttl: 86400000
+    max-length: 10000
+    overflow: drop-head

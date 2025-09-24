@@ -1,0 +1,16 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: cloudflare-tunnel-credentials
+  namespace: cloudflare-tunnel
+spec:
+  encryptedData:
+    CLOUDFLARE_TOKEN: AgBjPKs4isxvzWPXlX06tUY/ly/7rjgdnECHcUp8fqusVhEjR5k4jX3c7RD0ljwxeIJhrYSrB/h3sP8Un3tAtVErPistVv5VHB7sQi2upZxIA4PGUmON+sXBqq9fehDtPTVJBKqvHPBv/QoVSrQBnDSWicO+otnBEQyIvGXqlgLdh/so52zUnjDd+t8OsnGzP2rdtiYwhLeaEhzPif+e9TS0rRXpXlI97COE37AE7NBiHgbWtkiPE+/bEe9o72sqYW+BqlEnwfP8yzXviN9xx65o3JqmwdE469tFCMk2lpHzaniHB3tgJztxg3AJnbuddiecuSvmDy0i5cSLU5Z7MCyfjZKIAlHcPCnHf7CBZgJxAgFRA9hMkR1A78/1lJysZbSzeSJlo/LyDW++25WDyNVoX3L3gC5A1x76bRzBEZiZ0bCrgdgzXKhO7rLxnz1kQuqisAAKOOwk4OT7/5b8md1Hm95j4JzE1n7nXuzXTZHwaliJBFJC2Q7WCNtlYRHyIKU58OzVIkMQwpnJL112YulwKgiFv7FX0MWHwC6p6tzDZiyTdnir7a9pZK4gjiRY9TsImUplRMLhHG+EaKMEvkfK7vAQbp6dDjpsa2CeeSRikb11BWGaeFgIjBN4LJbA+44Sb2fqTi6nF31ASTbxUNSQKcOpSDm3ee3ZM4QWJPJNA7/rgdPCAAkTEUs9sD41b1S09UttAJ7UcB3l0uZTV3RyHAUpRpr7j24izPGJ6UaYb/ooGmn4zFgi8CdKEt54+WY3Xqhu0CSoyOq/IXxc2keUhRyYcamgNw/T1Jz2kmg0s1+TUgwoHJo7twqjypyv00zk3pWhwxhnQ8zAoAfduqzCTrEXV/oM4/F1JD37PQgA1ixJBBXcSueLku4RN0fUGxwtVhfIp8pVj2h2HSE17xfyKytdU4a6ZUqkMRwCl9cDu19hl3pURWG6HQ==
+  template:
+    metadata:
+      creationTimestamp: null
+      name: cloudflare-tunnel-credentials
+      namespace: cloudflare-tunnel
+    type: Opaque
+---

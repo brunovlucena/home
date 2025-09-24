@@ -1,0 +1,474 @@
+# Service Mesh Network Policies for Notifi Test Namespace Services
+# These policies provide service mesh traffic management and security for test infrastructure
+# 
+# NOTE: This file contains Linkerd-specific resources (Server and ServerAuthorization)
+# but your cluster is running Istio. These resources will fail to apply.
+# 
+# Options:
+# 1. Remove this file entirely if you don't need service mesh policies for testing
+# 2. Convert to Istio AuthorizationPolicy resources (see below for examples)
+# 3. Install Linkerd alongside Istio (not recommended)
+# 
+# Example Istio AuthorizationPolicy conversion:
+# apiVersion: security.istio.io/v1beta1
+# kind: AuthorizationPolicy
+# metadata:
+#   name: test-infrastructure-auth
+#   namespace: mocks
+# spec:
+#   selector:
+#     matchLabels:
+#       app.kubernetes.io/component: test-infrastructure
+#   rules:
+#   - from:
+#     - source:
+#         namespaces: ["notifi-test", "prometheus", "loki"]
+
+---
+# Default Server for Test Infrastructure Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: test-infrastructure-server
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: test-infrastructure
+  port: 8080
+  proxyProtocol: HTTP/1
+
+---
+# Server Authorization for Test Infrastructure Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: ServerAuthorization
+metadata:
+  name: test-infrastructure-auth
+  namespace: mocks
+spec:
+  server:
+    name: test-infrastructure-server
+  client:
+    networks:
+    - cidr: 10.0.0.0/16
+    - cidr: 172.20.0.0/16
+    authenticated:
+      unauthenticated: true
+    meshTLS:
+      identities:
+      - "*.notifi-test.svc.cluster.local"
+      - "*.prometheus.svc.cluster.local"
+      - "*.loki.svc.cluster.local"
+
+---
+# Server for Gateway Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: gateway-server
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: gateway
+  port: 80
+  proxyProtocol: HTTP/1
+
+---
+# Server Authorization for Gateway Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: ServerAuthorization
+metadata:
+  name: gateway-auth
+  namespace: mocks
+spec:
+  server:
+    name: gateway-server
+  client:
+    networks:
+    - cidr: 10.0.0.0/16
+    - cidr: 172.20.0.0/16
+    authenticated:
+      unauthenticated: true
+    meshTLS:
+      identities:
+      - "*.notifi-test.svc.cluster.local"
+      - "*.notifi.svc.cluster.local"
+
+---
+# Server for gRPC Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: grpc-server
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: manager
+  port: 4000
+  proxyProtocol: HTTP/2
+
+---
+# Server Authorization for gRPC Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: ServerAuthorization
+metadata:
+  name: grpc-auth
+  namespace: mocks
+spec:
+  server:
+    name: grpc-server
+  client:
+    networks:
+    - cidr: 10.0.0.0/16
+    - cidr: 172.20.0.0/16
+    meshTLS:
+      identities:
+      - "*.notifi-test.svc.cluster.local"
+      - "*.notifi.svc.cluster.local"
+
+---
+# Server for Messenger Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: messenger-server
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: messenger
+  port: 5000
+  proxyProtocol: HTTP/1
+
+---
+# Server Authorization for Messenger Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: ServerAuthorization
+metadata:
+  name: messenger-auth
+  namespace: mocks
+spec:
+  server:
+    name: messenger-server
+  client:
+    networks:
+    - cidr: 10.0.0.0/16
+    - cidr: 172.20.0.0/16
+    authenticated:
+      unauthenticated: true
+    meshTLS:
+      identities:
+      - "*.notifi-test.svc.cluster.local"
+      - "*.notifi.svc.cluster.local"
+
+---
+# Server for Proxy Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: proxy-server
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: proxy
+  port: 7000
+  proxyProtocol: HTTP/1
+
+---
+# Server Authorization for Proxy Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: ServerAuthorization
+metadata:
+  name: proxy-auth
+  namespace: mocks
+spec:
+  server:
+    name: proxy-server
+  client:
+    networks:
+    - cidr: 10.0.0.0/16
+    - cidr: 172.20.0.0/16
+    authenticated:
+      unauthenticated: true
+    meshTLS:
+      identities:
+      - "*.notifi-test.svc.cluster.local"
+      - "*.notifi.svc.cluster.local"
+
+---
+# Server for Database Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: database-server
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: database
+  port: 8123
+  proxyProtocol: HTTP/1
+
+---
+# Server Authorization for Database Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: ServerAuthorization
+metadata:
+  name: database-auth
+  namespace: mocks
+spec:
+  server:
+    name: database-server
+  client:
+    networks:
+    - cidr: 10.0.0.0/16
+    - cidr: 172.20.0.0/16
+    meshTLS:
+      identities:
+      - "*.notifi-test.svc.cluster.local"
+      - "*.notifi.svc.cluster.local"
+
+---
+# Server for Cache Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: cache-server
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: cache
+  port: 6379
+  proxyProtocol: TCP
+
+---
+# Server Authorization for Cache Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: ServerAuthorization
+metadata:
+  name: cache-auth
+  namespace: mocks
+spec:
+  server:
+    name: cache-server
+  client:
+    networks:
+    - cidr: 10.0.0.0/16
+    - cidr: 172.20.0.0/16
+    meshTLS:
+      identities:
+      - "*.notifi-test.svc.cluster.local"
+      - "*.notifi.svc.cluster.local"
+
+---
+# Server for Monitoring Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: monitoring-server
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: monitoring
+  port: 5000
+  proxyProtocol: HTTP/1
+
+---
+# Server Authorization for Monitoring Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: ServerAuthorization
+metadata:
+  name: monitoring-auth
+  namespace: mocks
+spec:
+  server:
+    name: monitoring-server
+  client:
+    networks:
+    - cidr: 10.0.0.0/16
+    - cidr: 172.20.0.0/16
+    authenticated:
+      unauthenticated: true
+    meshTLS:
+      identities:
+      - "*.notifi-test.svc.cluster.local"
+      - "*.notifi.svc.cluster.local"
+      - "*.prometheus.svc.cluster.local"
+      - "*.loki.svc.cluster.local"
+
+---
+# Server for Scheduler Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: scheduler-server
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: scheduler
+  port: 4000
+  proxyProtocol: HTTP/2
+
+---
+# Server Authorization for Scheduler Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: ServerAuthorization
+metadata:
+  name: scheduler-auth
+  namespace: mocks
+spec:
+  server:
+    name: scheduler-server
+  client:
+    networks:
+    - cidr: 10.0.0.0/16
+    - cidr: 172.20.0.0/16
+    meshTLS:
+      identities:
+      - "*.notifi-test.svc.cluster.local"
+      - "*.notifi.svc.cluster.local"
+
+---
+# Server for Processor Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: processor-server
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: processor
+  port: 5000
+  proxyProtocol: HTTP/1
+
+---
+# Server Authorization for Processor Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: ServerAuthorization
+metadata:
+  name: processor-auth
+  namespace: mocks
+spec:
+  server:
+    name: processor-server
+  client:
+    networks:
+    - cidr: 10.0.0.0/16
+    - cidr: 172.20.0.0/16
+    authenticated:
+      unauthenticated: true
+    meshTLS:
+      identities:
+      - "*.notifi-test.svc.cluster.local"
+      - "*.notifi.svc.cluster.local"
+
+---
+# Server for Broker Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: broker-server
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: broker
+  port: 4000
+  proxyProtocol: HTTP/2
+
+---
+# Server Authorization for Broker Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: ServerAuthorization
+metadata:
+  name: broker-auth
+  namespace: mocks
+spec:
+  server:
+    name: broker-server
+  client:
+    networks:
+    - cidr: 10.0.0.0/16
+    - cidr: 172.20.0.0/16
+    meshTLS:
+      identities:
+      - "*.notifi-test.svc.cluster.local"
+      - "*.notifi.svc.cluster.local"
+
+---
+# Server for Handler Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: handler-server
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: handler
+  port: 5000
+  proxyProtocol: HTTP/1
+
+---
+# Server Authorization for Handler Services
+apiVersion: policy.linkerd.io/v1beta2
+kind: ServerAuthorization
+metadata:
+  name: handler-auth
+  namespace: mocks
+spec:
+  server:
+    name: handler-server
+  client:
+    networks:
+    - cidr: 10.0.0.0/16
+    - cidr: 172.20.0.0/16
+    authenticated:
+      unauthenticated: true
+    meshTLS:
+      identities:
+      - "*.notifi-test.svc.cluster.local"
+      - "*.notifi.svc.cluster.local"
+
+---
+# Server for Service Components
+apiVersion: policy.linkerd.io/v1beta2
+kind: Server
+metadata:
+  name: service-server
+  namespace: mocks
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: service
+  port: 5000
+  proxyProtocol: HTTP/1
+
+---
+# Server Authorization for Service Components
+apiVersion: policy.linkerd.io/v1beta2
+kind: ServerAuthorization
+metadata:
+  name: service-auth
+  namespace: mocks
+spec:
+  server:
+    name: service-server
+  client:
+    networks:
+    - cidr: 10.0.0.0/16
+    - cidr: 172.20.0.0/16
+    authenticated:
+      unauthenticated: true
+    meshTLS:
+      identities:
+      - "*.notifi-test.svc.cluster.local"
+      - "*.notifi.svc.cluster.local"
+
