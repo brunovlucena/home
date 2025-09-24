@@ -1,23 +1,10 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: GitRepository
 metadata:
-  name: home
+  name: homelab
   namespace: flux-system
 spec:
   interval: 1m0s
-  url: https://github.com/brunovlucena/home.git
-  ref:
-    branch: main
-  # secretRef:
-  #   name: home 
----
-apiVersion: source.toolkit.fluxcd.io/v1beta2
-kind: GitRepository
-metadata:
-  name: bruno-site
-  namespace: flux-system
-spec:
-  interval: 1h0m0s
-  url: https://github.com/brunovlucena/bruno-site.git
+  url: https://github.com/brunovlucena/homelab.git
   ref:
     branch: main

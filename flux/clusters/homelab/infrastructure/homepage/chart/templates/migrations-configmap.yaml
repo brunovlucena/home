@@ -1,0 +1,15 @@
+{{- if .Values.database.enabled }}
+# =============================================================================
+# 📁 MIGRATIONS CONFIGMAP
+# =============================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "bruno-site.fullname" . }}-migrations
+  labels:
+    {{- include "bruno-site.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migrations
+data:
+  001_complete_schema.sql: |
+{{ .Files.Get "files/migrations/001_complete_schema.sql" | indent 4 }}
+{{- end }}

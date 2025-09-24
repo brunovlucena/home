@@ -10,10 +10,10 @@ help: ## Show this help message
 # Pulumi Operations
 # =============================================================================
 
-init-homelab: ## Initialize Pulumi homelab stack
+init: ## Initialize Pulumi homelab stack
 	cd pulumi && pulumi stack init homelab
 
-up-homelab: ## Deploy homelab stack
+up: ## Deploy homelab stack
 	@if [ -z "$$GITHUB_TOKEN" ]; then \
 		echo "Error: GITHUB_TOKEN environment variable is required"; \
 		echo "Run 'make setup-env' for instructions"; \
@@ -26,7 +26,7 @@ up-homelab: ## Deploy homelab stack
 	fi
 	cd pulumi && pulumi stack select homelab && pulumi refresh --yes && pulumi up --yes
 
-destroy-homelab: ## Destroy homelab stack
+destroy: ## Destroy homelab stack
 	cd pulumi && pulumi stack select homelab && pulumi destroy --yes
 
 # =============================================================================

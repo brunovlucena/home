@@ -1,0 +1,11 @@
+{
+  "name": "bruno-site-scripts",
+  "version": "1.0.0",
+  "description": "Utility scripts for Bruno Site",
+  "scripts": {
+    "optimize-images": "node optimize-images.js"
+  },
+  "dependencies": {
+    "sharp": "^0.33.0"
+  }
+}

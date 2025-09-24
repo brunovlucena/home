@@ -12,7 +12,7 @@ spec:
       version: 0.1.9
       sourceRef:
         kind: GitRepository
-        name: bruno-site
+        name: homelab
         namespace: flux-system
   values:
     ingress:
