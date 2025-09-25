@@ -4,8 +4,7 @@ metadata:
   name: bruno-site-rules
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/name: bruno-site
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "bruno-site.labels" . | nindent 4 }}
     app.kubernetes.io/component: monitoring
     prometheus: kube-prometheus
     role: alert-rules

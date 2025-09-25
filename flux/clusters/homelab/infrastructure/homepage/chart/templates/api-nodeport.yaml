@@ -6,7 +6,6 @@ metadata:
   labels:
     {{- include "bruno-site.labels" . | nindent 4 }}
     app.kubernetes.io/component: api
-    app.kubernetes.io/name: bruno-site-api-nodeport
 spec:
   type: NodePort
   ports:
