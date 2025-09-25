@@ -3,4 +3,11 @@ kind: Kustomization
 metadata:
   name: homelab-cluster
   namespace: flux-system
-
+spec:
+  interval: 10m0s
+  sourceRef:
+    kind: GitRepository
+    name: homelab
+  path: "./flux/clusters/homelab"
+  prune: true
+  wait: true
