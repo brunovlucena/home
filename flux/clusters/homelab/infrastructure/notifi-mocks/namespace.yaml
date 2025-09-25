@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: mocks
-  annotations:
-    linkerd.io/inject: enabled
-  labels:
-    name: mocks
-    linkerd.io/inject: enabled

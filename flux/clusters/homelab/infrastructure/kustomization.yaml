@@ -15,6 +15,7 @@ resources:
   - homepage # TODO: Review alerts
   - loki
   # - loki-mcp
-  # - notifi-mocks
+  - k6-operator
+  - notifi-test
   
 
