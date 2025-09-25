@@ -41,17 +41,34 @@ spec:
             operator: Equal
             value: "true"
             effect: NoSchedule
+        containers:
+          - name: prometheus
+            ports:
+              - name: web
+                containerPort: 30090
+                protocol: TCP
+            # args:
+            #   - '--web.listen-address=0.0.0.0:30090'
       service:
         type: NodePort
         ports:
           - name: web
             port: 9090
-            targetPort: 9090
+            targetPort: 30090
             nodePort: 30090
     grafana:
       adminPassword: adminbubs # TODO: Sealed Secrets
       initChownData:
         enabled: false
+      containers:
+        - name: grafana
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+            - name: additional
+              containerPort: 30080
+              protocol: TCP
       resources:
         requests:
           cpu: 100m
