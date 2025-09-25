@@ -59,6 +59,8 @@ spec:
         limits:
           cpu: 500m
           memory: 512Mi
+      nodeSelector:
+        role: mcp-servers
       tolerations:
         - key: "observability"
           operator: Equal
