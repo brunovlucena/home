@@ -3,5 +3,7 @@ kind: Kustomization
 resources:
   - helmrelease.yaml
   - namespace.yaml 
+  - prometheus-nodeport.yaml
+  - grafana-nodeport.yaml
   # - gateway.yaml  # Disabled - istio not enabled
   # - virtualservice.yaml  # Disabled - istio not enabled

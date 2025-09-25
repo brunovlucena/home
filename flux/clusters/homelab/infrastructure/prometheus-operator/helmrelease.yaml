@@ -1,4 +1,4 @@
----
+
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -34,6 +34,20 @@ spec:
           limits:
             cpu: 500m
             memory: 1Gi
+        nodeSelector:
+          role: observability
+        tolerations:
+          - key: "observability"
+            operator: Equal
+            value: "true"
+            effect: NoSchedule
+      service:
+        type: NodePort
+        ports:
+          - name: web
+            port: 9090
+            targetPort: 9090
+            nodePort: 30090
     grafana:
       adminPassword: adminbubs # TODO: Sealed Secrets
       initChownData:
@@ -45,6 +59,13 @@ spec:
         limits:
           cpu: 500m
           memory: 512Mi
+      nodeSelector:
+        role: observability
+      tolerations:
+        - key: "observability"
+          operator: Equal
+          value: "true"
+          effect: NoSchedule
       persistence:
         enabled: true
         type: pvc
@@ -121,19 +142,19 @@ spec:
               name: strava-secrets
               key: expires-at
         GRAFANA_LLM_OLLAMA_URL:
-          value: "http://192.168.0.3:11434"
+          value: "http://192.168.0.12:11434"
         GRAFANA_LLM_OLLAMA_MODEL:
           value: "gemma3n:e4b"
         PAGERDUTY_SERVICE_KEY:
           valueFrom:
             secretKeyRef:
               name: pagerduty-secrets
-              key: pagerduty-service-key
+              key: PAGERDUTY_SERVICE_KEY
         SLACK_WEBHOOK_URL:
           valueFrom:
             secretKeyRef:
               name: pagerduty-secrets
-              key: slack-webhook-url
+              key: SLACK_WEBHOOK_URL
       datasources:
         datasources.yaml:
           apiVersion: 1
@@ -195,7 +216,13 @@ spec:
     alertmanager:
       enabled: true
       replicas: 1
+      alertmanagerConfigSelector:
+        matchLabels:
+          app: kube-prometheus-stack-alertmanager
       alertmanagerSpec:
+        configSecret: alertmanager-prometheus-operator-kube-p-alertmanager
+        secrets:
+        - pagerduty-secrets
         storage:
           volumeClaimTemplate:
             spec:
@@ -204,31 +231,81 @@ spec:
               resources:
                 requests:
                   storage: 10Gi
-        secrets:
-          - "pagerduty-secrets"
-        configSecret: "alertmanager-prometheus-operator-kube-p-alertmanager"
-        containers:
-        - name: alertmanager
-          args:
-          - --config.file=/etc/alertmanager/config_out/alertmanager.env.yaml
-          - --storage.path=/alertmanager
-          - --web.external-url=http://alertmanager-prometheus-operator-kube-p-alertmanager-0:9093
-          - --web.route-prefix=/
-          - --cluster.listen-address=0.0.0.0:9094
-          - --cluster.advertise-address=$(POD_IP):9094
-          - --log.level=debug
-          - --log.format=json
-          env:
-          - name: PAGERDUTY_SERVICE_KEY
-            valueFrom:
-              secretKeyRef:
-                name: pagerduty-secrets
-                key: pagerduty-service-key
-          - name: SLACK_WEBHOOK_URL
-            valueFrom:
-              secretKeyRef:
-                name: pagerduty-secrets
-                key: slack-webhook-url
-      alertmanagerConfigSelector:
-        matchLabels:
-          app: kube-prometheus-stack-alertmanager
+        config:
+          global:
+            resolve_timeout: 5m
+          route:
+            group_by: ['alertname']
+            group_wait: 10s
+            group_interval: 10s
+            repeat_interval: 1h
+            receiver: 'slack-default'
+            routes:
+            - match:
+                severity: critical
+              receiver: 'pagerduty-critical'
+            - match:
+                severity: warning
+              receiver: 'slack-warning'
+            - match:
+                severity: info
+              receiver: 'slack-info'
+          receivers:
+          - name: 'pagerduty-critical'
+            pagerduty_configs:
+            - service_key: '${PAGERDUTY_SERVICE_KEY}'
+              description: '{{ .GroupLabels.alertname }}'
+              details:
+                summary: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+                severity: '{{ .GroupLabels.severity }}'
+                namespace: '{{ .GroupLabels.namespace }}'
+                instance: '{{ .GroupLabels.instance }}'
+              client: 'Alertmanager'
+              client_url: '{{ .ExternalURL }}'
+              severity: 'critical'
+              component: '{{ .GroupLabels.alertname }}'
+              group: '{{ .GroupLabels.alertname }}'
+              class: '{{ .GroupLabels.alertname }}'
+          - name: 'slack-default'
+            slack_configs:
+            - api_url: '${SLACK_WEBHOOK_URL}'
+              channel: '#jamie-sre-chatbot'
+              title: 'Alert: {{ .GroupLabels.alertname }}'
+              text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+              send_resolved: true
+          - name: 'slack-warning'
+            slack_configs:
+            - api_url: '${SLACK_WEBHOOK_URL}'
+              channel: '#jamie-sre-chatbot'
+              title: '⚠️ Warning: {{ .GroupLabels.alertname }}'
+              text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+              send_resolved: true
+          - name: 'slack-info'
+            slack_configs:
+            - api_url: '${SLACK_WEBHOOK_URL}'
+              channel: '#jamie-sre-chatbot'
+              title: 'ℹ️ Info: {{ .GroupLabels.alertname }}'
+              text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+              send_resolved: true
+          inhibit_rules:
+          - target_match:
+              severity: warning
+            source_match:
+              severity: critical
+            equal: ['namespace', 'alertname']
+          - target_match:
+              severity: info
+            source_match:
+              severity: warning
+            equal: ['namespace', 'alertname']
+        env:
+        - name: PAGERDUTY_SERVICE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: pagerduty-secrets
+              key: PAGERDUTY_SERVICE_KEY
+        - name: SLACK_WEBHOOK_URL
+          valueFrom:
+            secretKeyRef:
+              name: pagerduty-secrets
+              key: SLACK_WEBHOOK_URL

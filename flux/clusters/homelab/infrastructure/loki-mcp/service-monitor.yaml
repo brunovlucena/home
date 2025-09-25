@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: loki-mcp-server
+  namespace: loki
+  labels:
+    app.kubernetes.io/name: loki-mcp
+    app.kubernetes.io/component: mcp-server
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: loki-mcp
+      app.kubernetes.io/component: mcp-server
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s

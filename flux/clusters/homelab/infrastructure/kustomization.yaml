@@ -7,10 +7,14 @@ metadata:
 
 resources:
   - repositories
-  - cert-manager
-  - linkerd
+  - sealed-secrets
+  - cert-manager # TODO: Alerts
+  - cloudflare-tunnel # TODO Alerts
   - metrics-server
   - prometheus-operator
-  - sealed-secrets
-  - cloudflare-tunnel
-  - homepage
+  - homepage # TODO: Review alerts
+  - loki
+  # - loki-mcp
+  # - notifi-mocks
+  
+

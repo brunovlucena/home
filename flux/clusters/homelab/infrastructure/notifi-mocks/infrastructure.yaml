@@ -1,4 +1,4 @@
----
+
 # Mock Management Gateway Service
 apiVersion: apps/v1
 kind: Deployment
@@ -1931,6 +1931,202 @@ spec:
   - name: http
     port: 5000
     targetPort: 5000
+  - name: health
+    port: 6000
+    targetPort: 6000
+  - name: metrics
+    port: 7000
+    targetPort: 7000
+  type: ClusterIP
+---
+# Mock gRPC Server Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mock-grpc-server
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: grpc-server-test
+    app.kubernetes.io/component: grpc-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: grpc-server-test
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: grpc-server-test
+        app.kubernetes.io/component: grpc-server
+    spec:
+      containers:
+      - name: grpc-server
+        image: nginx:alpine
+        ports:
+        - containerPort: 50051
+        - containerPort: 50052
+        - containerPort: 50053
+        - containerPort: 6000
+        - containerPort: 7000
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          # Ultra-lightweight gRPC mock using nginx
+          cat > /etc/nginx/nginx.conf << 'EOF'
+          events { worker_connections 1024; }
+          http {
+              server {
+                  listen 50051;
+                  location / {
+                      return 200 "gRPC mock server\n";
+                      add_header Content-Type text/plain;
+                  }
+              }
+              server {
+                  listen 6000;
+                  location / {
+                      return 200 "healthy\n";
+                      add_header Content-Type text/plain;
+                  }
+              }
+              server {
+                  listen 7000;
+                  location /metrics {
+                      return 200 "# HELP grpc_requests_total Total gRPC requests\n# TYPE grpc_requests_total counter\ngrpc_requests_total 0\n";
+                      add_header Content-Type text/plain;
+                  }
+              }
+          }
+          EOF
+          nginx -g "daemon off;" &
+          
+          # Keep container running
+          tail -f /dev/null
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mock-grpc-server
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: grpc-server-test
+    app.kubernetes.io/component: grpc-server
+spec:
+  selector:
+    app.kubernetes.io/name: grpc-server-test
+  ports:
+  - name: grpc
+    port: 50051
+    targetPort: 50051
+  - name: grpc-alt1
+    port: 50052
+    targetPort: 50052
+  - name: grpc-alt2
+    port: 50053
+    targetPort: 50053
+  - name: health
+    port: 6000
+    targetPort: 6000
+  - name: metrics
+    port: 7000
+    targetPort: 7000
+  type: ClusterIP
+
+---
+# Mock WebSocket Server Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mock-websocket-server
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: websocket-server-test
+    app.kubernetes.io/component: websocket-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: websocket-server-test
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: websocket-server-test
+        app.kubernetes.io/component: websocket-server
+    spec:
+      containers:
+      - name: websocket-server
+        image: nginx:alpine
+        ports:
+        - containerPort: 8080
+        - containerPort: 8081
+        - containerPort: 8082
+        - containerPort: 6000
+        - containerPort: 7000
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          # Ultra-lightweight WebSocket mock using nginx
+          cat > /etc/nginx/nginx.conf << 'EOF'
+          events { worker_connections 1024; }
+          http {
+              map $http_upgrade $connection_upgrade {
+                  default upgrade;
+                  '' close;
+              }
+              
+              server {
+                  listen 8080;
+                  location / {
+                      return 200 "WebSocket mock server\n";
+                      add_header Content-Type text/plain;
+                  }
+              }
+              server {
+                  listen 6000;
+                  location /health {
+                      return 200 '{"status":"healthy","connections":0,"messages":0}\n';
+                      add_header Content-Type application/json;
+                  }
+              }
+              server {
+                  listen 7000;
+                  location /metrics {
+                      return 200 "# HELP websocket_connections_total Total WebSocket connections\n# TYPE websocket_connections_total counter\nwebsocket_connections_total 0\n# HELP websocket_messages_total Total WebSocket messages\n# TYPE websocket_messages_total counter\nwebsocket_messages_total 0\n";
+                      add_header Content-Type text/plain;
+                  }
+              }
+          }
+          EOF
+          nginx -g "daemon off;" &
+          
+          # Keep container running
+          tail -f /dev/null
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mock-websocket-server
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: websocket-server-test
+    app.kubernetes.io/component: websocket-server
+spec:
+  selector:
+    app.kubernetes.io/name: websocket-server-test
+  ports:
+  - name: websocket
+    port: 8080
+    targetPort: 8080
+  - name: websocket-alt1
+    port: 8081
+    targetPort: 8081
+  - name: websocket-alt2
+    port: 8082
+    targetPort: 8082
   - name: health
     port: 6000
     targetPort: 6000

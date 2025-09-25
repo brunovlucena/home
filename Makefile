@@ -1,4 +1,4 @@
-.PHONY: help secret-argocd pf-argocd bootstrap-flux-dev bootstrap-flux-prd flux-status flux-logs init-studio init-homelab up-studio up-homelab destroy-studio destroy-homelab clean logs-dev logs-prd status-dev status-prd setup-env flux-refresh flux-refresh-bruno flagger-status flagger-logs promote-canary rollback-canary istio-status istio-logs istio-proxy-status
+.PHONY: help secret-argocd pf-argocd bootstrap-flux-dev bootstrap-flux-prd flux-status flux-logs init-studio init-homelab up-studio up-homelab destroy-studio destroy-homelab clean logs-dev logs-prd status-dev status-prd setup-env flux-refresh flux-refresh-bruno flagger-status flagger-logs promote-canary rollback-canary istio-status istio-logs istio-proxy-status linkerd-install linkerd-install-clean linkerd-uninstall linkerd-status linkerd-dashboard linkerd-check
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -42,3 +42,28 @@ flux-refresh: ## Force refresh all Flux HelmRepositories, GitRepositories, and H
 	@echo "🚀 Refreshing HelmReleases..."
 	kubectl annotate helmrelease --all -n flux-system --overwrite reconcile.fluxcd.io/requestedAt="$$(date +%s)"
 	@echo "✅ Flux refresh triggered for all resources"
+
+# =============================================================================
+# Linkerd Operations
+# =============================================================================
+
+linkerd-install: ## Install Linkerd service mesh (manual installation)
+	@echo "🚀 Installing Linkerd service mesh..."
+	scripts/install-linkerd.sh homelab
+
+linkerd-status: ## Check Linkerd status
+	@echo "📊 Linkerd Status:"
+	linkerd check --context kind-homelab
+
+linkerd-viz-install: ## Install Linkerd Viz programmatically
+	@echo "📊 Installing Linkerd Viz programmatically..."
+	scripts/install-linkerd-viz.sh homelab
+
+linkerd-viz-status: ## Check Linkerd Viz status
+	@echo "📊 Linkerd Viz Status:"
+	linkerd viz check --context kind-homelab
+
+linkerd-dashboard: ## Access Linkerd dashboard
+	@echo "🌐 Opening Linkerd dashboard..."
+	@echo "Dashboard will be available at: http://localhost:8084"
+	linkerd viz dashboard --context kind-homelab --port 8084

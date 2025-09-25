@@ -42,6 +42,7 @@ build/
 
 # Sealed Secrets Backups (CRITICAL: Never commit these!)
 flux/clusters/*/infrastructure/sealed-secrets/backups/
+flux/clusters/*/infrastructure/sealed-secrets/keys/
 flux/clusters/*/infrastructure/sealed-secrets/*.yaml.backup
 flux/clusters/*/infrastructure/sealed-secrets/*.pem.backup
 sealed-secrets-key-backup.yaml
