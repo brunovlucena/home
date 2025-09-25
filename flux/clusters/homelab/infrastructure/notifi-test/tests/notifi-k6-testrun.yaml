@@ -14,7 +14,7 @@ spec:
       name: notifi-k6-test
       file: k6-tests.js
   runner:
-    image: grafana/k6:latest
+    image: ghcr.io/szkiba/xk6-prometheus:latest
     resources:
       limits:
         cpu: 1000m
@@ -27,8 +27,14 @@ spec:
         value: "info"
       - name: K6_OUT
         value: "json=test-results.json"
+      - name: K6_PROMETHEUS_RW_SERVER_URL
+        value: "http://prometheus-operator-kube-p-prometheus.prometheus.svc:9090/api/v1/write"
+      - name: K6_PROMETHEUS_RW_PUSH_INTERVAL
+        value: "5s"
+      - name: K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM
+        value: "true"
   starter:
-    image: grafana/k6:latest
+    image: ghcr.io/szkiba/xk6-prometheus:latest
     resources:
       limits:
         cpu: 500m
@@ -40,10 +46,6 @@ spec:
       - name: K6_LOG_LEVEL
         value: "info"
   # Test configuration - using the options from the script
-  arguments: |
-    --vus=20
-    --duration=3m
-    --out=json=test-results.json
-    --out=influxdb=http://influxdb:8086/k6
+  arguments: "--vus=20 --duration=3m"
   # Cleanup after test completion
   cleanup: "post"
