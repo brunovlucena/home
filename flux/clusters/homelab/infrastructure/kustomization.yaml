@@ -9,7 +9,7 @@ resources:
   - repositories
   - sealed-secrets
   - cert-manager # TODO: Alerts
-  - cloudflare-tunnel # TODO Alerts
+  # - cloudflare-tunnel # TODO Alerts
   - metrics-server
   - prometheus-operator
   - homepage # TODO: Review alerts
