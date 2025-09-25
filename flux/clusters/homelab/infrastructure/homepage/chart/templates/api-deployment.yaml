@@ -37,59 +37,6 @@ spec:
       serviceAccountName: {{ include "bruno-site.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      initContainers:
-        - name: wait-for-db
-          image: postgres:16-alpine
-          command:
-            - /bin/sh
-            - -c
-            - |
-              echo "⏳ Waiting for PostgreSQL to be ready..."
-              until pg_isready -h {{ .Values.database.host }} -p {{ .Values.database.port }} -U {{ .Values.database.user }}; do
-                echo "PostgreSQL is not ready yet. Waiting..."
-                sleep 5
-              done
-              echo "✅ PostgreSQL is ready!"
-              # Additional wait to ensure database is fully ready
-              sleep 10
-          env:
-            - name: PGPASSWORD
-              {{- if .Values.database.existingSecret }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.database.existingSecret }}
-                  key: password
-              {{- else if .Values.secrets.databasePassword }}
-              value: {{ .Values.secrets.databasePassword | quote }}
-              {{- else }}
-              value: "secure-password"
-              {{- end }}
-        - name: wait-for-redis
-          image: redis:7.2-alpine
-          command:
-            - /bin/sh
-            - -c
-            - |
-              echo "⏳ Waiting for Redis to be ready..."
-              {{- if .Values.redis.existingSecret }}
-              until redis-cli -h {{ .Values.redis.host }} -p {{ .Values.redis.port }} -a "$REDIS_PASSWORD" ping; do
-              {{- else }}
-              until redis-cli -h {{ .Values.redis.host }} -p {{ .Values.redis.port }} ping; do
-              {{- end }}
-                echo "Redis is not ready yet. Waiting..."
-                sleep 5
-              done
-              echo "✅ Redis is ready!"
-              # Additional wait to ensure Redis is fully ready
-              sleep 5
-          {{- if .Values.redis.existingSecret }}
-          env:
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.redis.existingSecret }}
-                  key: password
-          {{- end }}
       containers:
         - name: {{ .Chart.Name }}-api
           securityContext:
