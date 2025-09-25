@@ -41,7 +41,7 @@ api:
 
 # Ollama Configuration
 ollama:
-  url: "http://192.168.0.12:11434"  # External Ollama server
+  url: "http://ollama.bruno.svc.cluster.local:11434"  # External Ollama server
   enabled: true
 
 # Frontend Configuration
