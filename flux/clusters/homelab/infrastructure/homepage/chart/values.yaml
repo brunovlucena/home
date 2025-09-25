@@ -39,6 +39,11 @@ api:
       cpu: 250m
       memory: 256Mi
 
+# Ollama Configuration
+ollama:
+  url: "http://192.168.0.12:11434"  # External Ollama server
+  enabled: true
+
 # Frontend Configuration
 frontend:
   image:
