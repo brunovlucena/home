@@ -82,11 +82,11 @@ spec:
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
-  name: linkerd-edge
+  name: linkerd
   namespace: flux-system
 spec:
-  interval: 1h0m0s
-  url: https://helm.linkerd.io/edge
+  interval: 1m0s
+  url:  https://helm.buoyant.cloud
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository

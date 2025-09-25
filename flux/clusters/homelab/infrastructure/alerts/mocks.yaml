@@ -1,0 +1,342 @@
+# PrometheusRules for Linkerd Network Policy Monitoring
+# These rules monitor network connectivity issues that could be caused by Linkerd policies
+# CRITICAL: Connection CANNOT STOP - these rules ensure continuous monitoring
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: linkerd-network-connectivity
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: linkerd-monitoring
+    app.kubernetes.io/component: prometheus-rules
+spec:
+  groups:
+  - name: linkerd.network.connectivity
+    rules:
+    # Critical: Service-to-Service Connectivity
+    - alert: LinkerdServiceConnectivityDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: network-connectivity
+      annotations:
+        summary: "Linkerd service connectivity is down"
+        description: "Service {{ $labels.pod }} in namespace {{ $labels.namespace }} has no network traffic for 5 minutes. This could be caused by Linkerd policy restrictions."
+        runbook_url: "https://linkerd.io/2.11/tasks/troubleshooting/#service-connectivity"
+
+    # Critical: Policy Enforcement Failures
+    - alert: LinkerdPolicyEnforcementFailure
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure"}[5m]) > 0.1
+      for: 1m
+      labels:
+        severity: critical
+        component: policy-enforcement
+      annotations:
+        summary: "Linkerd policy enforcement is failing"
+        description: "High rate of policy enforcement failures detected in namespace {{ $labels.namespace }}. Service {{ $labels.pod }} is experiencing policy-related connection issues."
+        runbook_url: "https://linkerd.io/2.11/tasks/troubleshooting/#policy-enforcement"
+
+    # Critical: Server Authorization Failures
+    - alert: LinkerdServerAuthFailure
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",authorization="denied"}[5m]) > 0.05
+      for: 1m
+      labels:
+        severity: critical
+        component: server-authorization
+      annotations:
+        summary: "Linkerd server authorization failures"
+        description: "High rate of server authorization failures in namespace {{ $labels.namespace }}. Service {{ $labels.pod }} is being denied access due to policy restrictions."
+        runbook_url: "https://linkerd.io/2.11/tasks/troubleshooting/#server-authorization"
+
+    # Critical: Mesh TLS Failures
+    - alert: LinkerdMeshTLSFailure
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",tls="error"}[5m]) > 0.05
+      for: 1m
+      labels:
+        severity: critical
+        component: mesh-tls
+      annotations:
+        summary: "Linkerd mesh TLS failures"
+        description: "High rate of mesh TLS failures in namespace {{ $labels.namespace }}. Service {{ $labels.pod }} cannot establish secure connections due to TLS policy issues."
+        runbook_url: "https://linkerd.io/2.11/tasks/troubleshooting/#mesh-tls"
+
+    # Warning: High Latency Due to Policies
+    - alert: LinkerdPolicyLatencyHigh
+      expr: |
+        histogram_quantile(0.95, 
+          rate(linkerd_proxy_request_duration_seconds_bucket{namespace="mocks"}[5m])
+        ) > 1.0
+      for: 2m
+      labels:
+        severity: warning
+        component: policy-latency
+      annotations:
+        summary: "Linkerd policy enforcement causing high latency"
+        description: "95th percentile latency is high (>1s) in namespace {{ $labels.namespace }}. Policy enforcement may be causing performance degradation."
+
+    # Critical: Network Policy Blocking Traffic
+    - alert: LinkerdNetworkPolicyBlocking
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="network_policy_denied"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: network-policy
+      annotations:
+        summary: "Network policies are blocking traffic"
+        description: "Network policies are actively blocking traffic to service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Connection cannot be established."
+
+    # Critical: Service Discovery Failures
+    - alert: LinkerdServiceDiscoveryFailure
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="service_discovery"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: service-discovery
+      annotations:
+        summary: "Linkerd service discovery failures"
+        description: "Service discovery is failing for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Cannot resolve service endpoints due to policy restrictions."
+
+    # Critical: Port Access Denied
+    - alert: LinkerdPortAccessDenied
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="port_access_denied"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: port-access
+      annotations:
+        summary: "Linkerd port access denied"
+        description: "Port access is being denied for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Required ports are blocked by policies."
+
+    # Critical: Proxy Protocol Mismatch
+    - alert: LinkerdProxyProtocolMismatch
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="proxy_protocol_mismatch"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: proxy-protocol
+      annotations:
+        summary: "Linkerd proxy protocol mismatch"
+        description: "Proxy protocol mismatch detected for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Protocol configuration conflicts with policies."
+
+    # Critical: Client Authentication Failures
+    - alert: LinkerdClientAuthFailure
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="client_auth_failed"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: client-auth
+      annotations:
+        summary: "Linkerd client authentication failures"
+        description: "Client authentication is failing for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Client identity is not authorized by policies."
+
+    # Critical: Server Authorization Timeout
+    - alert: LinkerdServerAuthTimeout
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="server_auth_timeout"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: server-auth-timeout
+      annotations:
+        summary: "Linkerd server authorization timeout"
+        description: "Server authorization is timing out for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Policy evaluation is taking too long."
+
+    # Critical: Network CIDR Blocking
+    - alert: LinkerdNetworkCIDRBlocked
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="network_cidr_blocked"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: network-cidr
+      annotations:
+        summary: "Linkerd network CIDR blocking traffic"
+        description: "Network CIDR restrictions are blocking traffic to service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Source IP is not allowed by policies."
+
+    # Critical: Service Mesh Connectivity Lost
+    - alert: LinkerdServiceMeshDown
+      expr: |
+        up{job="linkerd-proxy",namespace="mocks"} == 0
+      for: 1m
+      labels:
+        severity: critical
+        component: service-mesh
+      annotations:
+        summary: "Linkerd service mesh is down"
+        description: "Linkerd proxy is down for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Complete loss of service mesh connectivity."
+
+    # Warning: High Error Rate
+    - alert: LinkerdHighErrorRate
+      expr: |
+        (
+          rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure"}[5m]) /
+          rate(linkerd_proxy_requests_total{namespace="mocks"}[5m])
+        ) > 0.1
+      for: 2m
+      labels:
+        severity: warning
+        component: error-rate
+      annotations:
+        summary: "High error rate in Linkerd service mesh"
+        description: "Error rate is above 10% for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. This may indicate policy configuration issues."
+
+    # Critical: Complete Service Isolation
+    - alert: LinkerdServiceIsolated
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",direction="inbound"}[5m]))
+        and
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",direction="outbound"}[5m]))
+      for: 2m
+      labels:
+        severity: critical
+        component: service-isolation
+      annotations:
+        summary: "Linkerd service is completely isolated"
+        description: "Service {{ $labels.pod }} in namespace {{ $labels.namespace }} has no inbound or outbound traffic. Service is completely isolated by policies."
+
+    # Critical: Policy Configuration Error
+    - alert: LinkerdPolicyConfigError
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="policy_config_error"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: policy-config
+      annotations:
+        summary: "Linkerd policy configuration error"
+        description: "Policy configuration error detected for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Policies are misconfigured and blocking traffic."
+
+    # Critical: Service Endpoint Unreachable
+    - alert: LinkerdServiceEndpointUnreachable
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="endpoint_unreachable"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: endpoint-reachability
+      annotations:
+        summary: "Linkerd service endpoint unreachable"
+        description: "Service endpoints are unreachable for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Network policies may be blocking endpoint access."
+
+    # Critical: DNS Resolution Failure
+    - alert: LinkerdDNSResolutionFailure
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="dns_resolution_failed"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: dns-resolution
+      annotations:
+        summary: "Linkerd DNS resolution failure"
+        description: "DNS resolution is failing for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Cannot resolve service names due to policy restrictions."
+
+    # Critical: Connection Pool Exhaustion
+    - alert: LinkerdConnectionPoolExhausted
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="connection_pool_exhausted"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: connection-pool
+      annotations:
+        summary: "Linkerd connection pool exhausted"
+        description: "Connection pool is exhausted for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Cannot establish new connections due to policy limits."
+
+    # Critical: Circuit Breaker Open
+    - alert: LinkerdCircuitBreakerOpen
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="circuit_breaker_open"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: circuit-breaker
+      annotations:
+        summary: "Linkerd circuit breaker is open"
+        description: "Circuit breaker is open for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Service is failing due to policy-related issues."
+
+    # Critical: Rate Limiting Active
+    - alert: LinkerdRateLimitingActive
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="rate_limited"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: rate-limiting
+      annotations:
+        summary: "Linkerd rate limiting is active"
+        description: "Rate limiting is active for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Traffic is being throttled by policies."
+
+    # Critical: Service Mesh Policy Violation
+    - alert: LinkerdServiceMeshPolicyViolation
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="policy_violation"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: policy-violation
+      annotations:
+        summary: "Linkerd service mesh policy violation"
+        description: "Service mesh policy violation detected for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Traffic is being blocked due to policy violations."
+
+    # Critical: Network Segmentation Failure
+    - alert: LinkerdNetworkSegmentationFailure
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="network_segmentation_failed"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: network-segmentation
+      annotations:
+        summary: "Linkerd network segmentation failure"
+        description: "Network segmentation is failing for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Traffic is not properly segmented by policies."
+
+    # Critical: Service Identity Mismatch
+    - alert: LinkerdServiceIdentityMismatch
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="service_identity_mismatch"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: service-identity
+      annotations:
+        summary: "Linkerd service identity mismatch"
+        description: "Service identity mismatch detected for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Service identity does not match policy requirements."
+
+    # Critical: Network Policy Denial
+    - alert: LinkerdNetworkPolicyDenial
+      expr: |
+        rate(linkerd_proxy_requests_total{namespace="mocks",classification="failure",error="network_policy_denial"}[5m]) > 0.01
+      for: 30s
+      labels:
+        severity: critical
+        component: network-policy-denial
+      annotations:
+        summary: "Linkerd network policy denial"
+        description: "Network policy is denying traffic for service {{ $labels.pod }} in namespace {{ $labels.namespace }}. Traffic is being blocked by network policies."
+
+    # Critical: Service Mesh Connectivity Critical
+    - alert: LinkerdServiceMeshConnectivityCritical
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks"}[5m]))
+        and
+        up{job="linkerd-proxy",namespace="mocks"} == 1
+      for: 1m
+      labels:
+        severity: critical
+        component: service-mesh-connectivity
+      annotations:
+        summary: "CRITICAL: Linkerd service mesh connectivity is down"
+        description: "CRITICAL: Service {{ $labels.pod }} in namespace {{ $labels.namespace }} has no network traffic despite proxy being up. This indicates a critical policy issue that MUST be resolved immediately. CONNECTION CANNOT STOP!"
+        runbook_url: "https://linkerd.io/2.11/tasks/troubleshooting/#critical-connectivity-issues"

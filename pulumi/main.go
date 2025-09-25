@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/pulumi/pulumi-command/sdk/go/command/local"
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes"
@@ -56,24 +55,6 @@ func main() {
 			return err
 		}
 
-		// Get GitHub token from environment variable
-		githubToken := os.Getenv("GITHUB_TOKEN")
-		if githubToken == "" {
-			return fmt.Errorf("GITHUB_TOKEN environment variable is required")
-		}
-
-		// Get GitHub username from environment variable or use default
-		githubUsername := os.Getenv("GITHUB_USERNAME")
-		if githubUsername == "" {
-			githubUsername = "brunovlucena"
-		}
-
-		// Get Cloudflare token from environment variable
-		cloudflareToken := os.Getenv("CLOUDFLARE_TOKEN")
-		if cloudflareToken == "" {
-			return fmt.Errorf("CLOUDFLARE_TOKEN environment variable is required")
-		}
-
 		// Install Flux controllers only (without GitRepository creation)
 		flux, err := local.NewCommand(ctx, "install-flux", &local.CommandArgs{
 			Create: pulumi.String(fmt.Sprintf("flux install --context kind-%s", clusterName)),
@@ -82,33 +63,8 @@ func main() {
 			return err
 		}
 
-		// Create the GitHub secret using kubectl (with cleanup to handle existing secrets)
-		createSecret, err := local.NewCommand(ctx, "create-github-secret", &local.CommandArgs{
-			Create: pulumi.String(fmt.Sprintf(`kubectl --context kind-%s delete secret home --namespace=flux-system --ignore-not-found=true && \
-kubectl --context kind-%s create secret generic home --namespace=flux-system --from-literal=username=%s --from-literal=password=%s`,
-				clusterName, clusterName, githubUsername, githubToken)),
-		}, pulumi.DependsOn([]pulumi.Resource{flux}))
-		if err != nil {
-			return err
-		}
-
-		// Create the Docker registry secret for GHCR
-		createDockerSecret, err := local.NewCommand(ctx, "create-docker-secret", &local.CommandArgs{
-			Create: pulumi.String(fmt.Sprintf(`kubectl --context kind-%s create namespace bruno --dry-run=client -o yaml | kubectl apply -f - && \
-kubectl --context kind-%s delete secret ghcr-secret --namespace=bruno --ignore-not-found=true && \
-kubectl --context kind-%s create secret docker-registry ghcr-secret \
-    --docker-server=ghcr.io \
-    --docker-username=%s \
-    --docker-password=%s \
-    --namespace=bruno`,
-				clusterName, clusterName, clusterName, githubUsername, githubToken)),
-		}, pulumi.DependsOn([]pulumi.Resource{flux}))
-		if err != nil {
-			return err
-		}
-
 		// Create namespaces first
-		createNamespaces, err := local.NewCommand(ctx, "create-namespaces", &local.CommandArgs{
+		_, err = local.NewCommand(ctx, "create-namespace", &local.CommandArgs{
 			Create: pulumi.String(fmt.Sprintf(`kubectl --context kind-%s create namespace cloudflare-ddns --dry-run=client -o yaml | kubectl apply -f - && \
 kubectl --context kind-%s create namespace external-dns --dry-run=client -o yaml | kubectl apply -f -`,
 				clusterName, clusterName)),
@@ -117,36 +73,35 @@ kubectl --context kind-%s create namespace external-dns --dry-run=client -o yaml
 			return err
 		}
 
-		// Create Cloudflare secrets for both namespaces
-		namespaces := []string{"cloudflare-ddns", "external-dns"}
-		var cloudflareSecrets []pulumi.Resource
+		// Install Linkerd before infrastructure deployment
+		linkerdInstall, err := local.NewCommand(ctx, "linkerd-install", &local.CommandArgs{
+			Create: pulumi.String(fmt.Sprintf("cd ../scripts && ./install-linkerd.sh %s", clusterName)),
+		}, pulumi.DependsOn([]pulumi.Resource{flux}))
+		if err != nil {
+			return err
+		}
 
-		for _, namespace := range namespaces {
-			secret, err := local.NewCommand(ctx, fmt.Sprintf("create-cloudflare-secret-%s", namespace), &local.CommandArgs{
-				Create: pulumi.String(fmt.Sprintf(`kubectl --context kind-%s delete secret cloudflare-api-token --namespace=%s --ignore-not-found=true && \
-kubectl --context kind-%s create secret generic cloudflare-api-token --namespace=%s --from-literal=api-token=%s`,
-					clusterName, namespace, clusterName, namespace, cloudflareToken)),
-			}, pulumi.DependsOn([]pulumi.Resource{createNamespaces}))
-			if err != nil {
-				return err
-			}
-			cloudflareSecrets = append(cloudflareSecrets, secret)
+		// Install Linkerd Viz
+		linkerdViz, err := local.NewCommand(ctx, "linkerd-viz-install", &local.CommandArgs{
+			Create: pulumi.String(fmt.Sprintf("cd ../scripts && ./install-linkerd-viz.sh %s", clusterName)),
+		}, pulumi.DependsOn([]pulumi.Resource{linkerdInstall}))
+		if err != nil {
+			return err
 		}
 
 		// Deploy infrastructure components using Kustomize from actual YAML files
 		infrastructureResources, err := kustomize.NewDirectory(ctx, "infrastructure-resources", kustomize.DirectoryArgs{
 			Directory: pulumi.String(fmt.Sprintf("../flux/clusters/%s/infrastructure", clusterName)),
-		}, pulumi.Provider(k8sProvider), pulumi.DependsOn(append([]pulumi.Resource{createSecret, createDockerSecret}, cloudflareSecrets...)))
+		}, pulumi.Provider(k8sProvider), pulumi.DependsOn([]pulumi.Resource{linkerdViz}))
 		if err != nil {
 			return err
 		}
 
 		// Export cluster information
 		ctx.Export("clusterName", pulumi.String(clusterName))
-		ctx.Export("certManagerDeployed", pulumi.String("deployed"))
-		ctx.Export("fluxOperatorInstalled", pulumi.String("installed"))
 		ctx.Export("fluxInstanceDeployed", pulumi.String("deployed"))
-		ctx.Export("observabilityComponents", pulumi.String("deployed"))
+		ctx.Export("linkerdInstalled", pulumi.String("installed"))
+		ctx.Export("linkerdVizInstalled", pulumi.String("installed"))
 		ctx.Export("infrastructureResources", infrastructureResources.Resources)
 
 		return nil

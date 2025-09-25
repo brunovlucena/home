@@ -1,0 +1,927 @@
+# Comprehensive Test Suite for Notifi Mock Infrastructure
+# This file provides test pods, jobs, and validation for all service types
+# based on the infrastructure.yaml and linkerd-policies.yaml configurations.
+
+# Test Pod for Gateway Services
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gateway-test-client
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: gateway-test-client
+    app.kubernetes.io/component: test-client
+spec:
+  restartPolicy: Never
+  containers:
+  - name: test-client
+    image: alpine:latest
+    command: ["/bin/sh"]
+    args:
+    - -c
+    - |
+      echo "Testing Gateway Services..."
+      
+      # Install curl
+      apk add --no-cache curl
+      
+      # Test Management Gateway
+      echo "Testing mock-management-gateway:5000"
+      curl -f http://mock-management-gateway:5000/ || echo "Management Gateway HTTP test failed"
+      curl -f http://mock-management-gateway:6000/ || echo "Management Gateway Health test failed"
+      curl -f http://mock-management-gateway:7000/ || echo "Management Gateway Metrics test failed"
+      
+      # Test Dataplane Gateway
+      echo "Testing mock-dataplane-gateway:80"
+      curl -f http://mock-dataplane-gateway:80/ || echo "Dataplane Gateway HTTP test failed"
+      curl -f http://mock-dataplane-gateway:6000/ || echo "Dataplane Gateway Health test failed"
+      curl -f http://mock-dataplane-gateway:7000/ || echo "Dataplane Gateway Metrics test failed"
+      
+      echo "Gateway tests completed"
+      sleep 3600
+
+---
+# Test Pod for gRPC Services (Manager Components)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: grpc-test-client
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: grpc-test-client
+    app.kubernetes.io/component: test-client
+spec:
+  restartPolicy: Never
+  containers:
+  - name: grpc-test-client
+    image: alpine:latest
+    command: ["/bin/sh"]
+    args:
+    - -c
+    - |
+      echo "Testing gRPC Services..."
+      
+      # Install curl for basic testing
+      apk add --no-cache curl
+      
+      # Test all manager services
+      services=(
+        "mock-user-manager:4000"
+        "mock-template-manager:4000"
+        "mock-tenant-manager:4000"
+        "mock-blockchain-manager:4000"
+        "mock-chat-manager:4000"
+        "mock-storage-manager:4000"
+        "mock-fusion-manager:4000"
+        "mock-subscription-manager:4000"
+        "mock-points-manager:4000"
+        "mock-scheduler:4000"
+        "mock-rate-limit-broker:4000"
+      )
+      
+      for service in "${services[@]}"; do
+        echo "Testing $service"
+        # Test health endpoints
+        curl -f http://$service/health || echo "Health check failed for $service"
+        curl -f http://$service/metrics || echo "Metrics check failed for $service"
+      done
+      
+      echo "gRPC tests completed"
+      sleep 3600
+
+---
+# Test Pod for Messenger Services
+apiVersion: v1
+kind: Pod
+metadata:
+  name: messenger-test-client
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: messenger-test-client
+    app.kubernetes.io/component: test-client
+spec:
+  restartPolicy: Never
+  containers:
+  - name: messenger-test-client
+    image: alpine:latest
+    command: ["/bin/sh"]
+    args:
+    - -c
+    - |
+      echo "Testing Messenger Services..."
+      
+      # Install curl
+      apk add --no-cache curl
+      
+      # Test all messenger services
+      services=(
+        "mock-mailer:5000"
+        "mock-sms-messenger:5000"
+        "mock-telegram-messenger:5000"
+        "mock-fcm-messenger:5000"
+        "mock-discord-messenger:5000"
+        "mock-slack-channel-messenger:5000"
+        "mock-web-push-messenger:5000"
+        "mock-web3-messenger:5000"
+        "mock-webhook-sender:5000"
+      )
+      
+      for service in "${services[@]}"; do
+        echo "Testing $service"
+        # Test HTTP endpoints
+        curl -f http://$service/ || echo "HTTP test failed for $service"
+        curl -f http://$service/health || echo "Health test failed for $service"
+        curl -f http://$service/metrics || echo "Metrics test failed for $service"
+      done
+      
+      echo "Messenger tests completed"
+      sleep 3600
+
+---
+# Test Pod for Proxy Services
+apiVersion: v1
+kind: Pod
+metadata:
+  name: proxy-test-client
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: proxy-test-client
+    app.kubernetes.io/component: test-client
+spec:
+  restartPolicy: Never
+  containers:
+  - name: proxy-test-client
+    image: alpine:latest
+    command: ["/bin/sh"]
+    args:
+    - -c
+    - |
+      echo "Testing Proxy Services..."
+      
+      # Install curl
+      apk add --no-cache curl
+      
+      # Test all proxy services
+      services=(
+        "mock-evm-proxy:7000"
+        "mock-solana-proxy:7000"
+        "mock-aptos-proxy:7000"
+        "mock-sui-proxy:7000"
+        "mock-cosmos-proxy:7000"
+        "mock-btc-proxy:7000"
+        "mock-xmtp-proxy:5000"
+        "mock-rpc-proxy:80"
+        "mock-fetch-proxy:4000"
+      )
+      
+      for service in "${services[@]}"; do
+        echo "Testing $service"
+        # Test HTTP endpoints
+        curl -f http://$service/ || echo "HTTP test failed for $service"
+        curl -f http://$service/health || echo "Health test failed for $service"
+        curl -f http://$service/metrics || echo "Metrics test failed for $service"
+      done
+      
+      echo "Proxy tests completed"
+      sleep 3600
+
+---
+# Test Pod for Database Services
+apiVersion: v1
+kind: Pod
+metadata:
+  name: database-test-client
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: database-test-client
+    app.kubernetes.io/component: test-client
+spec:
+  restartPolicy: Never
+  containers:
+  - name: database-test-client
+    image: alpine:latest
+    command: ["/bin/sh"]
+    args:
+    - -c
+    - |
+      echo "Testing Database Services..."
+      
+      # Install curl and netcat
+      apk add --no-cache curl netcat-openbsd
+      
+      # Test ClickHouse
+      echo "Testing mock-clickhouse:8123"
+      curl -f http://mock-clickhouse:8123/ || echo "ClickHouse HTTP test failed"
+      curl -f http://mock-clickhouse:9000/ || echo "ClickHouse Native test failed"
+      
+      # Test Redis Cache
+      echo "Testing mock-internal-cache:6379"
+      # Note: Redis doesn't have HTTP endpoints, so we'll just test connectivity
+      nc -z mock-internal-cache 6379 && echo "Redis connectivity test passed" || echo "Redis connectivity test failed"
+      
+      echo "Database tests completed"
+      sleep 3600
+
+---
+# Test Pod for Monitoring Services
+apiVersion: v1
+kind: Pod
+metadata:
+  name: monitoring-test-client
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: monitoring-test-client
+    app.kubernetes.io/component: test-client
+spec:
+  restartPolicy: Never
+  containers:
+  - name: monitoring-test-client
+    image: alpine:latest
+    command: ["/bin/sh"]
+    args:
+    - -c
+    - |
+      echo "Testing Monitoring Services..."
+      
+      # Install curl
+      apk add --no-cache curl
+      
+      # Test monitor service
+      echo "Testing mock-monitor:5000"
+      curl -f http://mock-monitor:5000/ || echo "Monitor HTTP test failed"
+      curl -f http://mock-monitor:6000/ || echo "Monitor Health test failed"
+      curl -f http://mock-monitor:7000/ || echo "Monitor Metrics test failed"
+      
+      echo "Monitoring tests completed"
+      sleep 3600
+
+---
+# Test Pod for Processor Services
+apiVersion: v1
+kind: Pod
+metadata:
+  name: processor-test-client
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: processor-test-client
+    app.kubernetes.io/component: test-client
+spec:
+  restartPolicy: Never
+  containers:
+  - name: processor-test-client
+    image: alpine:latest
+    command: ["/bin/sh"]
+    args:
+    - -c
+    - |
+      echo "Testing Processor Services..."
+      
+      # Install curl
+      apk add --no-cache curl
+      
+      # Test event processor
+      echo "Testing mock-event-processor:5000"
+      curl -f http://mock-event-processor:5000/ || echo "Event Processor HTTP test failed"
+      curl -f http://mock-event-processor:6000/ || echo "Event Processor Health test failed"
+      curl -f http://mock-event-processor:7000/ || echo "Event Processor Metrics test failed"
+      
+      echo "Processor tests completed"
+      sleep 3600
+
+---
+# Test Pod for Handler Services
+apiVersion: v1
+kind: Pod
+metadata:
+  name: handler-test-client
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: handler-test-client
+    app.kubernetes.io/component: test-client
+spec:
+  restartPolicy: Never
+  containers:
+  - name: handler-test-client
+    image: alpine:latest
+    command: ["/bin/sh"]
+    args:
+    - -c
+    - |
+      echo "Testing Handler Services..."
+      
+      # Install curl
+      apk add --no-cache curl
+      
+      # Test callback handler
+      echo "Testing mock-callback-handler:5000"
+      curl -f http://mock-callback-handler:5000/ || echo "Callback Handler HTTP test failed"
+      curl -f http://mock-callback-handler:6000/ || echo "Callback Handler Health test failed"
+      curl -f http://mock-callback-handler:7000/ || echo "Callback Handler Metrics test failed"
+      
+      echo "Handler tests completed"
+      sleep 3600
+
+---
+# Test Pod for Service Components
+apiVersion: v1
+kind: Pod
+metadata:
+  name: service-test-client
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: service-test-client
+    app.kubernetes.io/component: test-client
+spec:
+  restartPolicy: Never
+  containers:
+  - name: service-test-client
+    image: alpine:latest
+    command: ["/bin/sh"]
+    args:
+    - -c
+    - |
+      echo "Testing Service Components..."
+      
+      # Install curl
+      apk add --no-cache curl
+      
+      # Test outpost service
+      echo "Testing mock-outpost-service:5000"
+      curl -f http://mock-outpost-service:5000/ || echo "Outpost Service HTTP test failed"
+      curl -f http://mock-outpost-service:6000/ || echo "Outpost Service Health test failed"
+      curl -f http://mock-outpost-service:7000/ || echo "Outpost Service Metrics test failed"
+      
+      echo "Service tests completed"
+      sleep 3600
+
+---
+# Test Pod for gRPC Server Services
+apiVersion: v1
+kind: Pod
+metadata:
+  name: grpc-server-test-client
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: grpc-server-test-client
+    app.kubernetes.io/component: test-client
+spec:
+  restartPolicy: Never
+  containers:
+  - name: grpc-server-test-client
+    image: alpine:latest
+    command: ["/bin/sh"]
+    args:
+    - -c
+    - |
+      echo "Testing gRPC Server Services..."
+      
+      # Install curl for basic testing
+      apk add --no-cache curl
+      
+      # Test gRPC server
+      echo "Testing mock-grpc-server:50051"
+      curl -f http://mock-grpc-server:6000/ || echo "gRPC Server Health test failed"
+      curl -f http://mock-grpc-server:7000/ || echo "gRPC Server Metrics test failed"
+      
+      echo "gRPC Server tests completed"
+      sleep 3600
+
+---
+# Test Pod for WebSocket Server Services
+apiVersion: v1
+kind: Pod
+metadata:
+  name: websocket-test-client
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: websocket-test-client
+    app.kubernetes.io/component: test-client
+spec:
+  restartPolicy: Never
+  containers:
+  - name: websocket-test-client
+    image: alpine:latest
+    command: ["/bin/sh"]
+    args:
+    - -c
+    - |
+      echo "Testing WebSocket Server Services..."
+      
+      # Install curl for basic testing
+      apk add --no-cache curl
+      
+      # Test WebSocket server
+      echo "Testing mock-websocket-server:8080"
+      curl -f http://mock-websocket-server:6000/ || echo "WebSocket Server Health test failed"
+      curl -f http://mock-websocket-server:7000/ || echo "WebSocket Server Metrics test failed"
+      
+      echo "WebSocket tests completed"
+      sleep 3600
+
+---
+# Load Testing Job for Gateway Services
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gateway-load-test
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: gateway-load-test
+    app.kubernetes.io/component: load-test
+spec:
+  completions: 1
+  parallelism: 1
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gateway-load-test
+        app.kubernetes.io/component: load-test
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: load-test
+        image: alpine:latest
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          echo "Starting Gateway Load Tests..."
+          
+          # Install curl
+          apk add --no-cache curl
+          
+          # Load test management gateway
+          echo "Load testing mock-management-gateway:5000"
+          for i in $(seq 1 100); do
+            curl -f http://mock-management-gateway:5000/ > /dev/null 2>&1 || echo "Request $i failed"
+            sleep 0.1
+          done
+          
+          # Load test dataplane gateway
+          echo "Load testing mock-dataplane-gateway:80"
+          for i in $(seq 1 100); do
+            curl -f http://mock-dataplane-gateway:80/ > /dev/null 2>&1 || echo "Request $i failed"
+            sleep 0.1
+          done
+          
+          echo "Gateway load tests completed"
+
+---
+# Load Testing Job for gRPC Services
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: grpc-load-test
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: grpc-load-test
+    app.kubernetes.io/component: load-test
+spec:
+  completions: 1
+  parallelism: 1
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: grpc-load-test
+        app.kubernetes.io/component: load-test
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: load-test
+        image: alpine:latest
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          echo "Starting gRPC Load Tests..."
+          
+          # Install curl
+          apk add --no-cache curl
+          
+          # Load test all manager services
+          services=(
+            "mock-user-manager:4000"
+            "mock-template-manager:4000"
+            "mock-tenant-manager:4000"
+            "mock-blockchain-manager:4000"
+            "mock-chat-manager:4000"
+            "mock-storage-manager:4000"
+            "mock-fusion-manager:4000"
+            "mock-subscription-manager:4000"
+            "mock-points-manager:4000"
+            "mock-scheduler:4000"
+            "mock-rate-limit-broker:4000"
+          )
+          
+          for service in "${services[@]}"; do
+            echo "Load testing $service"
+            for i in $(seq 1 50); do
+              curl -f http://$service/health > /dev/null 2>&1 || echo "Health check $i failed for $service"
+              curl -f http://$service/metrics > /dev/null 2>&1 || echo "Metrics check $i failed for $service"
+              sleep 0.1
+            done
+          done
+          
+          echo "gRPC load tests completed"
+
+---
+# Load Testing Job for Messenger Services
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: messenger-load-test
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: messenger-load-test
+    app.kubernetes.io/component: load-test
+spec:
+  completions: 1
+  parallelism: 1
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: messenger-load-test
+        app.kubernetes.io/component: load-test
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: load-test
+        image: alpine:latest
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          echo "Starting Messenger Load Tests..."
+          
+          # Install curl
+          apk add --no-cache curl
+          
+          # Load test all messenger services
+          services=(
+            "mock-mailer:5000"
+            "mock-sms-messenger:5000"
+            "mock-telegram-messenger:5000"
+            "mock-fcm-messenger:5000"
+            "mock-discord-messenger:5000"
+            "mock-slack-channel-messenger:5000"
+            "mock-web-push-messenger:5000"
+            "mock-web3-messenger:5000"
+            "mock-webhook-sender:5000"
+          )
+          
+          for service in "${services[@]}"; do
+            echo "Load testing $service"
+            for i in $(seq 1 50); do
+              curl -f http://$service/ > /dev/null 2>&1 || echo "HTTP request $i failed for $service"
+              curl -f http://$service/health > /dev/null 2>&1 || echo "Health check $i failed for $service"
+              curl -f http://$service/metrics > /dev/null 2>&1 || echo "Metrics check $i failed for $service"
+              sleep 0.1
+            done
+          done
+          
+          echo "Messenger load tests completed"
+
+---
+# Network Policy Test Job
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: network-policy-test
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: network-policy-test
+    app.kubernetes.io/component: security-test
+spec:
+  completions: 1
+  parallelism: 1
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: network-policy-test
+        app.kubernetes.io/component: security-test
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: network-test
+        image: alpine:latest
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          echo "Testing Network Policies and Security..."
+          
+          # Install curl
+          apk add --no-cache curl
+          
+          # Test that services are accessible within the cluster
+          echo "Testing internal connectivity..."
+          
+          # Test gateway services
+          curl -f http://mock-management-gateway:5000/ && echo "Management Gateway accessible" || echo "Management Gateway not accessible"
+          curl -f http://mock-dataplane-gateway:80/ && echo "Dataplane Gateway accessible" || echo "Dataplane Gateway not accessible"
+          
+          # Test manager services
+          curl -f http://mock-user-manager:4000/health && echo "User Manager accessible" || echo "User Manager not accessible"
+          curl -f http://mock-template-manager:4000/health && echo "Template Manager accessible" || echo "Template Manager not accessible"
+          
+          # Test messenger services
+          curl -f http://mock-mailer:5000/ && echo "Mailer accessible" || echo "Mailer not accessible"
+          curl -f http://mock-sms-messenger:5000/ && echo "SMS Messenger accessible" || echo "SMS Messenger not accessible"
+          
+          # Test proxy services
+          curl -f http://mock-evm-proxy:7000/ && echo "EVM Proxy accessible" || echo "EVM Proxy not accessible"
+          curl -f http://mock-solana-proxy:7000/ && echo "Solana Proxy accessible" || echo "Solana Proxy not accessible"
+          
+          # Test database services
+          curl -f http://mock-clickhouse:8123/ && echo "ClickHouse accessible" || echo "ClickHouse not accessible"
+          
+          # Test monitoring services
+          curl -f http://mock-monitor:5000/ && echo "Monitor accessible" || echo "Monitor not accessible"
+          
+          echo "Network policy tests completed"
+
+---
+# Comprehensive Integration Test Job
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: integration-test
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: integration-test
+    app.kubernetes.io/component: integration-test
+spec:
+  completions: 1
+  parallelism: 1
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: integration-test
+        app.kubernetes.io/component: integration-test
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: integration-test
+        image: alpine:latest
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          echo "Starting Comprehensive Integration Tests..."
+          
+          # Install curl
+          apk add --no-cache curl
+          
+          # Test all service types systematically
+          echo "=== GATEWAY SERVICES ==="
+          curl -f http://mock-management-gateway:5000/ && echo "✓ Management Gateway" || echo "✗ Management Gateway"
+          curl -f http://mock-dataplane-gateway:80/ && echo "✓ Dataplane Gateway" || echo "✗ Dataplane Gateway"
+          
+          echo "=== MANAGER SERVICES ==="
+          curl -f http://mock-user-manager:4000/health && echo "✓ User Manager" || echo "✗ User Manager"
+          curl -f http://mock-template-manager:4000/health && echo "✓ Template Manager" || echo "✗ Template Manager"
+          curl -f http://mock-tenant-manager:4000/health && echo "✓ Tenant Manager" || echo "✗ Tenant Manager"
+          curl -f http://mock-blockchain-manager:4000/health && echo "✓ Blockchain Manager" || echo "✗ Blockchain Manager"
+          curl -f http://mock-chat-manager:4000/health && echo "✓ Chat Manager" || echo "✗ Chat Manager"
+          curl -f http://mock-storage-manager:4000/health && echo "✓ Storage Manager" || echo "✗ Storage Manager"
+          curl -f http://mock-fusion-manager:4000/health && echo "✓ Fusion Manager" || echo "✗ Fusion Manager"
+          curl -f http://mock-subscription-manager:4000/health && echo "✓ Subscription Manager" || echo "✗ Subscription Manager"
+          curl -f http://mock-points-manager:4000/health && echo "✓ Points Manager" || echo "✗ Points Manager"
+          
+          echo "=== MESSENGER SERVICES ==="
+          curl -f http://mock-mailer:5000/ && echo "✓ Mailer" || echo "✗ Mailer"
+          curl -f http://mock-sms-messenger:5000/ && echo "✓ SMS Messenger" || echo "✗ SMS Messenger"
+          curl -f http://mock-telegram-messenger:5000/ && echo "✓ Telegram Messenger" || echo "✗ Telegram Messenger"
+          curl -f http://mock-fcm-messenger:5000/ && echo "✓ FCM Messenger" || echo "✗ FCM Messenger"
+          curl -f http://mock-discord-messenger:5000/ && echo "✓ Discord Messenger" || echo "✗ Discord Messenger"
+          curl -f http://mock-slack-channel-messenger:5000/ && echo "✓ Slack Channel Messenger" || echo "✗ Slack Channel Messenger"
+          curl -f http://mock-web-push-messenger:5000/ && echo "✓ Web Push Messenger" || echo "✗ Web Push Messenger"
+          curl -f http://mock-web3-messenger:5000/ && echo "✓ Web3 Messenger" || echo "✗ Web3 Messenger"
+          curl -f http://mock-webhook-sender:5000/ && echo "✓ Webhook Sender" || echo "✗ Webhook Sender"
+          
+          echo "=== PROXY SERVICES ==="
+          curl -f http://mock-evm-proxy:7000/ && echo "✓ EVM Proxy" || echo "✗ EVM Proxy"
+          curl -f http://mock-solana-proxy:7000/ && echo "✓ Solana Proxy" || echo "✗ Solana Proxy"
+          curl -f http://mock-aptos-proxy:7000/ && echo "✓ Aptos Proxy" || echo "✗ Aptos Proxy"
+          curl -f http://mock-sui-proxy:7000/ && echo "✓ SUI Proxy" || echo "✗ SUI Proxy"
+          curl -f http://mock-cosmos-proxy:7000/ && echo "✓ Cosmos Proxy" || echo "✗ Cosmos Proxy"
+          curl -f http://mock-btc-proxy:7000/ && echo "✓ BTC Proxy" || echo "✗ BTC Proxy"
+          curl -f http://mock-xmtp-proxy:5000/ && echo "✓ XMTP Proxy" || echo "✗ XMTP Proxy"
+          curl -f http://mock-rpc-proxy:80/ && echo "✓ RPC Proxy" || echo "✗ RPC Proxy"
+          curl -f http://mock-fetch-proxy:4000/ && echo "✓ Fetch Proxy" || echo "✗ Fetch Proxy"
+          
+          echo "=== DATABASE SERVICES ==="
+          curl -f http://mock-clickhouse:8123/ && echo "✓ ClickHouse" || echo "✗ ClickHouse"
+          nc -z mock-internal-cache 6379 && echo "✓ Redis Cache" || echo "✗ Redis Cache"
+          
+          echo "=== MONITORING SERVICES ==="
+          curl -f http://mock-monitor:5000/ && echo "✓ Monitor" || echo "✗ Monitor"
+          
+          echo "=== SCHEDULER SERVICES ==="
+          curl -f http://mock-scheduler:4000/health && echo "✓ Scheduler" || echo "✗ Scheduler"
+          
+          echo "=== PROCESSOR SERVICES ==="
+          curl -f http://mock-event-processor:5000/ && echo "✓ Event Processor" || echo "✗ Event Processor"
+          
+          echo "=== BROKER SERVICES ==="
+          curl -f http://mock-rate-limit-broker:4000/health && echo "✓ Rate Limit Broker" || echo "✗ Rate Limit Broker"
+          
+          echo "=== HANDLER SERVICES ==="
+          curl -f http://mock-callback-handler:5000/ && echo "✓ Callback Handler" || echo "✗ Callback Handler"
+          
+          echo "=== SERVICE COMPONENTS ==="
+          curl -f http://mock-outpost-service:5000/ && echo "✓ Outpost Service" || echo "✗ Outpost Service"
+          
+          echo "=== gRPC SERVER SERVICES ==="
+          curl -f http://mock-grpc-server:6000/ && echo "✓ gRPC Server Health" || echo "✗ gRPC Server Health"
+          curl -f http://mock-grpc-server:7000/ && echo "✓ gRPC Server Metrics" || echo "✗ gRPC Server Metrics"
+          
+          echo "=== WEBSOCKET SERVER SERVICES ==="
+          curl -f http://mock-websocket-server:6000/ && echo "✓ WebSocket Server Health" || echo "✗ WebSocket Server Health"
+          curl -f http://mock-websocket-server:7000/ && echo "✓ WebSocket Server Metrics" || echo "✗ WebSocket Server Metrics"
+          
+          echo "=== INTEGRATION TESTS COMPLETED ==="
+          echo "All services have been tested for basic connectivity and health checks."
+
+---
+# Metrics Collection Job
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: metrics-collection-test
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: metrics-collection-test
+    app.kubernetes.io/component: metrics-test
+spec:
+  completions: 1
+  parallelism: 1
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: metrics-collection-test
+        app.kubernetes.io/component: metrics-test
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: metrics-test
+        image: alpine:latest
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - |
+          echo "Collecting Metrics from All Services..."
+          
+          # Install curl
+          apk add --no-cache curl
+          
+          # Collect metrics from all services
+          services=(
+            "mock-management-gateway:7000"
+            "mock-dataplane-gateway:7000"
+            "mock-user-manager:7000"
+            "mock-template-manager:7000"
+            "mock-tenant-manager:7000"
+            "mock-blockchain-manager:7000"
+            "mock-chat-manager:7000"
+            "mock-storage-manager:7000"
+            "mock-fusion-manager:7000"
+            "mock-subscription-manager:7000"
+            "mock-points-manager:7000"
+            "mock-mailer:7000"
+            "mock-sms-messenger:7000"
+            "mock-telegram-messenger:7000"
+            "mock-fcm-messenger:7000"
+            "mock-discord-messenger:7000"
+            "mock-slack-channel-messenger:7000"
+            "mock-web-push-messenger:7000"
+            "mock-web3-messenger:7000"
+            "mock-webhook-sender:7000"
+            "mock-evm-proxy:7000"
+            "mock-solana-proxy:7000"
+            "mock-aptos-proxy:7000"
+            "mock-sui-proxy:7000"
+            "mock-cosmos-proxy:7000"
+            "mock-btc-proxy:7000"
+            "mock-xmtp-proxy:7000"
+            "mock-rpc-proxy:7000"
+            "mock-fetch-proxy:7000"
+            "mock-monitor:7000"
+            "mock-scheduler:7000"
+            "mock-event-processor:7000"
+            "mock-rate-limit-broker:7000"
+            "mock-callback-handler:7000"
+            "mock-outpost-service:7000"
+            "mock-grpc-server:7000"
+            "mock-websocket-server:7000"
+          )
+          
+          for service in "${services[@]}"; do
+            echo "Collecting metrics from $service"
+            curl -s http://$service/metrics | head -20 || echo "No metrics available from $service"
+            echo "---"
+          done
+          
+          echo "Metrics collection completed"
+
+---
+# Health Check CronJob
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: health-check-cronjob
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: health-check-cronjob
+    app.kubernetes.io/component: health-check
+spec:
+  schedule: "*/5 * * * *"  # Every 5 minutes
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: health-check-cronjob
+            app.kubernetes.io/component: health-check
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: health-check
+            image: alpine:latest
+            command: ["/bin/sh"]
+            args:
+            - -c
+            - |
+              echo "Running scheduled health checks..."
+              
+              # Install curl
+              apk add --no-cache curl
+              
+              # Health check all services
+              services=(
+                "mock-management-gateway:6000"
+                "mock-dataplane-gateway:6000"
+                "mock-user-manager:6000"
+                "mock-template-manager:6000"
+                "mock-tenant-manager:6000"
+                "mock-blockchain-manager:6000"
+                "mock-chat-manager:6000"
+                "mock-storage-manager:6000"
+                "mock-fusion-manager:6000"
+                "mock-subscription-manager:6000"
+                "mock-points-manager:6000"
+                "mock-mailer:6000"
+                "mock-sms-messenger:6000"
+                "mock-telegram-messenger:6000"
+                "mock-fcm-messenger:6000"
+                "mock-discord-messenger:6000"
+                "mock-slack-channel-messenger:6000"
+                "mock-web-push-messenger:6000"
+                "mock-web3-messenger:6000"
+                "mock-webhook-sender:6000"
+                "mock-evm-proxy:6000"
+                "mock-solana-proxy:6000"
+                "mock-aptos-proxy:6000"
+                "mock-sui-proxy:6000"
+                "mock-cosmos-proxy:6000"
+                "mock-btc-proxy:6000"
+                "mock-xmtp-proxy:6000"
+                "mock-rpc-proxy:6000"
+                "mock-fetch-proxy:6000"
+                "mock-monitor:6000"
+                "mock-scheduler:6000"
+                "mock-event-processor:6000"
+                "mock-rate-limit-broker:6000"
+                "mock-callback-handler:6000"
+                "mock-outpost-service:6000"
+                "mock-grpc-server:6000"
+                "mock-websocket-server:6000"
+              )
+              
+              healthy_count=0
+              total_count=${#services[@]}
+              
+              for service in "${services[@]}"; do
+                if curl -f http://$service/health > /dev/null 2>&1; then
+                  echo "✓ $service is healthy"
+                  ((healthy_count++))
+                else
+                  echo "✗ $service is unhealthy"
+                fi
+              done
+              
+              echo "Health check summary: $healthy_count/$total_count services healthy"
+              
+              if [ $healthy_count -eq $total_count ]; then
+                echo "All services are healthy!"
+                exit 0
+              else
+                echo "Some services are unhealthy!"
+                exit 1
+              fi

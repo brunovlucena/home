@@ -1,0 +1,310 @@
+# PrometheusRules for Linkerd Service-Specific Network Monitoring
+# These rules monitor connectivity for each service type defined in the Linkerd policies
+# CRITICAL: Connection CANNOT STOP - these rules ensure continuous monitoring
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: linkerd-service-specific-monitoring
+  namespace: mocks
+  labels:
+    app.kubernetes.io/name: linkerd-monitoring
+    app.kubernetes.io/component: prometheus-rules
+spec:
+  groups:
+  - name: linkerd.service.specific
+    rules:
+    # Test Infrastructure Services (port 8080)
+    - alert: LinkerdTestInfrastructureDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*test-infrastructure.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: test-infrastructure
+        service_type: test-infrastructure
+        port: "8080"
+      annotations:
+        summary: "CRITICAL: Test Infrastructure service connectivity down"
+        description: "Test Infrastructure service {{ $labels.pod }} on port 8080 has no network traffic. This could be caused by test-infrastructure-server policy restrictions."
+
+    # Gateway Services (port 80)
+    - alert: LinkerdGatewayServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*gateway.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: gateway
+        service_type: gateway
+        port: "80"
+      annotations:
+        summary: "CRITICAL: Gateway service connectivity down"
+        description: "Gateway service {{ $labels.pod }} on port 80 has no network traffic. This could be caused by gateway-server policy restrictions."
+
+    # gRPC Services (port 4000)
+    - alert: LinkerdGRPCServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*manager.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: grpc
+        service_type: grpc
+        port: "4000"
+      annotations:
+        summary: "CRITICAL: gRPC service connectivity down"
+        description: "gRPC service {{ $labels.pod }} on port 4000 has no network traffic. This could be caused by grpc-server policy restrictions."
+
+    # Messenger Services (port 5000)
+    - alert: LinkerdMessengerServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*messenger.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: messenger
+        service_type: messenger
+        port: "5000"
+      annotations:
+        summary: "CRITICAL: Messenger service connectivity down"
+        description: "Messenger service {{ $labels.pod }} on port 5000 has no network traffic. This could be caused by messenger-server policy restrictions."
+
+    # Proxy Services (port 7000)
+    - alert: LinkerdProxyServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*proxy.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: proxy
+        service_type: proxy
+        port: "7000"
+      annotations:
+        summary: "CRITICAL: Proxy service connectivity down"
+        description: "Proxy service {{ $labels.pod }} on port 7000 has no network traffic. This could be caused by proxy-server policy restrictions."
+
+    # Database Services (port 8123)
+    - alert: LinkerdDatabaseServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*database.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: database
+        service_type: database
+        port: "8123"
+      annotations:
+        summary: "CRITICAL: Database service connectivity down"
+        description: "Database service {{ $labels.pod }} on port 8123 has no network traffic. This could be caused by database-server policy restrictions."
+
+    # Cache Services (port 6379)
+    - alert: LinkerdCacheServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*cache.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: cache
+        service_type: cache
+        port: "6379"
+      annotations:
+        summary: "CRITICAL: Cache service connectivity down"
+        description: "Cache service {{ $labels.pod }} on port 6379 has no network traffic. This could be caused by cache-server policy restrictions."
+
+    # Monitoring Services (port 5000)
+    - alert: LinkerdMonitoringServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*monitoring.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: monitoring
+        service_type: monitoring
+        port: "5000"
+      annotations:
+        summary: "CRITICAL: Monitoring service connectivity down"
+        description: "Monitoring service {{ $labels.pod }} on port 5000 has no network traffic. This could be caused by monitoring-server policy restrictions."
+
+    # Scheduler Services (port 4000)
+    - alert: LinkerdSchedulerServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*scheduler.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: scheduler
+        service_type: scheduler
+        port: "4000"
+      annotations:
+        summary: "CRITICAL: Scheduler service connectivity down"
+        description: "Scheduler service {{ $labels.pod }} on port 4000 has no network traffic. This could be caused by scheduler-server policy restrictions."
+
+    # Processor Services (port 5000)
+    - alert: LinkerdProcessorServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*processor.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: processor
+        service_type: processor
+        port: "5000"
+      annotations:
+        summary: "CRITICAL: Processor service connectivity down"
+        description: "Processor service {{ $labels.pod }} on port 5000 has no network traffic. This could be caused by processor-server policy restrictions."
+
+    # Broker Services (port 4000)
+    - alert: LinkerdBrokerServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*broker.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: broker
+        service_type: broker
+        port: "4000"
+      annotations:
+        summary: "CRITICAL: Broker service connectivity down"
+        description: "Broker service {{ $labels.pod }} on port 4000 has no network traffic. This could be caused by broker-server policy restrictions."
+
+    # Handler Services (port 5000)
+    - alert: LinkerdHandlerServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*handler.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: handler
+        service_type: handler
+        port: "5000"
+      annotations:
+        summary: "CRITICAL: Handler service connectivity down"
+        description: "Handler service {{ $labels.pod }} on port 5000 has no network traffic. This could be caused by handler-server policy restrictions."
+
+    # Service Components (port 5000)
+    - alert: LinkerdServiceComponentDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*service.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: service
+        service_type: service
+        port: "5000"
+      annotations:
+        summary: "CRITICAL: Service component connectivity down"
+        description: "Service component {{ $labels.pod }} on port 5000 has no network traffic. This could be caused by service-server policy restrictions."
+
+    # Storage Services (port 9000)
+    - alert: LinkerdStorageServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*storage.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: storage
+        service_type: storage
+        port: "9000"
+      annotations:
+        summary: "CRITICAL: Storage service connectivity down"
+        description: "Storage service {{ $labels.pod }} on port 9000 has no network traffic. This could be caused by storage-server policy restrictions."
+
+    # Analytics Services (port 8080)
+    - alert: LinkerdAnalyticsServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*analytics.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: analytics
+        service_type: analytics
+        port: "8080"
+      annotations:
+        summary: "CRITICAL: Analytics service connectivity down"
+        description: "Analytics service {{ $labels.pod }} on port 8080 has no network traffic. This could be caused by analytics-server policy restrictions."
+
+    # Worker Services (port 8080)
+    - alert: LinkerdWorkerServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*worker.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: worker
+        service_type: worker
+        port: "8080"
+      annotations:
+        summary: "CRITICAL: Worker service connectivity down"
+        description: "Worker service {{ $labels.pod }} on port 8080 has no network traffic. This could be caused by worker-server policy restrictions."
+
+    # API Services (port 80)
+    - alert: LinkerdAPIServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*api.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: api
+        service_type: api
+        port: "80"
+      annotations:
+        summary: "CRITICAL: API service connectivity down"
+        description: "API service {{ $labels.pod }} on port 80 has no network traffic. This could be caused by api-server policy restrictions."
+
+    # WebSocket Services (port 8080)
+    - alert: LinkerdWebSocketServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*websocket.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: websocket
+        service_type: websocket
+        port: "8080"
+      annotations:
+        summary: "CRITICAL: WebSocket service connectivity down"
+        description: "WebSocket service {{ $labels.pod }} on port 8080 has no network traffic. This could be caused by websocket-server policy restrictions."
+
+    # Queue Services (port 5672)
+    - alert: LinkerdQueueServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*queue.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: queue
+        service_type: queue
+        port: "5672"
+      annotations:
+        summary: "CRITICAL: Queue service connectivity down"
+        description: "Queue service {{ $labels.pod }} on port 5672 has no network traffic. This could be caused by queue-server policy restrictions."
+
+    # Search Services (port 9200)
+    - alert: LinkerdSearchServiceDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks",pod=~".*search.*"}[5m]))
+      for: 30s
+      labels:
+        severity: critical
+        component: search
+        service_type: search
+        port: "9200"
+      annotations:
+        summary: "CRITICAL: Search service connectivity down"
+        description: "Search service {{ $labels.pod }} on port 9200 has no network traffic. This could be caused by search-server policy restrictions."
+
+    # Critical: Any Service Type Completely Down
+    - alert: LinkerdAnyServiceTypeDown
+      expr: |
+        absent(rate(linkerd_proxy_requests_total{namespace="mocks"}[5m]))
+      for: 1m
+      labels:
+        severity: critical
+        component: any-service
+        service_type: all
+      annotations:
+        summary: "CRITICAL: ANY service type is completely down"
+        description: "CRITICAL: Service {{ $labels.pod }} in namespace {{ $labels.namespace }} has no network traffic. This indicates a critical policy issue affecting ALL service types. CONNECTION CANNOT STOP!"
+        runbook_url: "https://linkerd.io/2.11/tasks/troubleshooting/#critical-connectivity-issues"
