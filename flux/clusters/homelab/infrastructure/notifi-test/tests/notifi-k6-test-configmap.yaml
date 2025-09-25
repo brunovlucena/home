@@ -146,11 +146,10 @@ data:
       console.log('Testing Manager Services...');
       
       services.managers.forEach(manager => {
-        const managerWithHealth = {
-          ...manager,
+        const managerWithHealth = Object.assign({}, manager, {
           health: `${manager.url}/health`,
           metrics: `${manager.url}/metrics`
-        };
+        });
         testService(managerWithHealth, 'Manager');
       });
     }
@@ -160,11 +159,10 @@ data:
       console.log('Testing Messenger Services...');
       
       services.messengers.forEach(messenger => {
-        const messengerWithEndpoints = {
-          ...messenger,
+        const messengerWithEndpoints = Object.assign({}, messenger, {
           health: `${messenger.url}/health`,
           metrics: `${messenger.url}/metrics`
-        };
+        });
         testService(messengerWithEndpoints, 'Messenger');
       });
     }
@@ -174,11 +172,10 @@ data:
       console.log('Testing Proxy Services...');
       
       services.proxies.forEach(proxy => {
-        const proxyWithEndpoints = {
-          ...proxy,
+        const proxyWithEndpoints = Object.assign({}, proxy, {
           health: `${proxy.url}/health`,
           metrics: `${proxy.url}/metrics`
-        };
+        });
         testService(proxyWithEndpoints, 'Proxy');
       });
     }
@@ -420,18 +417,16 @@ data:
     export function collectMetrics() {
       console.log('Collecting Metrics from All Services...');
       
-      const allServices = [
-        ...services.gateways,
-        ...services.managers.map(m => ({ ...m, metrics: `${m.url}/metrics` })),
-        ...services.messengers.map(m => ({ ...m, metrics: `${m.url}/metrics` })),
-        ...services.proxies.map(p => ({ ...p, metrics: `${p.url}/metrics` })),
-        ...services.monitoring,
-        ...services.processors,
-        ...services.handlers,
-        ...services.services,
-        ...services.grpcServers,
-        ...services.websocketServers,
-      ];
+      const allServices = services.gateways
+        .concat(services.managers.map(m => Object.assign({}, m, { metrics: `${m.url}/metrics` })))
+        .concat(services.messengers.map(m => Object.assign({}, m, { metrics: `${m.url}/metrics` })))
+        .concat(services.proxies.map(p => Object.assign({}, p, { metrics: `${p.url}/metrics` })))
+        .concat(services.monitoring)
+        .concat(services.processors)
+        .concat(services.handlers)
+        .concat(services.services)
+        .concat(services.grpcServers)
+        .concat(services.websocketServers);
       
       allServices.forEach(service => {
         if (service.metrics) {
@@ -450,18 +445,17 @@ data:
     export function healthCheck() {
       console.log('Running Health Checks...');
       
-      const allServices = [
-        ...services.gateways.map(g => ({ ...g, health: g.health || `${g.url}/health` })),
-        ...services.managers.map(m => ({ ...m, health: `${m.url}/health` })),
-        ...services.messengers.map(m => ({ ...m, health: `${m.url}/health` })),
-        ...services.proxies.map(p => ({ ...p, health: `${p.url}/health` })),
-        ...services.monitoring,
-        ...services.processors,
-        ...services.handlers,
-        ...services.services,
-        ...services.grpcServers,
-        ...services.websocketServers,
-      ];
+      const allServices = services.gateways
+        .map(g => Object.assign({}, g, { health: g.health || `${g.url}/health` }))
+        .concat(services.managers.map(m => Object.assign({}, m, { health: `${m.url}/health` })))
+        .concat(services.messengers.map(m => Object.assign({}, m, { health: `${m.url}/health` })))
+        .concat(services.proxies.map(p => Object.assign({}, p, { health: `${p.url}/health` })))
+        .concat(services.monitoring)
+        .concat(services.processors)
+        .concat(services.handlers)
+        .concat(services.services)
+        .concat(services.grpcServers)
+        .concat(services.websocketServers);
       
       let healthyCount = 0;
       const totalCount = allServices.length;

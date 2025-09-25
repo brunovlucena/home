@@ -19,6 +19,9 @@ spec:
     prometheus:
       prometheusSpec:
         retention: 7d
+        additionalArgs:
+          - name: "enable-feature"
+            value: "native-histograms"
         storageSpec:
           volumeClaimTemplate:
             spec:
@@ -47,8 +50,6 @@ spec:
               - name: web
                 containerPort: 30090
                 protocol: TCP
-            # args:
-            #   - '--web.listen-address=0.0.0.0:30090'
       service:
         type: NodePort
         ports:
