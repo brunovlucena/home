@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: notifi-test
+  annotations:
+    linkerd.io/inject: enabled
+  labels:
+    name: notifi-test
+    linkerd.io/inject: enabled
