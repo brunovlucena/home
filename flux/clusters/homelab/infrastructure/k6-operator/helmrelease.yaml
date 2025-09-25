@@ -14,52 +14,5 @@ spec:
         name: grafana
         namespace: flux-system
   values:
-    # Default values for k6-operator v4.0.0
-    # See: https://github.com/grafana/k6-operator/blob/main/charts/k6-operator/values.yaml
-    image:
-      repository: ghcr.io/grafana/k6-operator
-      tag: "v1.0.0"
-      pullPolicy: IfNotPresent
-    
-    serviceAccount:
-      create: true
-      annotations: {}
-      name: ""
-    
-    rbac:
-      create: true
-    
-    resources:
-      limits:
-        cpu: 100m
-        memory: 128Mi
-      requests:
-        cpu: 100m
-        memory: 128Mi
-    
-    nodeSelector: {}
-    
-    tolerations: []
-    
-    affinity: {}
-    
-    # Monitoring
-    serviceMonitor:
-      enabled: true
-      interval: 30s
-      scrapeTimeout: 10s
-      labels: {}
-      annotations: {}
-    
-    # Security context
-    securityContext:
-      runAsNonRoot: true
-      runAsUser: 65534
-      runAsGroup: 65534
-      fsGroup: 65534
-    
-    podSecurityContext:
-      runAsNonRoot: true
-      runAsUser: 65534
-      runAsGroup: 65534
-      fsGroup: 65534
+    # Use default values for k6-operator v4.0.0
+    # The new version has different schema requirements
