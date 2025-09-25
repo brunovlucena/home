@@ -1,0 +1,43 @@
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cloudflare-tunnel-metrics
+  namespace: cloudflare-tunnel
+  labels:
+    app: kube-prometheus-stack
+    release: prometheus-operator
+    component: cloudflare-tunnel
+spec:
+  selector:
+    matchLabels:
+      app: cloudflared
+      app.kubernetes.io/component: metrics
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    scheme: http
+  namespaceSelector:
+    matchNames:
+    - cloudflare-tunnel
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: cloudflare-tunnel-health
+  namespace: cloudflare-tunnel
+  labels:
+    app: kube-prometheus-stack
+    release: prometheus-operator
+    component: cloudflare-tunnel
+spec:
+  jobName: cloudflare-tunnel-health
+  prober:
+    url: http://cloudflared-metrics.cloudflare-tunnel.svc.cluster.local:2000/ready
+  targets:
+    staticConfig:
+      static:
+      - cloudflared-metrics.cloudflare-tunnel.svc.cluster.local:2000
