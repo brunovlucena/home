@@ -13,25 +13,4 @@ spec:
         kind: HelmRepository
         name: grafana
         namespace: flux-system
-  values:
-    # k6-operator v3.16.0 configuration with flexible schema
-    # Resource limits following your preference for low CPU allocation
-    resources:
-      limits:
-        cpu: 100m
-        memory: 128Mi
-      requests:
-        cpu: 100m
-        memory: 128Mi
-    
-    # ServiceAccount configuration
-    serviceAccount:
-      create: true
-    
-    # RBAC configuration
-    rbac:
-      create: true
-    
-    # Prometheus monitoring
-    serviceMonitor:
-      enabled: true
+  values: {}
