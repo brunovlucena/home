@@ -10,7 +10,7 @@ spec:
   chart:
     spec:
       chart: loki
-      version: 6.25.0
+      version: 6.40.0
       sourceRef:
         kind: HelmRepository
         name: grafana
@@ -30,7 +30,7 @@ spec:
     loki:
       schemaConfig:
         configs:
-          - from: "2020-10-24"
+          - from: "2024-04-01"
             store: tsdb
             object_store: s3
             schema: v13
