@@ -10,5 +10,5 @@ resources:
   - namespace.yaml
   - infrastructure.yaml
   - linkerd-policies.yaml 
-  - tests/example-test-configmap.yaml
-  - tests/example-testrun.yaml
+  - tests/notifi-k6-simple-test-configmap.yaml
+  - tests/notifi-k6-simple-testrun.yaml
