@@ -14,21 +14,10 @@ spec:
         name: grafana
         namespace: flux-system
   values:
-    # Default values for k6-operator v4.0.0
-    # See: https://github.com/grafana/k6-operator/blob/main/charts/k6-operator/values.yaml
-    image:
-      repository: ghcr.io/grafana/k6-operator
-      tag: "v1.0.0"
-      pullPolicy: IfNotPresent
+    # Simplified values for k6-operator v4.0.0 to avoid schema validation issues
+    # Only include values that are explicitly supported by the chart schema
     
-    serviceAccount:
-      create: true
-      annotations: {}
-      name: ""
-    
-    rbac:
-      create: true
-    
+    # Resource limits following your preference for low CPU allocation
     resources:
       limits:
         cpu: 100m
@@ -37,29 +26,14 @@ spec:
         cpu: 100m
         memory: 128Mi
     
-    nodeSelector: {}
+    # ServiceAccount configuration
+    serviceAccount:
+      create: true
     
-    tolerations: []
+    # RBAC configuration
+    rbac:
+      create: true
     
-    affinity: {}
-    
-    # Monitoring
-    serviceMonitor:
+    # Prometheus monitoring
+    prometheus:
       enabled: true
-      interval: 30s
-      scrapeTimeout: 10s
-      labels: {}
-      annotations: {}
-    
-    # Security context
-    securityContext:
-      runAsNonRoot: true
-      runAsUser: 65534
-      runAsGroup: 65534
-      fsGroup: 65534
-    
-    podSecurityContext:
-      runAsNonRoot: true
-      runAsUser: 65534
-      runAsGroup: 65534
-      fsGroup: 65534
