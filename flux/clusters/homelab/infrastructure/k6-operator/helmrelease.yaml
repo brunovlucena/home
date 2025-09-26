@@ -8,15 +8,13 @@ spec:
   chart:
     spec:
       chart: k6-operator
-      version: '4.0.0'
+      version: '3.16.0'
       sourceRef:
         kind: HelmRepository
         name: grafana
         namespace: flux-system
   values:
-    # Simplified values for k6-operator v4.0.0 to avoid schema validation issues
-    # Only include values that are explicitly supported by the chart schema
-    
+    # k6-operator v3.16.0 configuration with flexible schema
     # Resource limits following your preference for low CPU allocation
     resources:
       limits:
@@ -35,5 +33,5 @@ spec:
       create: true
     
     # Prometheus monitoring
-    prometheus:
+    serviceMonitor:
       enabled: true
