@@ -1,0 +1,59 @@
+apiVersion: k6.io/v1alpha1
+kind: TestRun
+metadata:
+  name: notifi-simple-prometheus-test
+  namespace: notifi-test
+  annotations:
+    linkerd.io/inject: disabled
+  labels:
+    app: notifi-k6-simple-test
+    component: testing
+    test-type: prometheus-metrics
+spec:
+  arguments: --vus=10 --duration=50s
+  cleanup: post
+  parallelism: 1
+  paused: "false"  # Set to "true" to pause the test
+  quiet: "false"
+  runner:
+    metadata:
+      annotations:
+        linkerd.io/inject: disabled
+    env:
+    - name: K6_LOG_LEVEL
+      value: info
+    - name: K6_OUT
+      value: json=test-results.json
+    - name: K6_PROMETHEUS_RW_SERVER_URL
+      value: http://prometheus-operator-kube-p-prometheus.prometheus.svc:9090/api/v1/write
+    - name: K6_PROMETHEUS_RW_PUSH_INTERVAL
+      value: 5s
+    - name: K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM
+      value: "true"
+    image: grafana/k6:latest
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+  script:
+    configMap:
+      file: k6-simple-tests.js
+      name: notifi-k6-simple-test
+  # starter:
+  #   metadata:
+  #     annotations:
+  #       linkerd.io/inject: disabled
+  #   env:
+  #   - name: K6_LOG_LEVEL
+  #     value: info
+  #   image: grafana/k6:latest
+  #   resources:
+  #     limits:
+  #       cpu: 200m
+  #       memory: 256Mi
+  #     requests:
+  #       cpu: 50m
+  #       memory: 64Mi

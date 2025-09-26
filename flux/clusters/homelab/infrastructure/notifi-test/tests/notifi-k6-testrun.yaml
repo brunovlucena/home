@@ -14,7 +14,7 @@ spec:
       name: notifi-k6-test
       file: k6-tests.js
   runner:
-    image: ghcr.io/szkiba/xk6-prometheus:latest
+    image: grafana/k6:latest
     resources:
       limits:
         cpu: 1000m
@@ -27,14 +27,8 @@ spec:
         value: "info"
       - name: K6_OUT
         value: "json=test-results.json"
-      - name: K6_PROMETHEUS_RW_SERVER_URL
-        value: "http://prometheus-operator-kube-p-prometheus.prometheus.svc:9090/api/v1/write"
-      - name: K6_PROMETHEUS_RW_PUSH_INTERVAL
-        value: "5s"
-      - name: K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM
-        value: "true"
   starter:
-    image: ghcr.io/szkiba/xk6-prometheus:latest
+    image: grafana/k6:latest
     resources:
       limits:
         cpu: 500m
