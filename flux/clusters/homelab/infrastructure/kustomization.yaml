@@ -13,7 +13,7 @@ resources:
   - metrics-server
   - prometheus-operator
   - homepage # TODO: Review alerts
-  - loki
+  # - loki # TODO: Fix HelmRelease conflicts
   - alloy
   - tempo
   # - loki-mcp
