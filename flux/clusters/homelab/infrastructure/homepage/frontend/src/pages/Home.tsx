@@ -100,6 +100,15 @@ const Home: React.FC = () => {
       'rabbitmq': SiRabbitmq,
       'shield': FaShieldAlt,
       'certification': BiCertification,
+      'pydantic': FaRobot,
+      'logfire': FaRobot,
+      'vertexai': FaCloud,
+      'langchain': FaRobot,
+      'langgraph': FaRocket,
+      'flyte': FaStream,
+      'wandb': FaChartBar,
+      'kamaji': SiKubernetes,
+      'mcp': FaRobot,
     }
     return iconMap[iconName.toLowerCase()] || SiGithub
   }
@@ -263,6 +272,38 @@ const Home: React.FC = () => {
             <div className="skill-tag">
               <SiArgo className="skill-icon" style={{ color: '#326CE5' }} />
               <span>ArgoCD</span>
+            </div>
+            <div className="skill-tag">
+              <FaRobot className="skill-icon" style={{ color: '#FF6B35' }} />
+              <span>Pydantic Logfire</span>
+            </div>
+            <div className="skill-tag">
+              <FaCloud className="skill-icon" style={{ color: '#4285F4' }} />
+              <span>Vertex AI</span>
+            </div>
+            <div className="skill-tag">
+              <FaRobot className="skill-icon" style={{ color: '#1C3C3C' }} />
+              <span>Langchain</span>
+            </div>
+            <div className="skill-tag">
+              <FaRocket className="skill-icon" style={{ color: '#FF6B35' }} />
+              <span>Langgraph</span>
+            </div>
+            <div className="skill-tag">
+              <FaStream className="skill-icon" style={{ color: '#E6522C' }} />
+              <span>Flyte</span>
+            </div>
+            <div className="skill-tag">
+              <FaChartBar className="skill-icon" style={{ color: '#FF6B35' }} />
+              <span>Wandb</span>
+            </div>
+            <div className="skill-tag">
+              <SiKubernetes className="skill-icon" style={{ color: '#326CE5' }} />
+              <span>Kamaji</span>
+            </div>
+            <div className="skill-tag">
+              <FaRobot className="skill-icon" style={{ color: '#00B4D8' }} />
+              <span>MCP-Servers</span>
             </div>
           </div>
         </div>
