@@ -295,9 +295,16 @@ INSERT INTO skills (name, category, proficiency, icon, "order", active) VALUES
 ('Atmos', 'Tools', 4, 'atmos', 62, TRUE),
 ('Vertex AI', 'AI/ML', 4, 'vertexai', 63, TRUE),
 ('RAG', 'AI/ML', 4, 'rag', 64, TRUE),
-('CloudEvents', 'Platforms', 4, 'cloudevents', 65, TRUE),
-('Security', 'Security', 5, 'security', 66, TRUE),
-('Compliance', 'Security', 4, 'compliance', 67, TRUE);
+('Pydantic Logfire', 'AI/ML', 4, 'logfire', 65, TRUE),
+('Langchain', 'AI/ML', 4, 'langchain', 66, TRUE),
+('Langgraph', 'AI/ML', 4, 'langgraph', 67, TRUE),
+('Flyte', 'AI/ML', 4, 'flyte', 68, TRUE),
+('Wandb', 'AI/ML', 4, 'wandb', 69, TRUE),
+('Kamaji', 'AI/ML', 4, 'kamaji', 70, TRUE),
+('MCP-Servers', 'AI/ML', 4, 'mcp', 71, TRUE),
+('CloudEvents', 'Platforms', 4, 'cloudevents', 72, TRUE),
+('Security', 'Security', 5, 'security', 73, TRUE),
+('Compliance', 'Security', 4, 'compliance', 74, TRUE);
 
 -- Insert experience data in chronological order (oldest to newest)
 INSERT INTO experience (title, company, start_date, end_date, current, description, technologies, "order", active) VALUES
