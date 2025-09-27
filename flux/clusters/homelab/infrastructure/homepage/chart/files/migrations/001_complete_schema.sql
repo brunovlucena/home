@@ -215,7 +215,6 @@ INSERT INTO skills (name, category, proficiency, icon, "order", active) VALUES
 -- Project Management
 ('Project Management', 'Management', 4, '📊', 5, TRUE),
 ('Team Leadership', 'Management', 4, '👥', 6, TRUE),
-('Agile/Scrum', 'Management', 4, '🔄', 7, TRUE),
 
 -- Kubernetes & Cloud
 ('Kubernetes', 'Cloud', 5, '☸️', 8, TRUE),
@@ -241,9 +240,10 @@ INSERT INTO skills (name, category, proficiency, icon, "order", active) VALUES
 -- Programming Languages
 ('Go', 'Programming', 5, 'go', 23, TRUE),
 ('Python', 'Programming', 4, 'python', 24, TRUE),
-('TypeScript', 'Programming', 4, 'typescript', 25, TRUE),
-('JavaScript', 'Programming', 4, 'javascript', 26, TRUE),
 ('Bash', 'Programming', 4, 'bash', 27, TRUE),
+('Ruby', 'Programming', 4, 'ruby', 27, TRUE),
+('Java', 'Programming', 4, 'java', 27, TRUE),
+('C', 'Programming', 4, 'c', 27, TRUE),
 
 -- Databases & Messaging
 ('PostgreSQL', 'Database', 5, 'postgresql', 28, TRUE),
@@ -252,10 +252,16 @@ INSERT INTO skills (name, category, proficiency, icon, "order", active) VALUES
 ('MongoDB', 'Database', 3, 'mongodb', 31, TRUE),
 
 -- AI/ML
-('Machine Learning', 'AI/ML', 4, '🤖', 32, TRUE),
-('TensorFlow', 'AI/ML', 4, '📊', 33, TRUE),
-('Natural Language Processing', 'AI/ML', 4, '💬', 34, TRUE),
-('Computer Vision', 'AI/ML', 3, '👁️', 35, TRUE),
+('Pytorch', 'AI/ML', 4, '📊', 33, TRUE),
+('Vertex AI', 'AI/ML', 4, 'vertexai', 63, TRUE),
+('RAG', 'AI/ML', 4, 'rag', 64, TRUE),
+('Pydantic Logfire', 'AI/ML', 4, 'logfire', 65, TRUE),
+('Langchain', 'AI/ML', 4, 'langchain', 66, TRUE),
+('Langgraph', 'AI/ML', 4, 'langgraph', 67, TRUE),
+('Flyte', 'AI/ML', 4, 'flyte', 68, TRUE),
+('Wandb', 'AI/ML', 4, 'wandb', 69, TRUE),
+('MCP-Servers', 'AI/ML', 4, 'mcp', 71, TRUE),
+('Knative', 'Platforms', 4, 'knative', 59, TRUE),
 
 -- DevOps & SRE
 ('Site Reliability Engineering', 'DevOps', 5, '⚙️', 36, TRUE),
@@ -274,8 +280,6 @@ INSERT INTO skills (name, category, proficiency, icon, "order", active) VALUES
 -- Cloud Platforms
 ('AWS', 'Cloud', 5, 'amazon', 46, TRUE),
 ('Google Cloud Platform', 'Cloud', 4, 'googlecloud', 47, TRUE),
-('Azure', 'Cloud', 3, 'azure', 48, TRUE),
-('Multi-cloud', 'Cloud', 4, 'multicloud', 49, TRUE),
 
 -- Networking & Security
 ('Network Security', 'Security', 4, '🛡️', 50, TRUE),
@@ -287,24 +291,10 @@ INSERT INTO skills (name, category, proficiency, icon, "order", active) VALUES
 -- Tools & Platforms
 ('GitHub', 'Tools', 5, 'github', 55, TRUE),
 ('GitLab', 'Tools', 4, 'gitlab', 56, TRUE),
-('Jenkins', 'Tools', 4, 'jenkins', 57, TRUE),
 ('ArgoCD', 'Tools', 4, 'argocd', 58, TRUE),
-('Knative', 'Platforms', 4, 'knative', 59, TRUE),
-('Serverless', 'Platforms', 4, 'serverless', 60, TRUE),
 ('GitHub Actions', 'Tools', 5, 'githubactions', 61, TRUE),
 ('Atmos', 'Tools', 4, 'atmos', 62, TRUE),
-('Vertex AI', 'AI/ML', 4, 'vertexai', 63, TRUE),
-('RAG', 'AI/ML', 4, 'rag', 64, TRUE),
-('Pydantic Logfire', 'AI/ML', 4, 'logfire', 65, TRUE),
-('Langchain', 'AI/ML', 4, 'langchain', 66, TRUE),
-('Langgraph', 'AI/ML', 4, 'langgraph', 67, TRUE),
-('Flyte', 'AI/ML', 4, 'flyte', 68, TRUE),
-('Wandb', 'AI/ML', 4, 'wandb', 69, TRUE),
 ('Kamaji', 'AI/ML', 4, 'kamaji', 70, TRUE),
-('MCP-Servers', 'AI/ML', 4, 'mcp', 71, TRUE),
-('CloudEvents', 'Platforms', 4, 'cloudevents', 72, TRUE),
-('Security', 'Security', 5, 'security', 73, TRUE),
-('Compliance', 'Security', 4, 'compliance', 74, TRUE);
 
 -- Insert experience data in chronological order (oldest to newest)
 INSERT INTO experience (title, company, start_date, end_date, current, description, technologies, "order", active) VALUES
