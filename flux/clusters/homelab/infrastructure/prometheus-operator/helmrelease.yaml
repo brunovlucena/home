@@ -218,7 +218,7 @@ spec:
               uid: tempo
               type: tempo
               access: proxy
-              url: http://tempo-query-frontend.tempo:3100
+              url: http://tempo.tempo:3200
               isDefault: false
               editable: true
               jsonData:
