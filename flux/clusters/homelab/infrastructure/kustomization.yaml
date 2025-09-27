@@ -19,6 +19,7 @@ resources:
   # - loki-mcp
   - k6-operator
   # - notifi-test # TODO: Fix Linkerd Server conflicts
+  - github-actions-runner-crds
   - github-actions-runner
   
 
