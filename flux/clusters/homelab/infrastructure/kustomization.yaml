@@ -18,7 +18,7 @@ resources:
   - tempo
   # - loki-mcp
   - k6-operator
-  - notifi-test
+  # - notifi-test # TODO: Fix Linkerd Server conflicts
   - github-actions-runner
   
 
