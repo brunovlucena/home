@@ -79,7 +79,11 @@ jobs:
           fi
           
           # Convert array to JSON
-          images_json=$(printf '%s\n' "${images[@]}" | jq -R . | jq -s .)
+          if [ ${#images[@]} -eq 0 ]; then
+            images_json="[]"
+          else
+            images_json=$(printf '%s\n' "${images[@]}" | jq -R . | jq -s .)
+          fi
           echo "list=$images_json" >> $GITHUB_OUTPUT
           echo "count=${#images[@]}" >> $GITHUB_OUTPUT
           
