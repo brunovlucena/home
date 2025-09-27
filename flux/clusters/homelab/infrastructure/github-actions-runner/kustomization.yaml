@@ -32,13 +32,10 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/repository
-        value: "brunovlucena/home"  # Update this to your repository
+        value: "brunovlucena/homelab"
       - op: replace
         path: /spec/template/spec/labels
-        value: "self-hosted,linux,x64,home-infrastructure"
-      - op: replace
-        path: /spec/template/spec/runnerGroup
-        value: "default"
+        value: ["self-hosted", "linux", "x64", "homelab-infrastructure"]
 
 # ConfigMap for runner configuration
 configMapGenerator:
