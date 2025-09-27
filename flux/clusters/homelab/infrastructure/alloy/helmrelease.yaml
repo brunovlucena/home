@@ -21,28 +21,29 @@ spec:
     serviceMonitor:
       enabled: true
 
-    extraPorts:
-    - name: "otlp"
-      port: 4317
-      targetPort: 4317
-      protocol: "TCP"
-      appProtocol: "h2c"
+    alloy:
+      extraPorts:
+      - name: "otlp"
+        port: 4317
+        targetPort: 4317
+        protocol: "TCP"
+        appProtocol: "h2c"
 
-    clustering:
-      enabled: false
-      name: ""
-      portName: http
+      clustering:
+        enabled: false
+        name: ""
+        portName: http
 
-    stabilityLevel: "generally-available"
-    storagePath: /tmp/alloy
+      stabilityLevel: "generally-available"
+      storagePath: /tmp/alloy
 
-    mounts:
-      varlog: false
-      dockercontainers: false
+      mounts:
+        varlog: false
+        dockercontainers: false
 
-    configMap:
-      create: true
-      content: |
+      configMap:
+        create: true
+        content: |
             logging {
                 level  = "debug"
                 format = "json"
