@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: agent-sre
+  namespace: agent-sre
+
+# Resources for agent-sre
+resources:
+  - namespace.yaml
+
+# Common labels for all resources when they are added
+commonLabels:
+  app.kubernetes.io/name: agent-sre
+  app.kubernetes.io/part-of: homelab
+
+# Namespace configuration
+namespace: agent-sre

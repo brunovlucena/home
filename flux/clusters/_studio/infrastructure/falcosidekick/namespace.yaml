@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: falcosidekick
-  labels:
-    name: falcosidekick
-    purpose: security-alert-routing

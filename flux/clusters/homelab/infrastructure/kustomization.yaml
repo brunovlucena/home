@@ -9,17 +9,16 @@ resources:
   - repositories
   - sealed-secrets
   - cert-manager # TODO: Alerts
-  # - cloudflare-tunnel # TODO Alerts - temporarily disabled due to deployment issues
+  - cloudflare-tunnel # TODO Alerts - temporarily disabled due to deployment issues
   - metrics-server
   - prometheus-operator
   - homepage # TODO: Review alerts
-  # - loki # TODO: Fix HelmRelease conflicts
+  - loki
   - alloy
   - tempo
-  # - loki-mcp
   - k6-operator
+  - agent-legacy
+  - agent-sre
   # - notifi-test # TODO: Fix Linkerd Server conflicts
-  - github-actions-runner-crds
-  - github-actions-runner
   
 

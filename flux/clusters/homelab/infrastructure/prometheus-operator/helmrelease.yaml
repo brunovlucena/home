@@ -58,7 +58,6 @@ spec:
             targetPort: 30090
             nodePort: 30090
     grafana:
-      adminPassword: adminbubs # TODO: Sealed Secrets
       initChownData:
         enabled: false
       # livenessProbe:
@@ -132,9 +131,11 @@ spec:
         #   http_port: 30003
         unified_alerting:
           enabled: true
-        provisioning:
-          contactpoints: true
-          notification_policies: true
+          execute_alerts: true
+          backend: alertmanager
+          alertmanager:
+            url: http://prometheus-operator-kube-p-alertmanager.prometheus:9093
+            datasource: prometheus
       sidecar:
         datasources:
           enabled: true
@@ -144,14 +145,6 @@ spec:
           enabled: true
           label: grafana_dashboard
           labelValue: "1"
-        contactpoints:
-          enabled: true
-          label: grafana_contact_points
-          labelValue: "true"
-        notification_policies:
-          enabled: true
-          label: grafana_notification_policies
-          labelValue: "true"
       env:
         STRAVA_CLIENT_ID:
           valueFrom:
@@ -212,7 +205,7 @@ spec:
               uid: loki
               type: loki
               access: proxy
-              url: http://loki-read.loki:3100
+              url: http://loki-gateway.loki:80
               isDefault: false
               editable: true
               jsonData:
@@ -257,7 +250,6 @@ spec:
         matchLabels:
           app: kube-prometheus-stack-alertmanager
       alertmanagerSpec:
-        configSecret: alertmanager-prometheus-operator-kube-p-alertmanager
         secrets:
         - pagerduty-secrets
         storage:
@@ -268,9 +260,11 @@ spec:
               resources:
                 requests:
                   storage: 10Gi
-        config:
+        alertmanagerConfiguration:
           global:
             resolve_timeout: 5m
+            pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+            slack_api_url: '${SLACK_WEBHOOK_URL}'
           route:
             group_by: ['alertname']
             group_wait: 10s
@@ -300,6 +294,21 @@ spec:
               client: 'Alertmanager'
               client_url: '{{ .ExternalURL }}'
               severity: 'critical'
+              component: '{{ .GroupLabels.alertname }}'
+              group: '{{ .GroupLabels.alertname }}'
+              class: '{{ .GroupLabels.alertname }}'
+          - name: 'pagerduty-warning'
+            pagerduty_configs:
+            - service_key: '${PAGERDUTY_SERVICE_KEY}'
+              description: '{{ .GroupLabels.alertname }}'
+              details:
+                summary: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+                severity: '{{ .GroupLabels.severity }}'
+                namespace: '{{ .GroupLabels.namespace }}'
+                instance: '{{ .GroupLabels.instance }}'
+              client: 'Alertmanager'
+              client_url: '{{ .ExternalURL }}'
+              severity: 'warning'
               component: '{{ .GroupLabels.alertname }}'
               group: '{{ .GroupLabels.alertname }}'
               class: '{{ .GroupLabels.alertname }}'

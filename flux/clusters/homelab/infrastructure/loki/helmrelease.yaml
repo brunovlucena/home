@@ -38,7 +38,7 @@ spec:
               prefix: index_
               period: 24h
       # Enable test schema for quick setup
-      useTestSchema: true
+      useTestSchema: false
       limits_config:
         retention_period: 744h
         allow_structured_metadata: false

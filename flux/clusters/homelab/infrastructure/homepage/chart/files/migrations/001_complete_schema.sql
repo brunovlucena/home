@@ -418,7 +418,7 @@ INSERT INTO experience (title, company, start_date, end_date, current, descripti
 
 - Observability: Implement and optimize monitoring, logging, and tracing solutions (Prometheus, Loki, Tempo, Grafana, OpenTelemetry) to gain deep insights into system performance and behavior.
 
-- Chatbot for SRE: RAG, Vertex AI
+- AI: Pydantic Logfire, Vertex AI, Langchain, Langgraph, Flyte, Wandb, Kamaji, MCP-Servers
 
 - Automation and CI/CD: Automate infrastructure provisioning, deployment, and configuration management using Terraform, Atmos, and GitHub Actions to accelerate development and reduce errors.
 
@@ -427,7 +427,7 @@ INSERT INTO experience (title, company, start_date, end_date, current, descripti
 - Serverless on K8s: Knative (CloudEvents, RabbitMQ), Golang 
 
 - Security and Compliance: Ensure the security and compliance of systems and applications by implementing best practices and leveraging security tools.',
-    ARRAY['Kubernetes', 'AWS', 'GCP', 'Pulumi', 'Prometheus', 'Loki', 'Tempo', 'Grafana', 'OpenTelemetry', 'RAG', 'Vertex AI', 'Terraform', 'Atmos', 'GitHub Actions', 'AWS Lambda', 'Knative', 'CloudEvents', 'RabbitMQ', 'Golang', 'Security', 'Compliance']::TEXT[],
+    ARRAY['Kubernetes', 'AWS', 'GCP', 'Pulumi', 'Prometheus', 'Loki', 'Tempo', 'Grafana', 'OpenTelemetry', 'Pydantic Logfire', 'Vertex AI', 'Langchain', 'Langgraph', 'Flyte', 'Wandb', 'Kamaji', 'MCP-Servers', 'Terraform', 'Atmos', 'GitHub Actions', 'AWS Lambda', 'Knative', 'CloudEvents', 'RabbitMQ', 'Golang', 'Security', 'Compliance']::TEXT[],
     8,
     TRUE
 );

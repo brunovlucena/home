@@ -30,11 +30,11 @@ spec:
         - --protocol
         - quic
         - --retries
-        - 5
+        - "5"
         - --heartbeat-count
-        - 5
+        - "5"
         - --heartbeat-interval
-        - 5s
+        - "5s"
         - run
         - --token
         - $(TUNNEL_TOKEN)
