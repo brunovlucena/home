@@ -12,8 +12,6 @@ resources:
 - configmap.yaml
 - deployment.yaml
 - service.yaml
-- ../sealed-secrets/ghcr-secret-agent-legacy.yaml
-- ../sealed-secrets/ai-secrets-agent-legacy.yaml
 
 commonLabels:
   app.kubernetes.io/name: langgraph-agent
