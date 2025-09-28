@@ -8,11 +8,14 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY requirements.txt .
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy uv configuration files
+COPY pyproject.toml uv.lock ./
+
+# Install Python dependencies with uv
+RUN uv sync --frozen --no-dev
 
 # Copy application code
 COPY . .
@@ -28,5 +31,5 @@ EXPOSE 30120
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:30120/health || exit 1
 
-# Run the application
-CMD ["python", "mcp_simple_server.py"]
+# Run the application with uv
+CMD ["uv", "run", "python", "mcp_simple_server.py"]
