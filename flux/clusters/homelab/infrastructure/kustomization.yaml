@@ -18,7 +18,7 @@ resources:
   - tempo
   - k6-operator
   - agent-legacy
-  # - agent-sre  # Temporarily disabled due to deployment issues
+  - agent-sre
   - statuspage-exporter
   # - notifi-test # TODO: Fix Linkerd Server conflicts
   

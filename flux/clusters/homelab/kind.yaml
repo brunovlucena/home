@@ -51,6 +51,9 @@ nodes:
   - containerPort: 30120 # jamie
     hostPort: 31120
     protocol: TCP
+  - containerPort: 30121 # agent-sre
+    hostPort: 31121
+    protocol: TCP
   - containerPort: 30130 # flux
     hostPort: 31130
     protocol: TCP
