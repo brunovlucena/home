@@ -202,9 +202,9 @@ jobs:
       - name: "📦 Install Dependencies with uv"
         working-directory: ./flux/clusters/homelab/infrastructure/agent-sre
         run: |
-          echo "📦 Installing Python dependencies with uv..."
-          uv sync
-          uv add pytest pytest-cov flake8 --dev
+          echo "📦 Installing Python dependencies with uv (optimized)..."
+          uv sync --frozen --no-cache
+          uv add pytest pytest-cov flake8 --dev --no-cache
 
       - name: "🧪 Run Tests"
         working-directory: ./flux/clusters/homelab/infrastructure/agent-sre
@@ -260,9 +260,11 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=agent-sre
+          cache-to: type=gha,mode=max,scope=agent-sre
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
         env:
           # Add debug information for registry access
           DOCKER_BUILDKIT: 1
