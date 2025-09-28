@@ -25,6 +25,7 @@ spec:
       containers:
       - name: agent-sre
         image: ghcr.io/brunovlucena/agent-sre:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: http
