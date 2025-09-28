@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-LangGraph Agent for Kubernetes
+Agent Legacy for Kubernetes
 A modern AI agent using LangGraph that connects to Ollama for log analysis
 """
 
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="LangGraph Agent",
+    title="Agent Legacy",
     description="AI Agent for log analysis using LangGraph and Ollama",
     version="1.0.0"
 )
@@ -455,7 +455,7 @@ async def health_check():
     """Health check endpoint"""
     return {
         "status": "healthy",
-        "service": "langgraph-agent",
+        "service": "agent-legacy",
         "timestamp": datetime.now().isoformat(),
         "ollama_url": OLLAMA_URL,
         "model_name": MODEL_NAME,
@@ -593,7 +593,7 @@ async def stop_monitoring_endpoint():
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    logger.info(f"Starting LangGraph Agent on port {AGENT_PORT}")
+    logger.info(f"Starting Agent Legacy on port {AGENT_PORT}")
     logger.info(f"Ollama URL: {OLLAMA_URL}")
     logger.info(f"Model: {MODEL_NAME}")
     logger.info(f"Loki MCP URL: {LOKI_MCP_URL}")

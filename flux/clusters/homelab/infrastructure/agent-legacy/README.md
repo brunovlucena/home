@@ -1,4 +1,4 @@
-# LangGraph Agent for Kubernetes
+# Agent Legacy for Kubernetes
 
 A modern AI agent using LangGraph that connects to Ollama for intelligent log analysis and system monitoring.
 
@@ -15,8 +15,8 @@ A modern AI agent using LangGraph that connects to Ollama for intelligent log an
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   LangGraph     │───▶│   Ollama LLM     │───▶│   Loki Logs     │
-│   Agent         │    │   (Local Model)   │    │   (Analysis)    │
+│   Agent Legacy  │───▶│   Ollama LLM     │───▶│   Loki Logs     │
+│   (LangGraph)   │    │   (Local Model)   │    │   (Analysis)    │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
          │                        │                        │
          ▼                        ▼                        ▼
@@ -35,10 +35,10 @@ A modern AI agent using LangGraph that connects to Ollama for intelligent log an
 - **Intelligent Responses**: AI-powered insights and recommendations
 
 ### **Kubernetes Resources**
-- **Namespace**: `langgraph-agent`
+- **Namespace**: `agent-legacy`
 - **Deployment**: 2 replicas with auto-scaling
 - **Service**: ClusterIP for internal communication
-- **Ingress**: External access via `langgraph-agent.homelab.local`
+- **Ingress**: External access via `agent-legacy.homelab.local`
 - **HPA**: Auto-scaling based on CPU/memory usage
 - **ServiceMonitor**: Prometheus metrics collection
 
@@ -65,13 +65,13 @@ kubectl apply -f hpa.yaml
 ### **Build and Push Docker Image**
 ```bash
 # Build the image
-docker build -t langgraph-agent:latest .
+docker build -t agent-legacy:latest .
 
 # Tag for your registry
-docker tag langgraph-agent:latest your-registry/langgraph-agent:latest
+docker tag agent-legacy:latest your-registry/agent-legacy:latest
 
 # Push to registry
-docker push your-registry/langgraph-agent:latest
+docker push your-registry/agent-legacy:latest
 ```
 
 ## 📡 API Endpoints
@@ -89,20 +89,20 @@ docker push your-registry/langgraph-agent:latest
 ### **Example Usage**
 ```bash
 # Chat with the agent
-curl -X POST http://langgraph-agent.homelab.local/chat \
+curl -X POST http://agent-legacy.homelab.local/chat \
   -H "Content-Type: application/json" \
   -d '{"message": "Analyze the test failures from the last hour"}'
 
 # Direct log analysis
-curl -X POST http://langgraph-agent.homelab.local/analyze-logs \
+curl -X POST http://agent-legacy.homelab.local/analyze-logs \
   -H "Content-Type: application/json" \
   -d '{"query": "{namespace=\"mocks\"} |= \"error\"}"}'
 
 # Test analysis
-curl -X POST http://langgraph-agent.homelab.local/test-analysis
+curl -X POST http://agent-legacy.homelab.local/test-analysis
 
 # System health
-curl -X POST http://langgraph-agent.homelab.local/system-health
+curl -X POST http://agent-legacy.homelab.local/system-health
 ```
 
 ## 🔧 Configuration
@@ -192,16 +192,16 @@ curl -X POST http://langgraph-agent.homelab.local/system-health
 ### **Debug Commands**
 ```bash
 # Check pod status
-kubectl get pods -n langgraph-agent
+kubectl get pods -n agent-legacy
 
 # View logs
-kubectl logs -n langgraph-agent -l app.kubernetes.io/name=langgraph-agent
+kubectl logs -n agent-legacy -l app.kubernetes.io/name=agent-legacy
 
 # Check service
-kubectl get svc -n langgraph-agent
+kubectl get svc -n agent-legacy
 
 # Test connectivity
-kubectl exec -n langgraph-agent deployment/langgraph-agent -- curl http://localhost:8080/health
+kubectl exec -n agent-legacy deployment/agent-legacy -- curl http://localhost:8080/health
 ```
 
 ## 📚 References

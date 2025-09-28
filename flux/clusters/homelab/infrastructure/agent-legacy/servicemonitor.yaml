@@ -1,16 +1,16 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: langgraph-agent
-  namespace: langgraph-agent
+  name: agent-legacy
+  namespace: agent-legacy
   labels:
-    app.kubernetes.io/name: langgraph-agent
+    app.kubernetes.io/name: agent-legacy
     app.kubernetes.io/component: ai-agent
     release: prometheus
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: langgraph-agent
+      app.kubernetes.io/name: agent-legacy
       app.kubernetes.io/component: ai-agent
   endpoints:
   - port: http

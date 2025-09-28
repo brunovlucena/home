@@ -1,11 +1,11 @@
-# LangGraph Agent Makefile
-# Build, push, and test the LangGraph agent locally
+# Agent Legacy Makefile
+# Build, push, and test the Agent Legacy locally
 
 # Variables
-APP_NAME := langgraph-agent
+APP_NAME := agent-legacy
 REGISTRY := ghcr.io/brunovlucena
 IMAGE_TAG := dev
-NAMESPACE := langgraph-agent
+NAMESPACE := agent-legacy
 LOCAL_PORT := 8080
 
 # Docker configuration
@@ -30,7 +30,7 @@ NC := \033[0m # No Color
 
 .PHONY: help
 help: ## Show this help message
-	@echo "$(BLUE)LangGraph Agent - Available Commands:$(NC)"
+	@echo "$(BLUE)Agent Legacy - Available Commands:$(NC)"
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(NC) %s\n", $$1, $$2}'
 	@echo ""
@@ -56,7 +56,7 @@ install-venv: venv ## Create venv and install dependencies
 
 .PHONY: test-local
 test-local: ## Test the agent locally
-	@echo "$(BLUE)Testing LangGraph agent locally...$(NC)"
+	@echo "$(BLUE)Testing Agent Legacy locally...$(NC)"
 	@echo "$(YELLOW)Starting local test server on port $(LOCAL_PORT)...$(NC)"
 	@echo "$(YELLOW)Press Ctrl+C to stop$(NC)"
 	@echo ""
@@ -126,7 +126,7 @@ push: build-registry ## Push image to GitHub Container Registry
 
 .PHONY: run-local
 run-local: build ## Run the agent locally with Docker
-	@echo "$(BLUE)Running LangGraph agent locally with Docker...$(NC)"
+	@echo "$(BLUE)Running Agent Legacy locally with Docker...$(NC)"
 	@echo "$(YELLOW)Starting container on port $(LOCAL_PORT)...$(NC)"
 	@echo "$(YELLOW)Press Ctrl+C to stop$(NC)"
 	@echo ""
@@ -138,7 +138,7 @@ run-local: build ## Run the agent locally with Docker
 
 .PHONY: run-local-full
 run-local-full: build ## Run with full monitoring enabled
-	@echo "$(BLUE)Running LangGraph agent with full monitoring...$(NC)"
+	@echo "$(BLUE)Running Agent Legacy with full monitoring...$(NC)"
 	@echo "$(YELLOW)Starting container on port $(LOCAL_PORT)...$(NC)"
 	@echo "$(YELLOW)Press Ctrl+C to stop$(NC)"
 	@echo ""
@@ -273,8 +273,8 @@ dev-k8s: build-registry push deploy-local test-k8s ## Full Kubernetes developmen
 .PHONY: full-deploy
 full-deploy: test-all login-github push deploy-local ## Complete deployment workflow
 	@echo "$(GREEN)Complete deployment workflow finished!$(NC)"
-	@echo "$(BLUE)Your LangGraph agent is now deployed and running!$(NC)"
-	@echo "$(YELLOW)Access it at: http://langgraph-agent.homelab.local$(NC)"
+	@echo "$(BLUE)Your Agent Legacy is now deployed and running!$(NC)"
+	@echo "$(YELLOW)Access it at: http://agent-legacy.homelab.local$(NC)"
 	@echo "$(YELLOW)Or use port-forward: make port-forward$(NC)"
 
 .PHONY: lint
