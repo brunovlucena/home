@@ -31,5 +31,5 @@ EXPOSE 30121
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:30121/health || exit 1
 
-# Run the application directly from the venv
-CMD [".venv/bin/python", "main.py"]
+# Run the MCP server using uv
+CMD ["uv", "run", "python", "mcp_simple_server.py"]
