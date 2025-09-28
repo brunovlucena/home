@@ -117,9 +117,10 @@ jobs:
       - name: "📦 Install Dependencies"
         working-directory: ./flux/clusters/homelab/infrastructure/agent-legacy
         run: |
-          echo "📦 Installing Python dependencies..."
-          pip install -r requirements.txt
-          pip install pytest pytest-cov flake8
+          echo "📦 Installing Python dependencies with optimized pip..."
+          pip install --no-cache-dir --upgrade pip
+          pip install --no-cache-dir -r requirements.txt
+          pip install --no-cache-dir pytest pytest-cov flake8
 
       - name: "🧪 Run Tests"
         working-directory: ./flux/clusters/homelab/infrastructure/agent-legacy
@@ -161,9 +162,11 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=agent-legacy
+          cache-to: type=gha,mode=max,scope=agent-legacy
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
 
       - name: "🔒 Run Trivy Security Scan"
         uses: aquasecurity/trivy-action@master

@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: agent-sre
+  namespace: agent-sre
+  labels:
+    app.kubernetes.io/name: agent-sre
+    app.kubernetes.io/component: sre-agent
+    app.kubernetes.io/part-of: homelab
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: agent-sre
+        app.kubernetes.io/component: sre-agent
+        app.kubernetes.io/part-of: homelab
+    spec:
+      containers:
+      - name: agent-sre
+        image: ghcr.io/brunovlucena-org/agent-sre:latest
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: SERVICE_NAME
+          value: "agent-sre"
+        - name: HTTP_PORT
+          value: "8080"
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: LOGFIRE_TOKEN_SRE_AGENT
+          valueFrom:
+            secretKeyRef:
+              name: ai-secrets
+              key: logfire-token-sre-agent
+        - name: LANGSMITH_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ai-secrets
+              key: langsmith-api-key
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        # No health checks needed for script-based agent
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: agent-sre-config
+      restartPolicy: Never

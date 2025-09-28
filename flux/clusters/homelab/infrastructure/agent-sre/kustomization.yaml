@@ -8,6 +8,9 @@ metadata:
 # Resources for agent-sre
 resources:
   - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  - configmap.yaml
 
 # Common labels for all resources when they are added
 commonLabels:
