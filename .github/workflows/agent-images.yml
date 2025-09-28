@@ -112,7 +112,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION_LEGACY }}
           cache: 'pip'
-          cache-dependency-path: './flux/clusters/homelab/infrastructure/agent-legacy/requirements.txt'
+          cache-dependency-path: 'flux/clusters/homelab/infrastructure/agent-legacy/requirements.txt'
 
       - name: "📦 Install Dependencies"
         working-directory: ./flux/clusters/homelab/infrastructure/agent-legacy
