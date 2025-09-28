@@ -8,6 +8,8 @@ metadata:
 # Resources for agent-sre
 resources:
   - namespace.yaml
+  - ../sealed-secrets/ghcr-secret-agent-sre.yaml
+  - ../sealed-secrets/ai-secrets-agent-sre.yaml
 
 # Common labels for all resources when they are added
 commonLabels:
