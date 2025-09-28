@@ -337,7 +337,15 @@ INSERT INTO experience (title, company, start_date, end_date, current, descripti
     '2011-01-01',
     '2013-10-31',
     FALSE,
-    'Key Responsibilities: - Vulnerability Assessment: Conduct in-depth vulnerability assessments to identify and mitigate security risks within complex IT environments. - Vulnerability Research: Stay abreast of the latest security threats and vulnerabilities, conducting thorough research to understand their impact and potential exploits. - Automation Development: Develop and maintain automated tools and scripts (e.g., Bash, Ruby) to streamline vulnerability scanning and reporting processes. - Nessus Plugin Development: Create and customize Nessus Scanner Plugins (NASL) to enhance vulnerability detection capabilities and tailor them to specific security needs.',
+    'Key Responsibilities:
+
+- Vulnerability Assessment: Conduct in-depth vulnerability assessments to identify and mitigate security risks within complex IT environments
+
+- Vulnerability Research: Stay abreast of the latest security threats and vulnerabilities, conducting thorough research to understand their impact and potential exploits
+
+- Automation Development: Develop and maintain automated tools and scripts (e.g., Bash, Ruby) to streamline vulnerability scanning and reporting processes
+
+- Nessus Plugin Development: Create and customize Nessus Scanner Plugins (NASL) to enhance vulnerability detection capabilities and tailor them to specific security needs',
     ARRAY['Vulnerability Assessment', 'Security Research', 'Bash', 'Ruby', 'Nessus', 'NASL', 'Security Automation', 'Vulnerability Scanning', 'Security Tools']::TEXT[],
     1,
     TRUE
@@ -348,7 +356,15 @@ INSERT INTO experience (title, company, start_date, end_date, current, descripti
     '2017-08-01',
     '2018-03-31',
     FALSE,
-    'Key Responsibilities: - Cloud Operations: Managed and maintained complex cloud infrastructure on AWS and GCP. - Automation: Implemented automation tools (Saltstack) to streamline operations and reduce manual effort. - Monitoring and Logging: Deployed and configured monitoring and logging solutions (Prometheus, ELK) to ensure system health and performance. - Distributed Systems: Worked with distributed systems technologies like Mesos, Consul, Kafka, and Linkerd to build scalable and resilient applications.',
+    'Key Responsibilities:
+
+- Cloud Operations: Managed and maintained complex cloud infrastructure on AWS and GCP
+
+- Automation: Implemented automation tools (Saltstack) to streamline operations and reduce manual effort
+
+- Monitoring and Logging: Deployed and configured monitoring and logging solutions (Prometheus, ELK) to ensure system health and performance
+
+- Distributed Systems: Worked with distributed systems technologies like Mesos, Consul, Kafka, and Linkerd to build scalable and resilient applications',
     ARRAY['AWS', 'GCP', 'Saltstack', 'Prometheus', 'ELK', 'Mesos', 'Consul', 'Kafka', 'Linkerd', 'Distributed Systems', 'Cloud Operations', 'Automation', 'Monitoring', 'Logging']::TEXT[],
     2,
     TRUE
@@ -359,7 +375,15 @@ INSERT INTO experience (title, company, start_date, end_date, current, descripti
     '2018-04-01',
     '2018-12-31',
     FALSE,
-    'Key Responsibilities: - Cloud-Native Infrastructure: Designed and implemented a Kubernetes cluster on bare-metal to modernize the infrastructure. - Automation and CI/CD: Automated infrastructure provisioning and configuration management using Saltstack and Chef. - Monitoring and Logging: Deployed and configured monitoring and logging solutions (Prometheus, ELK) to gain visibility into system health and performance. - Collaboration: Worked closely with development teams to improve deployment processes and reduce downtime.',
+    'Key Responsibilities:
+
+- Cloud-Native Infrastructure: Designed and implemented a Kubernetes cluster on bare-metal to modernize the infrastructure
+
+- Automation and CI/CD: Automated infrastructure provisioning and configuration management using Saltstack and Chef
+
+- Monitoring and Logging: Deployed and configured monitoring and logging solutions (Prometheus, ELK) to gain visibility into system health and performance
+
+- Collaboration: Worked closely with development teams to improve deployment processes and reduce downtime',
     ARRAY['Kubernetes', 'Bare-metal', 'Saltstack', 'Chef', 'Prometheus', 'ELK', 'Automation', 'CI/CD', 'Monitoring', 'Logging', 'Infrastructure', 'Collaboration']::TEXT[],
     3,
     TRUE
@@ -370,7 +394,13 @@ INSERT INTO experience (title, company, start_date, end_date, current, descripti
     '2019-03-01',
     '2019-08-31',
     FALSE,
-    'Key Responsibilities: - Cloud Migration and Modernization: Took part in the migration of legacy infrastructure from VMware ESXi to a Multi-Tenant Kubernetes-based solution on top of OpenStack. - Infrastructure as Code: Implemented infrastructure as code practices using Terraform to automate provisioning and configuration management. - Automation and CI/CD: Developed and maintained automation scripts (Bash, Golang, Ansible, Helm) to streamline operations and improve efficiency.',
+    'Key Responsibilities:
+
+- Cloud Migration and Modernization: Took part in the migration of legacy infrastructure from VMware ESXi to a Multi-Tenant Kubernetes-based solution on top of OpenStack
+
+- Infrastructure as Code: Implemented infrastructure as code practices using Terraform to automate provisioning and configuration management
+
+- Automation and CI/CD: Developed and maintained automation scripts (Bash, Golang, Ansible, Helm) to streamline operations and improve efficiency',
     ARRAY['Cloud Migration', 'VMware ESXi', 'Kubernetes', 'OpenStack', 'Terraform', 'Bash', 'Golang', 'Ansible', 'Helm', 'Infrastructure as Code', 'Automation', 'CI/CD']::TEXT[],
     4,
     TRUE
@@ -381,7 +411,15 @@ INSERT INTO experience (title, company, start_date, end_date, current, descripti
     '2020-02-01',
     '2023-03-31',
     FALSE,
-    'Key Responsibilities: - Cloud Native Infrastructure: Designed, implemented, and maintained a robust cloud-native infrastructure on AWS, leveraging services like EKS, Kops, and Kubernetes. - Automation and CI/CD: Automated infrastructure provisioning, deployment, and configuration management using Terraform and GitHub Actions/GitLab CI/CD. - Observability: Implemented and optimized monitoring, logging, and tracing solutions (Prometheus, Loki, Grafana, Thanos, EFK) to gain deep insights into system performance and behavior. - Problem-Solving and Troubleshooting: Quickly identified and resolved complex infrastructure issues, minimizing downtime and service disruptions.',
+    'Key Responsibilities:
+
+- Cloud Native Infrastructure: Designed, implemented, and maintained a robust cloud-native infrastructure on AWS, leveraging services like EKS, Kops, and Kubernetes
+
+- Automation and CI/CD: Automated infrastructure provisioning, deployment, and configuration management using Terraform and GitHub Actions/GitLab CI/CD
+
+- Observability: Implemented and optimized monitoring, logging, and tracing solutions (Prometheus, Loki, Grafana, Thanos, EFK) to gain deep insights into system performance and behavior
+
+- Problem-Solving and Troubleshooting: Quickly identified and resolved complex infrastructure issues, minimizing downtime and service disruptions',
     ARRAY['AWS', 'EKS', 'Kops', 'Kubernetes', 'Terraform', 'GitHub Actions', 'GitLab CI/CD', 'Prometheus', 'Loki', 'Grafana', 'Thanos', 'EFK', 'Infrastructure', 'Automation', 'CI/CD', 'Observability', 'Troubleshooting']::TEXT[],
     5,
     TRUE
@@ -404,7 +442,21 @@ INSERT INTO experience (title, company, start_date, end_date, current, descripti
     '2023-06-01',
     NULL,
     TRUE,
-    'Key Responsibilities: - Cloud Native Infrastructure: Architect, build, and maintain highly available, scalable, and resilient cloud-native infrastructure using Kubernetes, AWS, GCP, Pulumi, and many others - Observability: Implement and optimize monitoring, logging, and tracing solutions (Prometheus, Loki, Tempo, Grafana, OpenTelemetry) to gain deep insights into system performance and behavior. - AI: Pydantic Logfire, Vertex AI, Langchain, Langgraph, Flyte, Wandb, Kamaji, MCP-Servers - Automation and CI/CD: Automate infrastructure provisioning, deployment, and configuration management using Terraform, Atmos, and GitHub Actions to accelerate development and reduce errors. - Serverless and Function-as-a-Service: Develop and deploy serverless applications on AWS Lambda - Serverless on K8s: Knative (CloudEvents, RabbitMQ), Golang - Security and Compliance: Ensure the security and compliance of systems and applications by implementing best practices and leveraging security tools.',
+    'Key Responsibilities:
+
+- Cloud Native Infrastructure: Architect, build, and maintain highly available, scalable, and resilient cloud-native infrastructure using Kubernetes, AWS, GCP, Pulumi, and many others
+
+- Observability: Implement and optimize monitoring, logging, and tracing solutions (Prometheus, Loki, Tempo, Grafana, OpenTelemetry) to gain deep insights into system performance and behavior
+
+- AI: Pydantic Logfire, Vertex AI, Langchain, Langgraph, Flyte, Wandb, Kamaji, MCP-Servers
+
+- Automation and CI/CD: Automate infrastructure provisioning, deployment, and configuration management using Terraform, Atmos, and GitHub Actions to accelerate development and reduce errors
+
+- Serverless and Function-as-a-Service: Develop and deploy serverless applications on AWS Lambda
+
+- Serverless on K8s: Knative (CloudEvents, RabbitMQ), Golang
+
+- Security and Compliance: Ensure the security and compliance of systems and applications by implementing best practices and leveraging security tools',
     ARRAY['Kubernetes', 'AWS', 'GCP', 'Pulumi', 'Prometheus', 'Loki', 'Tempo', 'Grafana', 'OpenTelemetry', 'Pydantic Logfire', 'Vertex AI', 'Langchain', 'Langgraph', 'Flyte', 'Wandb', 'Kamaji', 'MCP-Servers', 'Terraform', 'Atmos', 'GitHub Actions', 'AWS Lambda', 'Knative', 'CloudEvents', 'RabbitMQ', 'Golang', 'Security', 'Compliance']::TEXT[],
     8,
     TRUE
