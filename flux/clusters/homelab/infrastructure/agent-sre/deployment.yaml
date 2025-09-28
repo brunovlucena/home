@@ -1,5 +1,5 @@
-apiVersion: batch/v1
-kind: Job
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: agent-sre
   namespace: agent-sre
@@ -8,6 +8,11 @@ metadata:
     app.kubernetes.io/component: sre-agent
     app.kubernetes.io/part-of: homelab
 spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: agent-sre
+      app.kubernetes.io/component: sre-agent
   template:
     metadata:
       labels:
@@ -15,6 +20,8 @@ spec:
         app.kubernetes.io/component: sre-agent
         app.kubernetes.io/part-of: homelab
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
       - name: agent-sre
         image: ghcr.io/brunovlucena-org/agent-sre:latest
@@ -33,12 +40,12 @@ spec:
           valueFrom:
             secretKeyRef:
               name: ai-secrets
-              key: logfire-token-sre-agent
+              key: LOGFIRE_TOKEN
         - name: LANGSMITH_API_KEY
           valueFrom:
             secretKeyRef:
               name: ai-secrets
-              key: langsmith-api-key
+              key: HF_TOKEN
         resources:
           requests:
             memory: "128Mi"
@@ -46,7 +53,27 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
-        # No health checks needed for script-based agent
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+            - ALL
         volumeMounts:
         - name: config
           mountPath: /app/config
@@ -55,4 +82,4 @@ spec:
       - name: config
         configMap:
           name: agent-sre-config
-      restartPolicy: Never
+      restartPolicy: Always
