@@ -25,13 +25,13 @@ spec:
       containers:
       - name: sre-agent-mcp
         image: ghcr.io/brunovlucena/agent-sre:latest
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 30120
+        - containerPort: 30121
           name: http
         env:
         - name: MCP_PORT
-          value: "30120"
+          value: "30121"
         - name: MCP_HOST
           value: "0.0.0.0"
         - name: OLLAMA_URL
@@ -43,18 +43,13 @@ spec:
         - name: LOGFIRE_TOKEN_SRE_AGENT
           valueFrom:
             secretKeyRef:
-              name: sre-agent-secrets
-              key: logfire-token
+              name: ai-secrets
+              key: LOGFIRE_TOKEN_SRE_AGENT
         - name: LANGSMITH_API_KEY
           valueFrom:
             secretKeyRef:
-              name: sre-agent-secrets
-              key: langsmith-api-key
-        - name: SRE_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: sre-agent-secrets
-              key: sre-api-key
+              name: ai-secrets
+              key: LANGSMITH_API_KEY
         resources:
           requests:
             memory: "512Mi"
@@ -65,13 +60,13 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-            port: 30120
+            port: 30121
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /health
-            port: 30120
+            port: 30121
           initialDelaySeconds: 5
           periodSeconds: 5
 ---
@@ -85,22 +80,10 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - port: 30120
-    targetPort: 30120
-    nodePort: 31120
+  - port: 30121
+    targetPort: 30121
+    nodePort: 31121
     protocol: TCP
     name: http
   selector:
     app: sre-agent-mcp
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: sre-agent-secrets
-  namespace: agent-sre
-type: Opaque
-data:
-  # Base64 encoded values - replace with your actual values
-  logfire-token: cHlsZl92MV91c18zN3JaUm1xNzZxcGpZUDhRdHFQUDU5eVNwR1FyenpRbU4zR2JHTjR0Y0ZoMw==
-  langsmith-api-key: bHN2Ml9wdF9lNWY1ZDE5NzE3MDQ0NDkzYWNjNDZhZmYzODA0NDRkYV9hZjdiMGY2MzRj
-  sre-api-key: c3JlLWRldi15b3VyLWtleQ==
