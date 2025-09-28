@@ -19,3 +19,10 @@ dependencies = [
     "langsmith[otel]==0.4.31",
     "opentelemetry-api==1.37.0",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.4",
+    "pytest-cov==6.0.0",
+    "flake8==7.1.1",
+]

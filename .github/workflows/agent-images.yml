@@ -112,7 +112,6 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION_LEGACY }}
           cache: 'pip'
-          cache-dependency-path: 'flux/clusters/homelab/infrastructure/agent-legacy/requirements.txt'
 
       - name: "📦 Install Dependencies"
         working-directory: ./flux/clusters/homelab/infrastructure/agent-legacy
@@ -176,7 +175,7 @@ jobs:
           output: 'trivy-results-agent-legacy.sarif'
 
       - name: "📊 Upload Trivy Scan Results"
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results-agent-legacy.sarif'
 
@@ -203,8 +202,7 @@ jobs:
         working-directory: ./flux/clusters/homelab/infrastructure/agent-sre
         run: |
           echo "📦 Installing Python dependencies with uv (optimized)..."
-          uv sync --frozen --no-cache
-          uv add pytest pytest-cov flake8 --dev --no-cache
+          uv sync --frozen --extra dev
 
       - name: "🧪 Run Tests"
         working-directory: ./flux/clusters/homelab/infrastructure/agent-sre
@@ -277,7 +275,7 @@ jobs:
           output: 'trivy-results-agent-sre.sarif'
 
       - name: "📊 Upload Trivy Scan Results"
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results-agent-sre.sarif'
 

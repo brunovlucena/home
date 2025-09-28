@@ -31,7 +31,7 @@ try:
     print("✅ Ollama connection established")
     
     # Test a simple query
-    from langchain_core.prompts import ChatPromptTemplate
+    from langchain.prompts import ChatPromptTemplate
     prompt = ChatPromptTemplate.from_template("SRE Question: {question}")
     chain = prompt | llm
     
