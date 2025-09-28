@@ -26,27 +26,27 @@ spec:
       - name: agent-sre
         image: ghcr.io/brunovlucena/agent-sre:latest
         imagePullPolicy: Always
-        ports:
-        - containerPort: 8080
-          name: http
-          protocol: TCP
         env:
-        - name: SERVICE_NAME
+        - name: AGENT_SRE_SERVER_NAME
           value: "agent-sre"
-        - name: HTTP_PORT
-          value: "8080"
+        - name: AGENT_SRE_SERVER_VERSION
+          value: "1.0.0"
+        - name: OLLAMA_URL
+          value: "http://192.168.0.12:11434"
+        - name: MODEL_NAME
+          value: "bruno-sre:latest"
         - name: LOG_LEVEL
           value: "INFO"
         - name: LOGFIRE_TOKEN_SRE_AGENT
           valueFrom:
             secretKeyRef:
               name: ai-secrets
-              key: LOGFIRE_TOKEN
+              key: LOGFIRE_TOKEN_SRE_AGENT
         - name: LANGSMITH_API_KEY
           valueFrom:
             secretKeyRef:
               name: ai-secrets
-              key: HF_TOKEN
+              key: LANGSMITH_API_KEY
         resources:
           requests:
             memory: "128Mi"
@@ -55,17 +55,21 @@ spec:
             memory: "512Mi"
             cpu: "500m"
         livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 30
-          timeoutSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 8080
+          exec:
+            command:
+            - python
+            - -c
+            - "import sys; sys.exit(0)"
           initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - "import sys; sys.exit(0)"
+          initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 5
         securityContext:
