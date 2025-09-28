@@ -327,7 +327,7 @@ INSERT INTO skills (name, category, proficiency, icon, "order", active) VALUES
 ('ArgoCD', 'Tools', 4, 'argocd', 58, TRUE),
 ('GitHub Actions', 'Tools', 5, 'githubactions', 61, TRUE),
 ('Atmos', 'Tools', 4, 'atmos', 62, TRUE),
-('Kamaji', 'AI/ML', 4, 'kamaji', 70, TRUE),
+('Kamaji', 'AI/ML', 4, 'kamaji', 70, TRUE);
 
 -- Insert experience data in chronological order (oldest to newest)
 INSERT INTO experience (title, company, start_date, end_date, current, description, technologies, "order", active) VALUES

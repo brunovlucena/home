@@ -6,6 +6,7 @@ Tests the SRE agent functionality with proper environment variable configuration
 
 import os
 import logfire
+from langchain_community.llms import Ollama
 
 # Configure Logfire with environment variable
 sre_agent_token = os.getenv('LOGFIRE_TOKEN_SRE_AGENT')
@@ -24,20 +25,19 @@ else:
     print("⚠️  LANGSMITH_API_KEY not set, LangSmith features will be limited")
 
 # Test local Ollama connection
-from langchain_community.llms import Ollama
 
 try:
     llm = Ollama(model="bruno-sre:latest", base_url="http://192.168.0.12:11434")
     print("✅ Ollama connection established")
-    
+
     # Test a simple query
     from langchain.prompts import ChatPromptTemplate
     prompt = ChatPromptTemplate.from_template("SRE Question: {question}")
     chain = prompt | llm
-    
+
     response = chain.invoke({"question": "How do I monitor Kubernetes pods?"})
     print(f"🤖 Agent Response: {response}")
-    
+
 except Exception as e:
     print(f"❌ Error connecting to Ollama: {e}")
 
