@@ -230,6 +230,20 @@ jobs:
             type=raw,value=${{ needs.detect-changes.outputs.environment == 'dev' && env.IMAGE_TAG_DEV || env.IMAGE_TAG_PRD }}
             type=sha,prefix={{branch}}-
 
+      - name: "🔍 Debug Registry Access"
+        run: |
+          echo "🔍 Debugging registry access..."
+          echo "Registry: ${{ env.REGISTRY }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Tags to push: ${{ steps.meta.outputs.tags }}"
+          
+          # Test registry connectivity
+          echo "Testing registry connectivity..."
+          docker system info | grep -i registry || echo "No registry info found"
+
       - name: "🏗️ Build and Push Agent SRE Image"
         uses: docker/build-push-action@v5
         with:
@@ -240,6 +254,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64,linux/arm64
+        env:
+          # Add debug information for registry access
+          DOCKER_BUILDKIT: 1
 
       - name: "🔒 Run Trivy Security Scan"
         uses: aquasecurity/trivy-action@master
