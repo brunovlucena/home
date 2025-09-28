@@ -5,7 +5,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "bruno-site.fullname" . }}-db-init-{{ now | date "20060102150405" }}
+  name: {{ include "bruno-site.fullname" . }}-db-init-{{ .Files.Get "files/migrations/001_complete_schema.sql" | sha256sum | trunc 8 }}
   labels:
     {{- include "bruno-site.labels" . | nindent 4 }}
     app.kubernetes.io/component: db-init
@@ -13,6 +13,8 @@ metadata:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "10"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    # 🔄 This annotation ensures the job runs when migrations ConfigMap changes
+    "configmap/checksum": {{ .Files.Get "files/migrations/001_complete_schema.sql" | sha256sum }}
 spec:
   backoffLimit: 5
   template:
@@ -40,9 +42,24 @@ spec:
               echo "🔍 Checking if database exists..."
               psql -h {{ include "bruno-site.fullname" . }}-postgres -p {{ .Values.database.port }} -U {{ .Values.database.user }} -d postgres -c "SELECT 1 FROM pg_database WHERE datname='{{ .Values.database.name }}';" | grep -q 1 || psql -h {{ include "bruno-site.fullname" . }}-postgres -p {{ .Values.database.port }} -U {{ .Values.database.user }} -d postgres -c "CREATE DATABASE {{ .Values.database.name }};"
               
-              # Run complete schema migration
-              echo "🔄 Running 001_complete_schema.sql..."
-              psql -h {{ include "bruno-site.fullname" . }}-postgres -p {{ .Values.database.port }} -U {{ .Values.database.user }} -d {{ .Values.database.name }} -f /migrations/001_complete_schema.sql
+              # Calculate migration checksum
+              MIGRATION_CHECKSUM=$(sha256sum /migrations/001_complete_schema.sql | cut -d' ' -f1)
+              MIGRATION_VERSION="001_complete_schema"
+              
+              # Check if migration was already applied with same checksum
+              echo "🔍 Checking if migration $MIGRATION_VERSION was already applied..."
+              if psql -h {{ include "bruno-site.fullname" . }}-postgres -p {{ .Values.database.port }} -U {{ .Values.database.user }} -d {{ .Values.database.name }} -t -c "SELECT migration_applied('$MIGRATION_VERSION', '$MIGRATION_CHECKSUM');" | grep -q t; then
+                echo "✅ Migration $MIGRATION_VERSION already applied with same checksum. Skipping."
+              else
+                echo "🔄 Running migration $MIGRATION_VERSION with checksum $MIGRATION_CHECKSUM..."
+                psql -h {{ include "bruno-site.fullname" . }}-postgres -p {{ .Values.database.port }} -U {{ .Values.database.user }} -d {{ .Values.database.name }} -f /migrations/001_complete_schema.sql
+                
+                # Mark migration as applied
+                echo "📝 Marking migration as applied..."
+                psql -h {{ include "bruno-site.fullname" . }}-postgres -p {{ .Values.database.port }} -U {{ .Values.database.user }} -d {{ .Values.database.name }} -c "SELECT mark_migration_applied('$MIGRATION_VERSION', '$MIGRATION_CHECKSUM', 'Complete database schema and initial data for Bruno site system');"
+                
+                echo "✅ Migration $MIGRATION_VERSION completed successfully!"
+              fi
               
               echo "✅ Database initialization completed successfully!"
           env:

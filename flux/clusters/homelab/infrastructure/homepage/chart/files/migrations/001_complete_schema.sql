@@ -4,6 +4,39 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Migration tracking table
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    id SERIAL PRIMARY KEY,
+    version VARCHAR(50) UNIQUE NOT NULL,
+    checksum VARCHAR(64) NOT NULL,
+    applied_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    description TEXT
+);
+
+-- Function to check if migration was already applied
+CREATE OR REPLACE FUNCTION migration_applied(version_name VARCHAR, migration_checksum VARCHAR)
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1 FROM schema_migrations 
+        WHERE version = version_name AND checksum = migration_checksum
+    );
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to mark migration as applied
+CREATE OR REPLACE FUNCTION mark_migration_applied(version_name VARCHAR, migration_checksum VARCHAR, migration_desc TEXT)
+RETURNS VOID AS $$
+BEGIN
+    INSERT INTO schema_migrations (version, checksum, description)
+    VALUES (version_name, migration_checksum, migration_desc)
+    ON CONFLICT (version) DO UPDATE SET
+        checksum = EXCLUDED.checksum,
+        description = EXCLUDED.description,
+        applied_at = CURRENT_TIMESTAMP;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Projects table
 CREATE TABLE IF NOT EXISTS projects (
     id SERIAL PRIMARY KEY,
