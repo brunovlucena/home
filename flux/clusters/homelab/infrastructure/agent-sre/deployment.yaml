@@ -24,7 +24,7 @@ spec:
         - name: ghcr-secret
       containers:
       - name: agent-sre
-        image: ghcr.io/brunovlucena-org/agent-sre:latest
+        image: ghcr.io/brunovlucena/agent-sre:latest
         ports:
         - containerPort: 8080
           name: http

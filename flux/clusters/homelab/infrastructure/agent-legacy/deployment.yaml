@@ -22,7 +22,7 @@ spec:
         - name: ghcr-secret
       containers:
       - name: agent-legacy
-        image: ghcr.io/brunovlucena/agent-legacy:dev
+        image: ghcr.io/brunovlucena/agent-legacy:latest
         ports:
         - containerPort: 8080
           name: http
@@ -42,7 +42,7 @@ spec:
           valueFrom:
             configMapKeyRef:
               name: agent-legacy-config
-              key: LOKI_URL
+              key: LOKI_MCP_URL
         - name: AGENT_PORT
           valueFrom:
             configMapKeyRef:

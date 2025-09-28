@@ -6,13 +6,17 @@ Tests the SRE agent functionality with proper environment variable configuration
 
 import os
 import logfire
-from langchain_community.llms import Ollama
+from langchain_ollama import Ollama
 
 # Configure Logfire with environment variable
 sre_agent_token = os.getenv('LOGFIRE_TOKEN_SRE_AGENT')
 if sre_agent_token:
-    logfire.configure(service_name="sre-agent", token=sre_agent_token)
-    print("✅ Logfire configured successfully")
+    try:
+        logfire.configure(service_name="sre-agent", token=sre_agent_token)
+        print("✅ Logfire configured successfully")
+    except Exception as e:
+        print(f"⚠️  Logfire configuration failed: {e}")
+        print("⚠️  Continuing without Logfire...")
 else:
     print("⚠️  LOGFIRE_TOKEN_SRE_AGENT not set, skipping Logfire configuration")
 
