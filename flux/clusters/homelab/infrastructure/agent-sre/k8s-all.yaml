@@ -1,0 +1,106 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: agent-sre
+  labels:
+    name: agent-sre
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sre-agent-mcp
+  namespace: agent-sre
+  labels:
+    app: sre-agent-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sre-agent-mcp
+  template:
+    metadata:
+      labels:
+        app: sre-agent-mcp
+    spec:
+      containers:
+      - name: sre-agent-mcp
+        image: ghcr.io/brunovlucena/agent-sre:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 30120
+          name: http
+        env:
+        - name: MCP_PORT
+          value: "30120"
+        - name: MCP_HOST
+          value: "0.0.0.0"
+        - name: OLLAMA_URL
+          value: "http://192.168.0.12:11434"
+        - name: MODEL_NAME
+          value: "bruno-sre:latest"
+        - name: SERVICE_NAME
+          value: "sre-agent"
+        - name: LOGFIRE_TOKEN_SRE_AGENT
+          valueFrom:
+            secretKeyRef:
+              name: sre-agent-secrets
+              key: logfire-token
+        - name: LANGSMITH_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: sre-agent-secrets
+              key: langsmith-api-key
+        - name: SRE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: sre-agent-secrets
+              key: sre-api-key
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 30120
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 30120
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sre-agent-mcp-service
+  namespace: agent-sre
+  labels:
+    app: sre-agent-mcp
+spec:
+  type: NodePort
+  ports:
+  - port: 30120
+    targetPort: 30120
+    nodePort: 31120
+    protocol: TCP
+    name: http
+  selector:
+    app: sre-agent-mcp
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sre-agent-secrets
+  namespace: agent-sre
+type: Opaque
+data:
+  # Base64 encoded values - replace with your actual values
+  logfire-token: cHlsZl92MV91c18zN3JaUm1xNzZxcGpZUDhRdHFQUDU5eVNwR1FyenpRbU4zR2JHTjR0Y0ZoMw==
+  langsmith-api-key: bHN2Ml9wdF9lNWY1ZDE5NzE3MDQ0NDkzYWNjNDZhZmYzODA0NDRkYV9hZjdiMGY2MzRj
+  sre-api-key: c3JlLWRldi15b3VyLWtleQ==

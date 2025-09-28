@@ -1,0 +1,45 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: statuspage-exporter
+  namespace: statuspage-exporter
+  labels:
+    app.kubernetes.io/name: statuspage-exporter
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: homelab
+    prometheus: kube-prometheus
+    release: prometheus-operator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: statuspage-exporter
+      app.kubernetes.io/component: monitoring
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+    scheme: http
+    honorLabels: true
+    relabelings:
+    - sourceLabels: [__meta_kubernetes_pod_name]
+      targetLabel: pod
+    - sourceLabels: [__meta_kubernetes_pod_node_name]
+      targetLabel: node
+    - sourceLabels: [__meta_kubernetes_namespace]
+      targetLabel: namespace
+    - sourceLabels: [__meta_kubernetes_service_name]
+      targetLabel: service
+    - sourceLabels: [__meta_kubernetes_pod_container_name]
+      targetLabel: container
+    - targetLabel: environment
+      replacement: "production"
+    - targetLabel: cluster
+      replacement: "homelab"
+    - targetLabel: team
+      replacement: "sre"
+    - targetLabel: application
+      replacement: "statuspage-exporter"
+  namespaceSelector:
+    matchNames:
+    - statuspage-exporter
