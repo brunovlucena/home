@@ -178,12 +178,24 @@ const Home: React.FC = () => {
             <div className="about-intro">
               <div className="about-image-container">
                 <picture>
-                  <source srcSet="./assets/eu.webp" type="image/webp" />
+                  <source 
+                    srcSet="./assets/eu.webp" 
+                    type="image/webp" 
+                  />
                   <img 
                     src="./assets/eu.png" 
                     alt="Bruno Lucena" 
                     className="about-image"
-                    loading="lazy"
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
+                    onLoad={(e) => {
+                      e.currentTarget.style.opacity = '1';
+                    }}
+                    style={{
+                      opacity: '0',
+                      transition: 'opacity 0.3s ease-in-out'
+                    }}
                   />
                 </picture>
               </div>
@@ -356,6 +368,7 @@ const Home: React.FC = () => {
                           frameBorder="0"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
+                          loading="lazy"
                         ></iframe>
                       </div>
                     )}

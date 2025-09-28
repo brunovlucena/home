@@ -46,9 +46,24 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          router: ['react-router-dom']
+          router: ['react-router-dom'],
+          icons: ['react-icons/si', 'react-icons/fa', 'react-icons/bi']
         }
       }
-    }
+    },
+    // Optimize assets
+    assetsInlineLimit: 4096, // Inline assets smaller than 4kb
+    chunkSizeWarningLimit: 1000
+  },
+  // Optimize dependencies
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'react-icons/si',
+      'react-icons/fa',
+      'react-icons/bi'
+    ]
   },
 }) 
