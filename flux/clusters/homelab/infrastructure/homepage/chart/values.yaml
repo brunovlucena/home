@@ -94,6 +94,9 @@ database:
   user: postgres
   password: ""
   existingSecret: "bruno-site-db-secret"  # Created by Sealed Secrets
+  migration:
+    schedule: "0 2 * * *"  # Daily at 2 AM - runs database migrations
+    enabled: true
 
 # PostgreSQL configuration
 postgres:
