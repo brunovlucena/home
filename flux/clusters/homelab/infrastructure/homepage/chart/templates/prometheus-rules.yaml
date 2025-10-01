@@ -294,6 +294,245 @@ spec:
         runbook_url: "https://github.com/brunovlucena/bruno-site/docs/runbooks/sql-injection-attempts.md"
 
   # =============================================================================
+  # 👥 VISITOR TRACKING ALERTS - TRAFFIC MONITORING & ABUSE DETECTION
+  # =============================================================================
+  - name: bruno-site.visitors
+    rules:
+    # ==================== CRITICAL: ABUSE DETECTION ====================
+    
+    - alert: BrunoSiteAbuseHighRequestRate
+      expr: |
+        sum by (namespace, service) (
+          rate(http_requests_total{
+            namespace="bruno",
+            path!="/metrics",
+            path!="/health"
+          }[1m])
+        ) > 10
+      for: 2m
+      labels:
+        severity: critical
+        service: api
+        component: bruno-site
+        security: abuse
+        type: rate-abuse
+      annotations:
+        summary: "🚨 ABUSE DETECTED: Extremely high request rate"
+        description: "Bruno Site is receiving {{`{{ $value | printf \"%.2f\" }}`}} requests per second from visitors. This may indicate a DDoS attack, scraping bot, or abuse."
+        impact: "High - May degrade service performance or increase costs"
+        runbook_url: "https://github.com/brunovlucena/bruno-site/docs/runbooks/abuse-high-rate.md"
+        action: "1. Check logs for source IPs\n2. Review CloudFlare firewall rules\n3. Consider rate limiting or blocking suspicious IPs"
+
+    - alert: BrunoSiteAbuseRepeatedErrors
+      expr: |
+        sum by (namespace, status_code) (
+          rate(http_requests_total{
+            namespace="bruno",
+            status_code=~"4..",
+            path!="/metrics",
+            path!="/health"
+          }[5m])
+        ) > 2
+      for: 5m
+      labels:
+        severity: critical
+        service: api
+        component: bruno-site
+        security: abuse
+        type: error-abuse
+      annotations:
+        summary: "🚨 ABUSE DETECTED: High rate of 4xx errors"
+        description: "Bruno Site is receiving {{`{{ $value | printf \"%.2f\" }}`}} 4xx errors per second. This may indicate scanning, brute force attempts, or malicious probing."
+        impact: "High - Potential security threat or resource exhaustion"
+        runbook_url: "https://github.com/brunovlucena/bruno-site/docs/runbooks/abuse-repeated-errors.md"
+        action: "1. Identify attacking IPs in logs\n2. Enable CloudFlare challenge mode\n3. Block malicious sources"
+
+    - alert: BrunoSiteAbuseSuspiciousPattern
+      expr: |
+        (
+          sum(rate(http_requests_total{namespace="bruno", path=~"/api/.*", path!="/metrics", path!="/health"}[1m]))
+          /
+          sum(rate(http_requests_total{namespace="bruno", path="/", path!="/metrics", path!="/health"}[1m]))
+        ) > 50
+      for: 5m
+      labels:
+        severity: critical
+        service: api
+        component: bruno-site
+        security: abuse
+        type: api-scraping
+      annotations:
+        summary: "🚨 ABUSE DETECTED: API scraping pattern detected"
+        description: "Ratio of API requests to homepage views is {{`{{ $value | printf \"%.2f\" }}`}}:1. This suggests automated scraping rather than normal user behavior."
+        impact: "Medium - Database and API load, potential data extraction"
+        runbook_url: "https://github.com/brunovlucena/bruno-site/docs/runbooks/abuse-api-scraping.md"
+        action: "1. Review API access patterns\n2. Implement API authentication\n3. Add rate limiting per endpoint"
+
+    - alert: BrunoSiteAbuseExcessiveBandwidth
+      expr: |
+        sum by (namespace) (
+          rate(http_request_size_bytes_sum{
+            namespace="bruno",
+            path!="/metrics",
+            path!="/health"
+          }[5m])
+        ) > 10485760
+      for: 5m
+      labels:
+        severity: critical
+        service: api
+        component: bruno-site
+        security: abuse
+        type: bandwidth-abuse
+      annotations:
+        summary: "🚨 ABUSE DETECTED: Excessive bandwidth consumption"
+        description: "Bruno Site is serving {{`{{ $value | humanize1024 }}`}}B/s of traffic. This may indicate asset downloading/scraping."
+        impact: "High - Increased bandwidth costs and potential service degradation"
+        runbook_url: "https://github.com/brunovlucena/bruno-site/docs/runbooks/abuse-bandwidth.md"
+        action: "1. Check which assets are being requested\n2. Enable CloudFlare caching\n3. Block abusive sources"
+
+    # ==================== WARNING: VISITOR THRESHOLDS ====================
+    
+    - alert: BrunoSiteVisitorsModerateTraffic
+      expr: |
+        sum(increase(http_requests_total{
+          namespace="bruno",
+          container="bruno-site-frontend",
+          path="/",
+          status_code="200"
+        }[24h])) >= 10 and
+        sum(increase(http_requests_total{
+          namespace="bruno",
+          container="bruno-site-frontend",
+          path="/",
+          status_code="200"
+        }[24h])) < 100
+      for: 30m
+      labels:
+        severity: warning
+        service: frontend
+        component: bruno-site
+        feature: visitor-tracking
+        threshold: moderate
+      annotations:
+        summary: "👥 Moderate visitor traffic: 10-100 visitors today"
+        description: "Bruno Site has received {{`{{ $value | printf \"%.0f\" }}`}} unique page views in the last 24 hours. Traffic is moderate."
+        impact: "None - Normal traffic levels"
+        dashboard_url: "https://grafana.lucena.cloud/d/bruno-visitors"
+        action: "Monitor traffic patterns for optimization opportunities"
+
+    - alert: BrunoSiteVisitorsHighTraffic
+      expr: |
+        sum(increase(http_requests_total{
+          namespace="bruno",
+          container="bruno-site-frontend",
+          path="/",
+          status_code="200"
+        }[24h])) >= 100
+      for: 30m
+      labels:
+        severity: warning
+        service: frontend
+        component: bruno-site
+        feature: visitor-tracking
+        threshold: high
+      annotations:
+        summary: "🎉 High visitor traffic: 100+ visitors today!"
+        description: "Bruno Site has received {{`{{ $value | printf \"%.0f\" }}`}} unique page views in the last 24 hours. This is excellent traffic!"
+        impact: "Positive - High engagement, monitor for scaling needs"
+        dashboard_url: "https://grafana.lucena.cloud/d/bruno-visitors"
+        action: "1. Celebrate! 🎉\n2. Check HPA is scaling appropriately\n3. Review analytics for traffic sources\n4. Consider caching strategies"
+
+    - alert: BrunoSiteVisitorsLowTraffic
+      expr: |
+        sum(increase(http_requests_total{
+          namespace="bruno",
+          container="bruno-site-frontend",
+          path="/",
+          status_code="200"
+        }[24h])) < 10
+      for: 12h
+      labels:
+        severity: info
+        service: frontend
+        component: bruno-site
+        feature: visitor-tracking
+        threshold: low
+      annotations:
+        summary: "📉 Low visitor traffic: Less than 10 visitors today"
+        description: "Bruno Site has received only {{`{{ $value | printf \"%.0f\" }}`}} page views in the last 24 hours."
+        impact: "None - Informational only"
+        dashboard_url: "https://grafana.lucena.cloud/d/bruno-visitors"
+        action: "Consider SEO optimization or marketing activities"
+
+    # ==================== VISITOR ENGAGEMENT METRICS ====================
+    
+    - alert: BrunoSiteHighBounceRate
+      expr: |
+        (
+          sum(increase(http_requests_total{namespace="bruno", path="/", status_code="200"}[1h]))
+          -
+          sum(increase(http_requests_total{namespace="bruno", path=~"/api/.*|/resume|/projects", status_code="200"}[1h]))
+        )
+        /
+        sum(increase(http_requests_total{namespace="bruno", path="/", status_code="200"}[1h]))
+        > 0.7
+      for: 1h
+      labels:
+        severity: info
+        service: frontend
+        component: bruno-site
+        feature: visitor-engagement
+      annotations:
+        summary: "📊 High bounce rate detected"
+        description: "{{`{{ $value | printf \"%.0f\" }}`}}% of visitors are leaving without viewing additional pages in the last hour."
+        impact: "Low - May indicate UX issues or irrelevant traffic"
+        dashboard_url: "https://grafana.lucena.cloud/d/bruno-visitors"
+        action: "1. Review landing page content\n2. Check page load times\n3. Analyze traffic sources"
+
+    - alert: BrunoSiteResumePagePopular
+      expr: |
+        sum(increase(http_requests_total{
+          namespace="bruno",
+          path="/resume",
+          status_code="200"
+        }[1h])) > 5
+      for: 30m
+      labels:
+        severity: info
+        service: frontend
+        component: bruno-site
+        feature: visitor-engagement
+      annotations:
+        summary: "📄 Resume page is popular"
+        description: "The resume page has received {{`{{ $value | printf \"%.0f\" }}`}} views in the last hour. Job recruiters may be viewing your profile!"
+        impact: "Positive - Potential job opportunities"
+        dashboard_url: "https://grafana.lucena.cloud/d/bruno-visitors"
+        action: "Ensure resume content is up-to-date"
+
+    # ==================== VISITOR SOURCE ANALYSIS ====================
+    
+    - alert: BrunoSiteBotTrafficDetected
+      expr: |
+        sum(rate(http_requests_total{
+          namespace="bruno",
+          path="/robots.txt",
+          status_code="200"
+        }[5m])) > 0.1
+      for: 10m
+      labels:
+        severity: info
+        service: frontend
+        component: bruno-site
+        feature: bot-detection
+      annotations:
+        summary: "🤖 Bot/Crawler traffic detected"
+        description: "Search engine bots or crawlers are accessing your site at {{`{{ $value | printf \"%.2f\" }}`}} requests per second."
+        impact: "Positive - SEO indexing activity"
+        dashboard_url: "https://grafana.lucena.cloud/d/bruno-visitors"
+        action: "Monitor for legitimate vs malicious bots"
+
+  # =============================================================================
   # 📈 PERFORMANCE ALERTS - PERFORMANCE MONITORING
   # =============================================================================
   - name: bruno-site.performance

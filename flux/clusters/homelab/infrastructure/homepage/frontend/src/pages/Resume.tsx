@@ -362,7 +362,7 @@ const Resume: React.FC = () => {
       <div className="resume">
         <div className="container">
           <h1>Bruno Lucena</h1>
-          <h2>Senior Cloud Native Infrastructure Engineer</h2>
+          <h2>Senior Agentic Team Lead</h2>
           <div className="loading">
             <p>Loading professional experience from database...</p>
           </div>
@@ -376,7 +376,7 @@ const Resume: React.FC = () => {
       <div className="resume">
         <div className="container">
           <h1>Bruno Lucena</h1>
-          <h2>Senior Cloud Native Infrastructure Engineer</h2>
+          <h2>Senior Agentic Team Lead</h2>
           <div className="error">
             <p>Error loading experience: {error}</p>
           </div>
@@ -389,7 +389,7 @@ const Resume: React.FC = () => {
     <div className="resume">
       <div className="container">
         <h1>Bruno Lucena</h1>
-        <h2>Senior Cloud Native Infrastructure Engineer</h2>
+        <h2>Senior Agentic Team Lead</h2>
         
         <section className="resume-section">
           <h3>Professional Experience</h3>

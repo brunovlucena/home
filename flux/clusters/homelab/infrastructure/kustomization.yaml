@@ -19,6 +19,7 @@ resources:
   - k6-operator
   - agent-legacy
   - agent-sre
+  - grafana-mcp
   - statuspage-exporter
   # - notifi-test # TODO: Fix Linkerd Server conflicts
   
